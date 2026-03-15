@@ -244,3 +244,15 @@ MIT License
 # Author
 
 GyroOS Research Project
+
+## Documents
+
+- [GyroOS White Paper](whitepaper/GyroOS_White_Paper.pdf)
+- [Gyro Logic Research Note](whitepaper/Gyro_Logic_Research_Note.pdf)
+- [Gyro Logic Formal Definition](whitepaper/Gyro_Logic_Formal_Definition_v1.pdf)
+- [GyroVM Architecture](whitepaper/GyroVM_Architecture.pdf)
+- [GyroOS Kernel Architecture](whitepaper/GyroOS_Kernel_Architecture.pdf)
+
+## Prototype
+
+- [Prototype Code](prototype/)
