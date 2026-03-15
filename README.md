@@ -10,6 +10,10 @@
 
 ![Agent Conflict Demo](docs/agent_conflict_demo.png)
 
+## Positioning
+
+![GyroOS Positioning](docs/gyroos_positioning_map.png)
+
 # GyroOS
 
 **Observation-Driven Operating System for AI Agent Systems**
