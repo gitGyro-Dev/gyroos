@@ -18,6 +18,10 @@
 
 ![GyroOS Mathematical Model](docs/gyroos_mathematical_model.png)
 
+## Concept Landscape
+
+![GyroOS Concept Landscape](docs/gyroos_concept_landscape.png)
+
 # GyroOS
 
 **Observation-Driven Operating System for AI Agent Systems**
