@@ -1,5 +1,9 @@
 ![GyroOS One Page Architecture](docs/gyroos_onepage_architecture.png)
 
+## GyroOS Runtime Flow
+
+![GyroOS Runtime](docs/gyroos_runtime_flow_en.png)
+
 ![GyroOS Architecture](docs/gyroos_master_diagram.png)
 
 ![GyroOS Future Map](docs/gyroos_future_map.png)
