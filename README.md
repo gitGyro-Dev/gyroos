@@ -14,6 +14,10 @@
 
 ![GyroOS Positioning](docs/gyroos_positioning_map.png)
 
+## Mathematical Model
+
+![GyroOS Mathematical Model](docs/gyroos_mathematical_model.png)
+
 # GyroOS
 
 **Observation-Driven Operating System for AI Agent Systems**
