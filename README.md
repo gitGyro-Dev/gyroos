@@ -1,8 +1,27 @@
-![GyroOS One Page Architecture](docs/gyroos_onepage_architecture.png)
+![GyroOS Architecture](docs/gyroos_onepage_architecture.png)
+
+# GyroOS
+
+Observation-Driven Operating System for AI Agent Systems
+
+GyroOS is a research project exploring a new operating system architecture
+for multi-agent AI environments.
+
+Instead of instruction-driven computation, GyroOS proposes
+an **observation-driven computing model** based on:
+
+- observation
+- perception
+- conflict detection
+- resolution
+- history
+- balance
 
 ## GyroOS Runtime Flow
 
 ![GyroOS Runtime](docs/gyroos_runtime_flow_en.png)
+
+## Architecture Overview
 
 ![GyroOS Architecture](docs/gyroos_master_diagram.png)
 
@@ -247,9 +266,12 @@ GyroOS Research Project
 
 ## Documents
 
+## Documents
+
 - [GyroOS White Paper](whitepaper/GyroOS_White_Paper.pdf)
 - [Gyro Logic Research Note](whitepaper/Gyro_Logic_Research_Note.pdf)
 - [Gyro Logic Formal Definition](whitepaper/Gyro_Logic_Formal_Definition_v1.pdf)
+- [Gyro Machine Architecture](whitepaper/Gyro_Machine_Architecture.pdf)
 - [GyroVM Architecture](whitepaper/GyroVM_Architecture.pdf)
 - [GyroOS Kernel Architecture](whitepaper/GyroOS_Kernel_Architecture.pdf)
 
