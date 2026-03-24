@@ -26,7 +26,7 @@ This project is structured into three conceptual layers:
 
 ### ① Formal Layer（概要）
 
-📄 [Formal PDF](./docs/gyro_logic/GyroLogic_Formal_v1.pdf)
+📄 [Formal PDF](./docs/GyroLogic_Formal_v1.pdf)
 
 * Truth = point in manifold
 * Transform = re-evaluation
@@ -37,7 +37,7 @@ This project is structured into three conceptual layers:
 
 ### ② Intuition Layer（直感）
 
-📄 [Intuition PDF](./docs/gyro_logic/GyroLogic_Intuition_v1.pdf)
+📄 [Intuition PDF](./docs/GyroLogic_Intuition_v1.pdf)
 
 * Truth changes with perspective
 * Conflict is not an error
@@ -47,7 +47,7 @@ This project is structured into three conceptual layers:
 
 ### ③ Mathematical Layer（数理）
 
-📄 [Mathematical PDF](./docs/gyro_logic/GyroLogic_Mathematical_v1.pdf)
+📄 [Mathematical PDF](./docs/GyroLogic_Mathematical_v1.pdf)
 
 * Fiber bundle structure
 * Connection ∇
