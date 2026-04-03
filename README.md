@@ -28,7 +28,8 @@ Gyro Logic is a formal system where:
 
 ## 🌌 Core Concept
 
-> Logic is not static. It is dynamic, contextual, and evolving.
+> Logic is not static.
+> It is dynamic, contextual, and evolving.
 
 ---
 
@@ -38,18 +39,25 @@ Gyro Logic is a formal system where:
 
 * **Behavior**: evolving semantic trajectory
 * **Frame**: observer / goal / time / scale
-* **Interference**: structured conflict
+* **Interference**: structured interaction (including conflict)
 * **Stability**: attractor-based structure
 
 ---
 
 ## 🔺 Key Shift
 
-| Classical Logic  | Gyro Logic             |
-| ---------------- | ---------------------- |
-| Truth = value    | Truth = behavior slice |
-| Logic = rules    | Logic = dynamics       |
-| Conflict = error | Conflict = structure   |
+| Classical Logic  | Gyro Logic                         |
+| ---------------- | ---------------------------------- |
+| Truth = value    | Truth = behavior slice             |
+| Logic = rules    | Logic = dynamics                   |
+| Conflict = error | Conflict = structured interference |
+
+---
+
+## 📄 Research Position
+
+Preprint-style formal system and prototype for a new behavior-based logic.
+This work is being prepared for arXiv submission.
 
 ---
 
@@ -69,6 +77,8 @@ GyroOS is the computational embodiment of Gyro Logic.
 
 ## 🧩 Architecture
 
+![GyroOS Architecture](docs/diagrams/gyroos_architecture.png)
+
 ```text
 Human / AI
    ↓
@@ -83,14 +93,35 @@ Kernel Primitives
 
 ---
 
-## ⚙️ Prototype
+## 📚 Documentation
 
-This repository includes a minimal prototype:
+👉 Full theory and system design are available in the `/docs` directory.
 
-* Object creation
-* Relation graph
-* Conflict visualization
-* Frame switching
+### 🧠 Gyro Logic (Theory)
+
+* [Overview](docs/gyro_logic/00_overview.md)
+* [Formal System v1.0](docs/gyro_logic/01_formal_system.md)
+* Geometry *(coming soon)*
+* Algebra *(coming soon)*
+* Stability & Attractor Theory *(coming soon)*
+
+---
+
+### 💻 GyroOS (System Design)
+
+* [Architecture](docs/gyroos/01_architecture.md)
+* Kernel *(coming soon)*
+* Object Model *(coming soon)*
+* VM / Execution Model *(coming soon)*
+* Prototype *(coming soon)*
+
+---
+
+### 🖼️ Visual Models
+
+* GyroOS Architecture *(included)*
+* Behavior Geometry *(coming soon)*
+* Inference Flow *(coming soon)*
 
 ---
 
@@ -103,22 +134,24 @@ streamlit run app.py
 
 ---
 
-## 📁 Structure
+## 📁 Repository Structure
 
 ```text
 gyroos/
-├── app.py
-├── core/
+├── README.md
 ├── docs/
-│   ├── paper.tex
-│   ├── diagram.png
+│   ├── gyro_logic/
+│   ├── gyroos/
+│   ├── diagrams/
+│   └── pitch/
+└── archive/
 ```
 
 ---
 
 ## 🔬 Status
 
-**Research Prototype / Open for Exploration**
+Research Prototype / Active Development
 
 ---
 
