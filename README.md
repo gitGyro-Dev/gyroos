@@ -1,160 +1,112 @@
-# Gyro Logic / GyroOS
+# GyroOS / Gyro Logic
 
-**A Geometric, Behavior-Based Logic and a Next-Generation Operating System**
-
----
-
-## 🧭 Overview
-
-Gyro Logic is a formal system where:
-
-* Meaning = behavior
-* Truth = slice of behavior
-* Conflict = interference
-* Logic = evolution of semantic fields
-
-[
-\frac{d\mathcal{B}}{dt}
-=======================
-
-## \Phi(\mathcal{B})
-
-\nabla \mathcal{L}_{stab}
-+
-\mathcal{I}(\mathcal{B})
-]
+A novel logic and operating system based on **behavior dynamics and stability**.
 
 ---
 
-## 🌌 Core Concept
+## 🧠 What is Gyro Logic?
 
-> Logic is not static.
-> It is dynamic, contextual, and evolving.
+Gyro Logic is a new logical framework where:
 
----
-
-## 🧠 Gyro Logic
-
-### Core Components
-
-* **Behavior**: evolving semantic trajectory
-* **Frame**: observer / goal / time / scale
-* **Interference**: structured interaction (including conflict)
-* **Stability**: attractor-based structure
+- Meaning = Stabilized Behavior
+- Truth = Stability-weighted Projection
+- Inference = Stability Optimization
+- Conflict = Interference in Behavior Field
 
 ---
 
-## 🔺 Key Shift
+## 🔁 Core Loop
 
-| Classical Logic  | Gyro Logic                         |
-| ---------------- | ---------------------------------- |
-| Truth = value    | Truth = behavior slice             |
-| Logic = rules    | Logic = dynamics                   |
-| Conflict = error | Conflict = structured interference |
+![Core](docs/figures/gyro_logic_core_pub.png)
 
 ---
 
-## 📄 Research Position
+## 🌊 Stability Landscape
 
-Preprint-style formal system and prototype for a new behavior-based logic.
-This work is being prepared for arXiv submission.
-
----
-
-## 💻 GyroOS
-
-GyroOS is the computational embodiment of Gyro Logic.
-
-### Features
-
-* Fileless architecture
-* Relation-native data model
-* Behavior-based computation
-* Multi-agent reasoning
-* Self-reorganizing system
+![Stability](docs/figures/stability_landscape_pub.png)
 
 ---
 
-## 🧩 Architecture
+## ⚙️ GyroOS Architecture
 
-![GyroOS Architecture](docs/diagrams/gyroos_architecture.png)
-
-```text
-Human / AI
-   ↓
-Frame Interface
-   ↓
-Semantic Behavior Field
-   ↓
-Object / Relation / Interference
-   ↓
-Kernel Primitives
-```
+![GyroOS](docs/figures/gyroos_architecture_pub.png)
 
 ---
 
-## 📚 Documentation
+## 📐 Formal Definition
 
-👉 Full theory and system design are available in the `/docs` directory.
+Behavior:
+\[
+\mathcal{B} : \mathbb{T} \rightarrow \mathcal{M}
+\]
 
-### 🧠 Gyro Logic (Theory)
+Stability:
+\[
+\mathcal{L}_{stab} = \alpha C - \beta D - \gamma I + \delta R
+\]
 
-* [Overview](docs/gyro_logic/00_overview.md)
-* [Formal System v1.0](docs/gyro_logic/01_formal_system.md)
-* Geometry *(coming soon)*
-* Algebra *(coming soon)*
-* Stability & Attractor Theory *(coming soon)*
+Truth:
+\[
+T(t;F)=\Pi(\mathcal{B},F,t)\cdot\Sigma(\mathcal{B},F,t)
+\]
 
----
+Attractor:
+\[
+\mathcal{A}_F = \arg\max \mathcal{L}_{stab}
+\]
 
-### 💻 GyroOS (System Design)
-
-* [Architecture](docs/gyroos/01_architecture.md)
-* Kernel *(coming soon)*
-* Object Model *(coming soon)*
-* VM / Execution Model *(coming soon)*
-* Prototype *(coming soon)*
-
----
-
-### 🖼️ Visual Models
-
-* GyroOS Architecture *(included)*
-* Behavior Geometry *(coming soon)*
-* Inference Flow *(coming soon)*
+Dynamics:
+\[
+\frac{d\mathcal{B}}{dt} = \nabla \mathcal{L}_{stab}
+\]
 
 ---
 
-## 🚀 Quick Start
+## 🧩 Key Concepts
 
-```bash
-pip install streamlit networkx matplotlib
-streamlit run app.py
-```
+- Behavior Field
+- Stability Functional
+- Frame-dependent Truth
+- Attractor as Meaning Core
+- Inference as Dynamic Transformation
 
 ---
 
-## 📁 Repository Structure
+## 🚀 GyroOS
 
-```text
-gyroos/
-├── README.md
-├── docs/
-│   ├── gyro_logic/
-│   ├── gyroos/
-│   ├── diagrams/
-│   └── pitch/
-└── archive/
-```
+GyroOS is a new operating system based on Gyro Logic:
+
+- Fileless
+- Relation-native
+- Behavior-driven
+- Self-organizing
 
 ---
 
 ## 🔬 Status
 
-Research Prototype / Active Development
+- [x] Formal System v1.0
+- [x] Stability Theory
+- [x] Attractor Theory
+- [x] Core Diagrams
+- [ ] Prototype Expansion
+- [ ] arXiv Submission
 
 ---
 
-## ✨ Final Statement
+## 📄 Paper (Coming Soon)
 
-> Thinking becomes manipulable.
+arXiv submission in preparation.
+
+---
+
+## 🌍 Vision
+
+A new foundation for:
+
+- AI reasoning
+- Multi-agent systems
+- Dynamic knowledge representation
+- Post-symbolic computation
+
+---
