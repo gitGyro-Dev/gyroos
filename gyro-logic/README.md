@@ -104,17 +104,17 @@ I(T) = I(\mathcal{G}(T))
 
 ### 📄 Short Paper
 
-* [Gyro Logic Short Paper](./docs/gyro_logic/GyroLogic_ShortPaper_v1.pdf)
+* [Gyro Logic Short Paper](../docs/gyro_logic/GyroLogic_ShortPaper_v1.pdf)
 
 ### 📘 Full Paper (arXiv draft)
 
-* [Gyro Logic v6](./docs/gyro_logic/GyroLogic_arxiv_v6.tex)
+* [Gyro Logic v6](../docs/gyro_logic/GyroLogic_arxiv_v6.tex)
 
 ---
 
 ## 🧠 DeepMind-Oriented Deck
 
-* [Pitch Deck (DeepMind version)](./docs/gyro_logic/GyroLogic_DeepMind_Pitch_v2.pptx)
+* [Pitch Deck (DeepMind version)](../docs/gyro_logic/GyroLogic_DeepMind_Pitch_v2.pptx)
 
 ---
 
