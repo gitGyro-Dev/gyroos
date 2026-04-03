@@ -4,7 +4,7 @@
 
 ---
 
-![Gyro Logic Overview](./docs/gyro_logic/gyroos_master_diagram.png)
+![Gyro Logic Overview](../docs/gyro_logic/gyroos_master_diagram.png)
 
 ---
 
