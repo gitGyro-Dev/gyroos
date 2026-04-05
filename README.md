@@ -103,6 +103,24 @@ Behavior × Frame → conflict-aware trajectory → stabilized resolution
 
 ---
 
+## 🚨 Conflict Geometry (Key Insight)
+
+![Figure4](docs/figure4_conflict_geometry.png)
+
+Conflict is not an error.
+
+It is:
+
+→ curvature in frame space
+
+---
+
+## 🎥 Inference Animation
+
+![animation](docs/gyro_animation.gif)
+
+Inference is a trajectory, not a computation step.
+
 ## 📌 Why the Conflict Demo matters
 
 The conflict demo is important because it shows that Gyro Logic is not just gradient ascent with a new name.
