@@ -1,120 +1,151 @@
-# GyroOS / Gyro Logic
+# 🌀 GyroOS / Gyro Logic
 
-A logic and operating system framework based on **behavior dynamics and
-stability**.
+![Hero](docs/gyro_hero.png)
 
-------------------------------------------------------------------------
+---
 
-## Overview
+## 🚀 Overview
 
-Gyro Logic is a formal framework in which:
+Gyro Logic is a new computational paradigm based on:
 
--   Meaning emerges as **stabilized behavior**
--   Truth is defined as a **stability-weighted projection**
--   Inference is formulated as **stability optimization**
+- stability dynamics
+- multi-dimensional logic
+- behavior + frame co-evolution
+- conflict-aware inference
 
-This repository presents the core theory, formal system, and system
-architecture of GyroOS.
+GyroOS is the execution system of this logic.
 
-------------------------------------------------------------------------
+---
 
-## Motivation
+## 🧠 Core Idea
 
-Classical logic treats truth as static and context-independent.
+Meaning   = stabilized behavior  
+Truth     = stability projection  
+Inference = trajectory toward attractor  
+Conflict  = interference between frames  
 
-However, real-world systems exhibit:
+---
 
--   Context-dependent reasoning\
--   Goal-oriented decision making\
--   Dynamic interaction between agents
+## 🔥 Core Equations
 
-Gyro Logic models these phenomena using a unified stability-based
-formulation.
+dB/dt = ∇L(B,F)  
+dF/dt = ∇L(B,F) - λ∇Ξ  
 
-------------------------------------------------------------------------
+---
 
-## Core Structure
+## 📐 Research Figures
 
-![Core](docs/figures/gyro_logic_core_pub.png)
+### Figure 1 — Unified Architecture
+![Figure 1](docs/gyro_figure1_paper.png)
 
-------------------------------------------------------------------------
+### Figure 2 — Mathematical Structure
+![Figure 2](docs/gyro_figure2_paper.png)
 
-## Stability Landscape
+### Figure 3 — Inference Dynamics
+![Figure 3](docs/gyro_figure3_paper.png)
 
-![Stability](docs/figures/stability_landscape_pub.png)
+---
 
-------------------------------------------------------------------------
+## ⚙️ Demos
 
-## GyroOS Architecture
+### 1. Basic Demo
+```bash
+python gyro_demo_v2.py
+```
 
-![GyroOS](docs/figures/gyroos_architecture_pub.png)
+Shows:
+- state evolution
+- frame adaptation
+- stability increase
 
-------------------------------------------------------------------------
+### 2. Conflict Demo
+```bash
+python gyro_conflict_demo.py
+```
 
-## Formal Definition
+Shows:
+- two competing frames
+- explicit conflict
+- trajectory bending under conflict
+- stability and conflict plots
 
-Behavior: \[ `\mathcal{B}`{=tex} : `\mathbb{T}`{=tex}
-`\rightarrow `{=tex}`\mathcal{M}`{=tex} \]
+---
 
-Stability: \[ `\mathcal{L}`{=tex}\_{stab} = `\alpha `{=tex}C -
-`\beta `{=tex}D - `\gamma `{=tex}I + `\delta `{=tex}R \]
+## 🌌 Concept
 
-Truth: \[
-T(t;F)=`\Pi`{=tex}(`\mathcal{B}`{=tex},F,t)`\cdot`{=tex}`\Sigma`{=tex}(`\mathcal{B}`{=tex},F,t)
-\]
+Traditional computing:
 
-Attractor: \[ `\mathcal{A}`{=tex}*F =
-`\arg`{=tex}`\max `{=tex}`\mathcal{L}`{=tex}*{stab} \]
+Input → Function → Output  
 
-Dynamics: \[ `\frac{d\mathcal{B}}{dt}`{=tex} =
-`\nabla `{=tex}`\mathcal{L}`{=tex}\_{stab} \]
+Gyro computing:
 
-------------------------------------------------------------------------
+State → Dynamics → Attractor  
 
-## Key Concepts
+Traditional reasoning:
 
--   Behavior Field\
--   Stability Functional\
--   Frame-dependent Truth\
--   Attractor as Meaning Core\
--   Inference as Dynamic Transformation
+Fixed model → fixed conclusion  
 
-------------------------------------------------------------------------
+Gyro reasoning:
 
-## GyroOS
+Behavior × Frame → conflict-aware trajectory → stabilized resolution  
 
-GyroOS is an operating system architecture derived from Gyro Logic.
+---
 
--   Fileless\
--   Relation-native\
--   Behavior-driven\
--   Self-organizing
+## 🧩 System Mapping
 
-------------------------------------------------------------------------
+| Concept | Role |
+|--------|------|
+| Behavior | State |
+| Frame | Perspective / scheduler |
+| Stability | Objective / resource fitness |
+| Conflict | Constraint / interference |
+| Inference | Optimization trajectory |
 
-## Status
+---
 
--   [x] Formal System v1.0\
--   [x] Stability Theory\
--   [x] Attractor Theory\
--   [x] Core Diagrams\
--   [ ] Prototype Expansion\
--   [ ] arXiv Submission
+## 📌 Why the Conflict Demo matters
 
-------------------------------------------------------------------------
+The conflict demo is important because it shows that Gyro Logic is not just gradient ascent with a new name.
 
-## Publication
+It explicitly models:
 
-Zenodo release (DOI) --- coming soon\
-arXiv submission --- in preparation
+- multiple frames
+- competing pulls
+- conflict as a measurable internal quantity
+- reasoning as stabilization under tension
 
-------------------------------------------------------------------------
+This is the bridge from abstract theory to a new computing principle.
 
-## Vision
+---
 
-A foundation for:
+## 🔭 Vision
 
--   AI reasoning\
--   Multi-agent systems\
--   Dynamic knowledge representation\
--   Post-symbolic computation
+GyroOS is:
+
+- a meaning-centric operating system
+- a dynamic logic engine
+- a possible first step toward higher-dimensional logic computing
+
+This project should be read as **Stage I**:
+
+Gyro Logic + GyroOS as the first theoretical and executable layer  
+toward a future multi-dimensional logic system that may generate new information technology.
+
+---
+
+## 🚧 Roadmap
+
+- [x] Theory core
+- [x] Research figures
+- [x] Basic dynamic demo
+- [x] Conflict demo
+- [ ] Prototype kernel expansion
+- [ ] Multi-agent reasoning
+- [ ] arXiv paper
+- [ ] higher-dimensional logic extension
+
+---
+
+## 👤 Author
+
+kawakami
