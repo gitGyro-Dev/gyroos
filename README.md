@@ -2,25 +2,43 @@
 
 ![Hero](docs/gyro_hero.png)
 
+> Computation is not a function.  
+> It is a trajectory shaped by competing frames.
+
 ---
 
-## 🚀 Overview
+## 🎥 What is Gyro Logic?
 
-Gyro Logic is a new computational paradigm based on:
+![animation](docs/gyro_animation.gif)
 
-- stability dynamics
-- multi-dimensional logic
-- behavior + frame co-evolution
-- conflict-aware inference
+---
 
-GyroOS is the execution system of this logic.
+## ⚡ Why this is different
+
+### Traditional Computing
+Input → Function → Output
+
+### Gyro Computing
+State → Dynamics → Attractor
+
+---
+
+### Traditional AI
+- Single model
+- Fixed interpretation
+- Static inference
+
+### Gyro Logic
+- Multiple competing frames
+- Dynamic interpretation
+- Trajectory-based inference
 
 ---
 
 ## 🧠 Core Idea
 
 Meaning   = stabilized behavior  
-Truth     = stability projection  
+Truth     = stability-weighted projection  
 Inference = trajectory toward attractor  
 Conflict  = interference between frames  
 
@@ -28,8 +46,8 @@ Conflict  = interference between frames
 
 ## 🔥 Core Equations
 
-dB/dt = ∇L(B,F)  
-dF/dt = ∇L(B,F) - λ∇Ξ  
+dB/dt = ∇_B L(B,F)  
+dF/dt = ∇_F L(B,F) - λ∇_F Ξ  
 
 ---
 
@@ -44,50 +62,34 @@ dF/dt = ∇L(B,F) - λ∇Ξ
 ### Figure 3 — Inference Dynamics
 ![Figure 3](docs/gyro_figure3_paper.png)
 
+### Figure 4 — Conflict Geometry
+![Figure 4](docs/figure4_conflict_geometry.png)
+
+> Conflict is not an error.  
+> It is curvature in frame space.
+
+---
+
+## 🔬 Conflict Visualization
+
+### Inference Trajectory
+![trajectory](docs/conflict_trajectory.png)
+
+### Stability under Competing Frames
+![scores](docs/conflict_scores.png)
+
+### Frame Conflict
+![conflict](docs/conflict_conflict.png)
+
 ---
 
 ## ⚙️ Demos
 
-### 1. Basic Demo
-```bash
+### ▶ Basic Demo
 python gyro_demo_v2.py
-```
 
-Shows:
-- state evolution
-- frame adaptation
-- stability increase
-
-### 2. Conflict Demo
-```bash
+### ▶ Conflict Demo (Key)
 python gyro_conflict_demo.py
-```
-
-Shows:
-- two competing frames
-- explicit conflict
-- trajectory bending under conflict
-- stability and conflict plots
-
----
-
-## 🌌 Concept
-
-Traditional computing:
-
-Input → Function → Output  
-
-Gyro computing:
-
-State → Dynamics → Attractor  
-
-Traditional reasoning:
-
-Fixed model → fixed conclusion  
-
-Gyro reasoning:
-
-Behavior × Frame → conflict-aware trajectory → stabilized resolution  
 
 ---
 
@@ -96,43 +98,40 @@ Behavior × Frame → conflict-aware trajectory → stabilized resolution
 | Concept | Role |
 |--------|------|
 | Behavior | State |
-| Frame | Perspective / scheduler |
-| Stability | Objective / resource fitness |
-| Conflict | Constraint / interference |
+| Frame | Perspective / Scheduler |
+| Stability | Objective / Fitness |
+| Conflict | Interference |
 | Inference | Optimization trajectory |
 
 ---
 
-## 🚨 Conflict Geometry (Key Insight)
+## 🌌 Concept
 
-![Figure4](docs/figure4_conflict_geometry.png)
+Traditional reasoning:
+fixed model → fixed answer  
 
-Conflict is not an error.
-
-It is:
-
-→ curvature in frame space
+Gyro reasoning:
+multiple frames → conflict → stabilization  
 
 ---
 
-## 🎥 Inference Animation
+## 🚨 Key Insight
 
-![animation](docs/gyro_animation.gif)
+Inference ≠ computation step  
+Inference = trajectory in (Behavior × Frame) space  
 
-Inference is a trajectory, not a computation step.
+---
 
-## 📌 Why the Conflict Demo matters
+## 📌 Current Status
 
-The conflict demo is important because it shows that Gyro Logic is not just gradient ascent with a new name.
-
-It explicitly models:
-
-- multiple frames
-- competing pulls
-- conflict as a measurable internal quantity
-- reasoning as stabilization under tension
-
-This is the bridge from abstract theory to a new computing principle.
+- [x] Formal Theory
+- [x] Research Figures
+- [x] Dynamic Demo
+- [x] Conflict Demo
+- [x] Visualization
+- [ ] Multi-agent system
+- [ ] GyroOS kernel
+- [ ] arXiv paper
 
 ---
 
@@ -140,34 +139,35 @@ This is the bridge from abstract theory to a new computing principle.
 
 GyroOS is:
 
-- a meaning-centric operating system
-- a dynamic logic engine
-- a possible first step toward higher-dimensional logic computing
+→ A Meaning-Centric Operating System  
+→ A Multi-Dimensional Logic Engine  
+→ A New Computational Paradigm  
 
-This project should be read as **Stage I**:
+---
 
-Gyro Logic + GyroOS as the first theoretical and executable layer  
-toward a future multi-dimensional logic system that may generate new information technology.
+## 🧨 Core Claim
+
+Computation = Stability Optimization  
+Logic = Geometry of Stability  
+Intelligence = Motion in Frame Space  
 
 ---
 
 ## 🚧 Roadmap
 
-- [x] Theory core
-- [x] Research figures
-- [x] Basic dynamic demo
-- [x] Conflict demo
-- [ ] Prototype kernel expansion
-- [ ] Multi-agent reasoning
-- [ ] arXiv paper
-- [ ] higher-dimensional logic extension
+Phase 1 (Now): Theory / Visualization / Demo  
+Phase 2: Multi-frame systems  
+Phase 3: GyroOS kernel  
+Phase 4: New computing paradigm  
+
+---
+
+## 📄 Citation
+
+DOI: https://doi.org/10.5281/zenodo.19428071
 
 ---
 
 ## 👤 Author
 
 kawakami
-
-## Citation
-
-DOI: https://doi.org/10.5281/zenodo.19428071
