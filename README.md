@@ -167,3 +167,7 @@ toward a future multi-dimensional logic system that may generate new information
 ## 👤 Author
 
 kawakami
+
+## Citation
+
+DOI: https://doi.org/10.5281/zenodo.19428071
