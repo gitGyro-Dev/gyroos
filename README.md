@@ -162,6 +162,24 @@ Phase 4: New computing paradigm
 
 ---
 
+## 🔁 Spin-off Projects
+
+GyroLogic is not just a theoretical framework.  
+It is designed to generate real-world applications across multiple domains.
+
+### 🔐 GyroAuth  
+Spatio-temporal multi-dimensional authentication
+
+👉 https://github.com/gitGyro-Dev/gyroauth  
+
+GyroAuth applies GyroLogic to authentication, redefining identity verification as:
+
+**multi-dimensional state convergence across space, time, and motion**
+
+---
+
+More spin-off applications will be added.
+
 ## 📄 Citation
 
 DOI: https://doi.org/10.5281/zenodo.19428071
