@@ -129,15 +129,25 @@ They **emerge dynamically** through topological changes in the stability landsca
 
 ## 🔬 Conflict Visualization
 
-### Inference Trajectory
+### Inference Trajectory (Trajectory Shaped by Constraints)
 ![trajectory](docs/conflict_trajectory.png)
 
-### Stability under Competing Frames
+> Inference is shaped not only by attractors, but by forbidden regions.
+
+---
+
+### Stability Evolution (Competing Frames)
 ![scores](docs/conflict_scores.png)
 
-### Frame Conflict
+> Stability emerges through competition and transition between frames.
+
+---
+
+### Conflict Dynamics (Driver of Structural Change)
 ![conflict](docs/conflict_conflict.png)
 
+> Conflict is not noise.  
+> It generates new structure (holes) in the stability landscape.
 ---
 
 ## ⚙️ Demos
