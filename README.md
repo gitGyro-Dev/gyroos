@@ -127,27 +127,61 @@ They **emerge dynamically** through topological changes in the stability landsca
 
 ---
 
-## 🔬 Conflict Visualization
+### 🔬 Conflict Visualization (Upgraded — Figure 7–9)
 
-### Inference Trajectory (Trajectory Shaped by Constraints)
+### Figure 7 — Constraint-Aware Inference Trajectory
 ![trajectory](docs/conflict_trajectory.png)
 
-> Inference is shaped not only by attractors, but by forbidden regions.
+> Inference is not a straight optimization path.  
+> It is a trajectory shaped by both attraction and forbidden regions (holes).
+
+Key interpretation:
+- Attractor pulls trajectory
+- Hole repels trajectory
+- Final path = balance of forces
 
 ---
 
-### Stability Evolution (Competing Frames)
+### Figure 8 — Stability Evolution under Competing Frames
 ![scores](docs/conflict_scores.png)
 
-> Stability emerges through competition and transition between frames.
+> Stability is not static.  
+> It emerges through competition between frames.
+
+Key interpretation:
+- Frame A dominates early
+- Frame B rises later
+- Transition point defines inference shift
+- Total stability emerges from competition
 
 ---
 
-### Conflict Dynamics (Driver of Structural Change)
+### Figure 9 — Conflict-Driven Phase Transition
 ![conflict](docs/conflict_conflict.png)
 
 > Conflict is not noise.  
-> It generates new structure (holes) in the stability landscape.
+> It is the mechanism that generates structure.
+
+Key interpretation:
+- Conflict rises → reaches peak
+- Critical region triggers phase transition
+- Hole emerges after peak conflict
+- System stabilizes in new topology
+
+---
+
+## 🧠 Why these figures matter
+
+These three figures define the dynamic core of Gyro Logic:
+
+- Trajectory → how inference moves
+- Stability → what drives motion
+- Conflict → what reshapes structure
+
+Together:
+
+Inference = constrained motion in a dynamically reshaped stability landscape
+
 ---
 
 ## ⚙️ Demos
