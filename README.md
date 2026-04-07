@@ -130,7 +130,7 @@ They **emerge dynamically** through topological changes in the stability landsca
 ### 🔬 Conflict Visualization (Upgraded — Figure 7–9)
 
 ### Figure 7 — Constraint-Aware Inference Trajectory
-![trajectory](docs/conflict_trajectory.png)
+![trajectory](docs/figure7_inference.png)
 
 > Inference is not a straight optimization path.  
 > It is a trajectory shaped by both attraction and forbidden regions (holes).
@@ -143,7 +143,7 @@ Key interpretation:
 ---
 
 ### Figure 8 — Stability Evolution under Competing Frames
-![scores](docs/conflict_scores.png)
+![scores](docs/figure8_stability.png)
 
 > Stability is not static.  
 > It emerges through competition between frames.
@@ -157,7 +157,7 @@ Key interpretation:
 ---
 
 ### Figure 9 — Conflict-Driven Phase Transition
-![conflict](docs/conflict_conflict.png)
+![conflict](docs/figure9_conflict.png)
 
 > Conflict is not noise.  
 > It is the mechanism that generates structure.
