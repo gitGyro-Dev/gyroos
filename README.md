@@ -70,6 +70,63 @@ dF/dt = ∇_F L(B,F) - λ∇_F Ξ
 
 ---
 
+## 🕳 Hole / Void (Key Concept)
+
+A "hole" is not an object.
+
+It is a region that cannot be occupied under stability dynamics.
+
+### Definition
+
+- **Hole**: bounded region of zero stability enclosed by stable regions  
+- **Void**: globally unreachable region across all frames  
+
+### Interpretation
+
+- Objects = stable regions  
+- Holes = locally forbidden regions  
+- Void = globally forbidden regions  
+
+### Figure 5 — Hole Structure in Stability Space
+![Figure 5](docs/figure5_hole_structure.png)
+
+### Dynamic Effect
+
+Holes are not static.
+
+They:
+
+- bend trajectories  
+- constrain inference  
+- emerge through conflict  
+- disappear under local decomposition  
+
+---
+
+## 🔄 Phase Transition (Hole Formation)
+
+Holes are not predefined structures.
+
+They **emerge dynamically** through topological changes in the stability landscape.
+
+### Figure 6 — Hole Formation (Mathematical)
+![Figure 6](docs/figure6_hole_phase_math.png)
+
+- Saddle critical point: ∇L = 0  
+- det(Hessian) < 0  
+- Topology changes at threshold L = θ  
+
+---
+
+### Figure 6b — Phase Transition (Before / After)
+![Figure 6b](docs/figure6b_phase_transition.png)
+
+- Before: simply connected region  
+- After: hole emerges  
+- Betti number changes (β₁: 0 → 1)
+
+---
+
 ## 🔬 Conflict Visualization
 
 ### Inference Trajectory
