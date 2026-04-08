@@ -184,6 +184,12 @@ Inference = constrained motion in a dynamically reshaped stability landscape
 
 ---
 
+## 🧩 Paradox Series
+
+- [Paradox Index](docs/paradoxes/paradox_index.md)
+
+---
+
 ## ⚙️ Demos
 
 ### ▶ Basic Demo
