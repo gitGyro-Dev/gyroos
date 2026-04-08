@@ -190,6 +190,25 @@ Inference = constrained motion in a dynamically reshaped stability landscape
 
 ---
 
+
+## v1.2 — Paradox Integration Layer
+
+A frame-based interpretation engine that reformulates paradoxes as instability arising from interference between competing frames.
+
+This layer introduces a structured pipeline:
+
+* Paradox → Structural Decomposition → Formalization → Outreach
+
+It demonstrates that paradoxes are not failures of logic, but manifestations of:
+
+* Stability breakdown
+* Frame conflict
+* Absence of stable attractors
+
+See: `docs/paradox_layer_v1_2.md`
+
+---
+
 ## ⚙️ Demos
 
 ### ▶ Basic Demo
