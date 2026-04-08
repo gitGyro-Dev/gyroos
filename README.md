@@ -209,6 +209,11 @@ See: `docs/paradox_layer_v1_2.md`
 
 ---
 
+Examples:
+- Liar Paradox (complete decomposition)
+
+---
+
 ## ⚙️ Demos
 
 ### ▶ Basic Demo
