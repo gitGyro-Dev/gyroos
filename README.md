@@ -2,6 +2,20 @@
 
 Based on Gyro Logic v2.0
 
+## 🧠 Theoretical Foundation
+
+This project is based on **Gyro Logic v2.0**:
+
+https://doi.org/10.5281/zenodo.19555020
+
+Gyro Logic defines:
+
+- Identity as stability  
+- Observation as operator (Slice)  
+- Structure as emergent from dynamic systems  
+
+This repository represents the **implementation layer** of that theory.
+
 Gyro Logic is a theoretical framework for modeling identity, meaning, and truth as emergent properties of stability under dynamic observation.
 
 Unlike conventional logical or identity systems, Gyro Logic treats observation as an active operator, identity as a preserved dynamic structure, and truth as stability under observation.
