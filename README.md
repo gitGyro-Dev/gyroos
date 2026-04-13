@@ -1,8 +1,11 @@
 # Gyro Logic
 
+Based on Gyro Logic v2.0
+
 Gyro Logic is a theoretical framework for modeling identity, meaning, and truth as emergent properties of stability under dynamic observation.
 
 Unlike conventional logical or identity systems, Gyro Logic treats observation as an active operator, identity as a preserved dynamic structure, and truth as stability under observation.
+
 
 ---
 
