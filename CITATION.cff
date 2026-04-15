@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: "GyroOS"
+
+message: "If you use this work, please cite it as below."
+type: software
+
+authors:
+  - family-names: "Gyro Logic Lab"
+    given-names: ""
+
+abstract: >
+  Gyro Logic is a formal framework that models reality as structure,
+  observation as compression, and identity as stability-preserving trajectories.
+
+keywords:
+  - stability
+  - identity
+  - observation
+  - dynamical systems
+  - information structure
+
+license: CC-BY-4.0
+
+repository-code: https://github.com/gitGyro-Dev/gyroos
+
+url: https://github.com/gitGyro-Dev/gyrologic
+
+https://doi.org/10.5281/zenodo.19555192
+
+version: "vNext"
+date-released: 2026-01-01
