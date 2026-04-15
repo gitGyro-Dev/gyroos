@@ -2,6 +2,10 @@
 
 Based on Gyro Logic v2.0
 
+System and computational architecture built on Gyro Logic.
+For the formal theory, see gyrologic.
+For authentication application, see GyroAuth.
+
 ## 🧠 Theoretical Foundation
 
 This project is based on **Gyro Logic v2.0**:
