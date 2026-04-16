@@ -6,6 +6,22 @@ System and computational architecture built on Gyro Logic.
 For the formal theory, see gyrologic.
 For authentication application, see GyroAuth.
 
+## Position
+
+GyroOS is the system-level realization of Gyro Logic.
+
+The formal theoretical foundation is defined in:
+https://github.com/gitGyro-Dev/gyrologic
+
+GyroOS focuses on translating:
+
+- structure → data models
+- observation → system interfaces
+- stability → scoring engines
+- identity → state tracking
+
+into executable systems.
+
 ## 🧠 Theoretical Foundation
 
 This project is based on **Gyro Logic v2.0**:
