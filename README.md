@@ -340,3 +340,9 @@ GyroOS is not a system that resolves deviation.
 👉 It is a system that **exists and operates on top of deviation**.
 
 ---
+
+## 📄 DOI
+
+This project is archived on Zenodo:
+
+https://doi.org/10.5281/zenodo.19676566
