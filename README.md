@@ -1,129 +1,342 @@
-# Gyro Logic
+# GyroOS
 
-Based on Gyro Logic v2.0
+**Execution Architecture for Slice-based, Deviation-aware, Stability-driven Computation**
 
-System and computational architecture built on Gyro Logic.
-For the formal theory, see gyrologic.
-For authentication application, see GyroAuth.
+---
 
-## Position
+## 🧭 What is GyroOS?
 
-GyroOS is the system-level realization of Gyro Logic.
+GyroOS is the execution system for **Gyro Logic v2**.
 
-The formal theoretical foundation is defined in:
-https://github.com/gitGyro-Dev/gyrologic
+It implements a computational model where:
 
-GyroOS focuses on translating:
+* Observation is inherently partial (Slice)
+* Inconsistency is unavoidable (Δ: Deviation)
+* Meaning emerges from controlled tolerance (Stability)
 
-- structure → data models
-- observation → system interfaces
-- stability → scoring engines
-- identity → state tracking
+👉 GyroOS does not eliminate inconsistency
+👉 It operates **on top of inconsistency**
 
-into executable systems.
+---
 
-## 🧠 Theoretical Foundation
+## 🧩 Position in the Stack
 
-This project is based on **Gyro Logic v2.0**:
+```text
+Gyro Logic   = Theory
+GyroOS       = Execution System (this repository)
+GyroAuth     = Application
+```
 
-https://doi.org/10.5281/zenodo.19555020
+* Gyro Logic defines **what exists**
+* GyroOS defines **how it runs**
+* GyroAuth defines **how it is used**
 
-Gyro Logic defines:
+👉 Upper layers do NOT depend on lower layers
+👉 Lower layers implement upper layers
+👉 Mixing layers is prohibited
 
-- Identity as stability  
-- Observation as operator (Slice)  
-- Structure as emergent from dynamic systems  
+---
 
-This repository represents the **implementation layer** of that theory.
+## 🔁 Core Computational Flow
 
-Gyro Logic is a theoretical framework for modeling identity, meaning, and truth as emergent properties of stability under dynamic observation.
+```text
+S (Structure)
+↓
+O (Slice)
+↓
+X = O(S)
++
+Δ (Deviation)
+↓
+Stability (tolerance of Δ)
+↓
+Selection
+```
 
-Unlike conventional logical or identity systems, Gyro Logic treats observation as an active operator, identity as a preserved dynamic structure, and truth as stability under observation.
+---
+
+## 🧠 Key Concepts (v2)
+
+### Slice
+
+* Reconstruction of structure
+* Not a read operation, but a transformation
+
+### Δ (Deviation)
+
+* Difference between observations
+* Always present
+* First-class entity
+
+### Stability
+
+* Tolerance of deviation
+* Not correctness, but acceptability
+
+### Selection
+
+* Operational choice among representations
+* Not absolute truth
+
+### Void
+
+* Region where deviation cannot be evaluated
+* Drives exploration
+
+### Jump
+
+* Change of Slice (reconstruction of observation space)
+
+### Reduction
+
+* Property of Slice results
+* NOT an operation
+
+---
+
+## 🏗️ System Architecture
+
+```text
+Data Space (Structure)
+        ↓
+   Slice Engine
+        ↓
+Multiple Representations (X1, X2, X3...)
+        ↓
+      Δ Engine
+        ↓
+   Deviation Map / Timeline
+        ↓
+   Stability Engine
+        ↓
+ Stability Scores
+        ↓
+ Selection Engine
+        ↓
+ Selected Representation
+        ↓
+ Action / Runtime Control
+        ↓
+ State Evolution
+
+        ↘
+       Jump Engine
+        ↓
+   Slice Reconfiguration
+
+   + Void Handling
+   + Consciousness Layer (meta-control)
+```
+
+---
+
+## 🔧 Core Engines
+
+### Slice Engine
+
+* Generates multiple representations
+* Manages observation strategies
+
+### Δ Engine
+
+* Computes deviation between slices
+* Tracks temporal deviation patterns
+* Classifies deviation types
+
+### Stability Engine
+
+* Converts deviation into stability scores
+* Evaluates tolerance and persistence
+
+### Selection Engine
+
+* Chooses operational representation
+* Supports weighted and multi-selection
+
+### Jump Engine
+
+* Detects instability or unresolved deviation
+* Reconfigures Slice space
+
+### Void Handling
+
+* Manages undefined / unresolvable regions
+* Triggers re-observation
+
+### Consciousness Layer (advanced)
+
+* Updates Slice strategies
+* Optimizes deviation handling
+
+---
+
+## 🧠 Computational Perspective
+
+Traditional systems:
+
+* Compute values
+* Execute instructions
+* Assume consistency
+
+GyroOS:
+
+* Computes stability
+* Operates on multiple representations
+* Assumes inconsistency
+
+👉 Computation is:
+
+> Controlled evolution over inconsistent observations
+
+---
+
+## 📦 Repository Structure
+
+```text
+gyroos/
+  src/
+    core/
+    engines/
+    runtime/
+    api/
+    storage/
+  docs/
+  examples/
+  paper/
+  archive_2/
+```
+
+---
+
+## 📚 Documentation
+
+* Execution model
+* Slice system
+* Deviation computation
+* Stability evaluation
+* Selection logic
+* Jump / Void handling
+* API specification
+
+👉 Start from: `docs/00_positioning.md`
+
+- Theory-to-implementation mapping (Gyro Logic → GyroOS)
+
+---
+
+## 🚀 Current Status
+
+* [x] Theory mapping (Gyro Logic v2)
+* [x] Core architecture defined
+* [x] Execution model defined
+* [ ] Engine-level implementation
+* [ ] API layer
+* [ ] Prototype runtime
+
+---
+
+## 🧪 Research Direction
+
+GyroOS explores:
+
+* Computation under unavoidable deviation
+* Stability as a computational primitive
+* Multi-view representation systems
+* Identity as trajectory under deviation
+* Dynamic observation frameworks
+
+---
+
+## 📄 Publication
+
+Planned paper:
+
+**GyroOS: Execution Architecture for Deviation-aware Stability-driven Computation**
+
+To be published on:
+
+* arXiv
+* Jxiv
+* Zenodo (DOI)
+
+---
+
+## 📦 License
+
+Planned:
+
+* Open (research)
+* Commercial licensing (implementation / consulting)
+
+---
+
+## 💼 Commercial Direction
+
+GyroOS is a **foundational layer**, not a product.
+
+Applications:
+
+* Adaptive systems
+* Identity modeling
+* Authentication (GyroAuth)
+* Autonomous decision systems
+* Multi-context AI systems
+
+## 🔐 Application Layer: GyroAuth
+
+GyroOS serves as the execution foundation for application systems built on Gyro Logic.
+
+One primary application is:
+
+👉 **GyroAuth** — a deviation-aware, stability-based authentication system
+
+GyroAuth redefines authentication as:
+
+* Not identity matching
+* Not exact reproduction
+* But **stability under deviation**
+
+Repository:
+https://github.com/gitGyro-Dev/gyroauth
+
+---
+
+GyroAuth is developed in a separate layer to preserve:
+
+* Theoretical consistency (Gyro Logic)
+* Execution integrity (GyroOS)
+* Application flexibility (GyroAuth)
 
 
 ---
 
-## Overview
+## 🤝 Collaboration / Licensing
 
-Gyro Logic models reality as a dynamic **Field**.  
-Observation acts as a **Slice operator**, transforming the Field and revealing stable structures.
+Open to:
 
-![Gyro Logic Overview](figures/figure1.png)
+* Research collaboration
+* Proof-of-concept development
+* Licensing agreements
+* System integration
 
-This process defines:
+Contact:
 
-- how structure emerges from observation
-- how stability defines meaning
-- how identity forms as a persistent dynamic pattern
-
----
-
-## Identity as Soliton-like Structure
-
-Identity is not a static label, but a dynamic structure that survives perturbation and repeated observation.
-
-![Soliton-like Identity](figures/figure2.png)
-
-A soliton-like identity:
-
-- maintains structural coherence
-- preserves phase structure
-- re-converges after disturbance
-
-Such structures represent robust identity under Gyro Logic.
+* GitHub Issues / Discussions
 
 ---
 
-## Frame Transition (Jump)
+## 🧠 One-line Definition
 
-When instability increases beyond the capacity of the current Frame, a transition occurs.
+GyroOS is:
 
-![Frame Transition](figures/figure3.png)
-
-This transition involves:
-
-- loss of stability in the current Frame
-- expansion of Void (non-stabilizable region)
-- irreversible Jump
-- emergence of a new stable Frame
-
-This mechanism explains structural transformation and identity change.
+> A computational system that operates on multiple inconsistent observations and evolves through stability-based selection.
 
 ---
 
-## Core Concepts
+## 🔴 Final Statement
 
-- **Field**: Dynamic representation of reality  
-- **Slice**: Observation operator acting on the Field  
-- **Stability**: Structural invariance under repeated observation  
-- **Identity**: Preserved dynamic structure (soliton-like)  
-- **Void**: Region where stable structures cannot form  
-- **Jump**: Transition between Frames  
+GyroOS is not a system that resolves deviation.
+
+👉 It is a system that **exists and operates on top of deviation**.
 
 ---
-
-## Documentation
-
-- Overview → `docs/01_overview.md`
-- Field & Slice → `docs/02_field_and_slice.md`
-- Stability & Convergence → `docs/03_stability_and_convergence.md`
-- Identity & Soliton → `docs/04_identity_and_soliton.md`
-- Frame & Jump → `docs/05_frame_and_jump.md`
-- Void & Instability → `docs/06_void_and_instability.md`
-- Operator Formalism → `docs/07_operator_formalism.md`
-- GyroAuth Connection → `docs/08_gyroauth_connection.md`
-
----
-
-## Applications
-
-- GyroAuth: convergence-based authentication
-- AI behavior and identity modeling
-- Stability-based reasoning systems
-- Dynamic systems and cognitive models
-
----
-
-## Version
-
-**Gyro Logic v2.0**
