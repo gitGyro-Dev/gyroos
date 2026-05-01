@@ -6,16 +6,32 @@
 
 ## 🧭 What is GyroOS?
 
-GyroOS is the execution system for **Gyro Logic v2**.
+GyroOS is the execution system for **Gyro Logic (v2.6)**.
 
-It implements a computational model where:
+It implements a computational framework where:
 
-* Observation is inherently partial (Slice)
-* Inconsistency is unavoidable (Δ: Deviation)
-* Meaning emerges from controlled tolerance (Stability)
+* Observation is inherently partial (**Slice**)
+* Inconsistency is unavoidable (**Δ: Deviation**)
+* Meaning emerges from tolerance (**Stability**)
 
-👉 GyroOS does not eliminate inconsistency
-👉 It operates **on top of inconsistency**
+👉 GyroOS does not eliminate deviation
+👉 It operates **on top of deviation**
+
+---
+
+## 🔁 Gyro Loop (Core Principle)
+
+GyroOS is not a one-shot system.
+
+It operates as a continuous loop:
+
+```text
+Oₙ(S) = Xₙ + Δₙ
+Stabₙ = Φ(Xₙ, Δₙ)
+Oₙ₊₁ = Ψ(Oₙ, Stabₙ)
+```
+
+👉 Observation and evaluation continuously update each other
 
 ---
 
@@ -31,142 +47,75 @@ GyroAuth     = Application
 * GyroOS defines **how it runs**
 * GyroAuth defines **how it is used**
 
-👉 Upper layers do NOT depend on lower layers
-👉 Lower layers implement upper layers
-👉 Mixing layers is prohibited
-
 ---
 
 ## 🔁 Core Computational Flow
 
 ```text
-S (Structure)
-↓
-O (Slice)
-↓
-X = O(S)
-+
-Δ (Deviation)
-↓
-Stability (tolerance of Δ)
-↓
-Selection
+Structure → Slice → Δ → Stability → Update
 ```
 
 ---
 
-## 🧠 Key Concepts (v2)
+## 🧠 Key Concepts
 
 ### Slice
 
-* Reconstruction of structure
-* Not a read operation, but a transformation
+Reconstruction of structure into representations
 
 ### Δ (Deviation)
 
-* Difference between observations
-* Always present
-* First-class entity
+Difference between observations (always present)
 
 ### Stability
 
-* Tolerance of deviation
-* Not correctness, but acceptability
+Tolerance of deviation
 
-### Selection
+### Update
 
-* Operational choice among representations
-* Not absolute truth
+Modification of observation strategy
 
 ### Void
 
-* Region where deviation cannot be evaluated
-* Drives exploration
+Region where deviation cannot be evaluated
 
 ### Jump
 
-* Change of Slice (reconstruction of observation space)
-
-### Reduction
-
-* Property of Slice results
-* NOT an operation
+Change of Slice (reconstruction of observation space)
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Architecture
 
 ```text
-Data Space (Structure)
-        ↓
-   Slice Engine
-        ↓
-Multiple Representations (X1, X2, X3...)
-        ↓
-      Δ Engine
-        ↓
-   Deviation Map / Timeline
-        ↓
-   Stability Engine
-        ↓
- Stability Scores
-        ↓
- Selection Engine
-        ↓
- Selected Representation
-        ↓
- Action / Runtime Control
-        ↓
- State Evolution
-
-        ↘
-       Jump Engine
-        ↓
-   Slice Reconfiguration
-
-   + Void Handling
-   + Consciousness Layer (meta-control)
+Raw State
+   ↓
+Slice Engine
+   ↓
+Representations (X + Δ)
+   ↓
+Deviation Engine
+   ↓
+Stability Engine
+   ↓
+Update Engine
+   ↓
+Loop Controller
+   ↓
+Next Observation
 ```
 
 ---
 
 ## 🔧 Core Engines
 
-### Slice Engine
-
-* Generates multiple representations
-* Manages observation strategies
-
-### Δ Engine
-
-* Computes deviation between slices
-* Tracks temporal deviation patterns
-* Classifies deviation types
-
-### Stability Engine
-
-* Converts deviation into stability scores
-* Evaluates tolerance and persistence
-
-### Selection Engine
-
-* Chooses operational representation
-* Supports weighted and multi-selection
-
-### Jump Engine
-
-* Detects instability or unresolved deviation
-* Reconfigures Slice space
-
-### Void Handling
-
-* Manages undefined / unresolvable regions
-* Triggers re-observation
-
-### Consciousness Layer (advanced)
-
-* Updates Slice strategies
-* Optimizes deviation handling
+* Slice Engine (multi-slice observation)
+* Deviation Engine (Δ computation)
+* Stability Engine (tolerance evaluation)
+* Update Engine (Slice policy update)
+* Loop Controller (continuous execution)
+* Void / Jump handling
+* Consciousness Layer (meta-control)
 
 ---
 
@@ -174,19 +123,17 @@ Multiple Representations (X1, X2, X3...)
 
 Traditional systems:
 
-* Compute values
-* Execute instructions
 * Assume consistency
+* Compute outputs
 
 GyroOS:
 
-* Computes stability
-* Operates on multiple representations
 * Assumes inconsistency
+* Evolves observation
 
 👉 Computation is:
 
-> Controlled evolution over inconsistent observations
+> Continuous adaptation of observation under deviation
 
 ---
 
@@ -199,7 +146,6 @@ gyroos/
     engines/
     runtime/
     api/
-    storage/
   docs/
   examples/
   paper/
@@ -208,52 +154,38 @@ gyroos/
 
 ---
 
-## 📚 Documentation
+## 📄 DOI
 
-* Execution model
-* Slice system
-* Deviation computation
-* Stability evaluation
-* Selection logic
-* Jump / Void handling
-* API specification
+This project is archived on Zenodo:
 
-👉 Start from: `docs/00_positioning.md`
+👉 https://doi.org/XXXXX
 
-- Theory-to-implementation mapping (Gyro Logic → GyroOS)
+---
+
+## 🔐 Application Layer: GyroAuth
+
+GyroOS serves as the foundation for:
+
+👉 GyroAuth — deviation-aware authentication
+
+https://github.com/gitGyro-Dev/gyroauth
 
 ---
 
 ## 🚀 Current Status
 
-* [x] Theory mapping (Gyro Logic v2)
+* [x] Gyro Logic v2.6 mapping
+* [x] Loop-based execution model
 * [x] Core architecture defined
-* [x] Execution model defined
-* [ ] Engine-level implementation
+* [ ] Engine implementation
 * [ ] API layer
-* [ ] Prototype runtime
-
----
-
-## 🧪 Research Direction
-
-GyroOS explores:
-
-* Computation under unavoidable deviation
-* Stability as a computational primitive
-* Multi-view representation systems
-* Identity as trajectory under deviation
-* Dynamic observation frameworks
+* [ ] Runtime prototype
 
 ---
 
 ## 📄 Publication
 
-Planned paper:
-
-**GyroOS: Execution Architecture for Deviation-aware Stability-driven Computation**
-
-To be published on:
+Planned:
 
 * arXiv
 * Jxiv
@@ -261,88 +193,16 @@ To be published on:
 
 ---
 
-## 📦 License
-
-Planned:
-
-* Open (research)
-* Commercial licensing (implementation / consulting)
-
----
-
-## 💼 Commercial Direction
-
-GyroOS is a **foundational layer**, not a product.
-
-Applications:
-
-* Adaptive systems
-* Identity modeling
-* Authentication (GyroAuth)
-* Autonomous decision systems
-* Multi-context AI systems
-
-## 🔐 Application Layer: GyroAuth
-
-GyroOS serves as the execution foundation for application systems built on Gyro Logic.
-
-One primary application is:
-
-👉 **GyroAuth** — a deviation-aware, stability-based authentication system
-
-GyroAuth redefines authentication as:
-
-* Not identity matching
-* Not exact reproduction
-* But **stability under deviation**
-
-Repository:
-https://github.com/gitGyro-Dev/gyroauth
-
----
-
-GyroAuth is developed in a separate layer to preserve:
-
-* Theoretical consistency (Gyro Logic)
-* Execution integrity (GyroOS)
-* Application flexibility (GyroAuth)
-
-
----
-
-## 🤝 Collaboration / Licensing
-
-Open to:
-
-* Research collaboration
-* Proof-of-concept development
-* Licensing agreements
-* System integration
-
-Contact:
-
-* GitHub Issues / Discussions
-
----
-
 ## 🧠 One-line Definition
 
 GyroOS is:
 
-> A computational system that operates on multiple inconsistent observations and evolves through stability-based selection.
+> A system that continuously evolves observation through stability under deviation
 
 ---
 
 ## 🔴 Final Statement
 
-GyroOS is not a system that resolves deviation.
+GyroOS does not resolve deviation.
 
-👉 It is a system that **exists and operates on top of deviation**.
-
----
-
-## 📄 DOI
-
-This project is archived on Zenodo:
-
-https://doi.org/10.5281/zenodo.19676566
+👉 It evolves by adapting to deviation.

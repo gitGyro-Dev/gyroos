@@ -1,17 +1,17 @@
 # GyroOS
 
-**Slice・Deviation・Stabilityに基づく計算アーキテクチャ**
+**Slice・Deviation・Stabilityに基づく実行アーキテクチャ**
 
 ---
 
 ## 🧭 GyroOSとは？
 
-GyroOSは、**Gyro Logic v2** を実行するための計算システムです。
+GyroOSは、**Gyro Logic（v2.6）** を実行する計算システムです。
 
-本システムは以下の前提に基づいています：
+本システムは以下の前提に基づきます：
 
-* 観測は本質的に不完全である（Slice）
-* 観測間には必ずズレが存在する（Δ：Deviation）
+* 観測は本質的に不完全（Slice）
+* 観測間には必ずズレが存在（Δ）
 * 意味はズレの許容から生まれる（Stability）
 
 👉 GyroOSはズレを消すシステムではない
@@ -19,154 +19,97 @@ GyroOSは、**Gyro Logic v2** を実行するための計算システムです�
 
 ---
 
+## 🔁 Gyro Loop（中核）
+
+GyroOSは単発処理ではなく、ループとして動作します：
+
+```text
+Oₙ(S) = Xₙ + Δₙ
+Stabₙ = Φ(Xₙ, Δₙ)
+Oₙ₊₁ = Ψ(Oₙ, Stabₙ)
+```
+
+👉 観測と評価が相互に更新され続ける
+
+---
+
 ## 🧩 レイヤー構造
 
 ```text
 Gyro Logic   = 理論
-GyroOS       = 実装（本リポジトリ）
+GyroOS       = 実装
 GyroAuth     = 応用
 ```
-
-* Gyro Logic は「何が存在するか」を定義する
-* GyroOS は「どう動作するか」を定義する
-* GyroAuth は「どう利用するか」を定義する
-
-👉 上位は下位に依存しない
-👉 下位は上位を実装する
-👉 混同は禁止
 
 ---
 
 ## 🔁 コア計算フロー
 
 ```text
-S（構造）
-↓
-O（Slice）
-↓
-X = O(S)
-＋
-Δ（ズレ）
-↓
-Stability（ズレの許容）
-↓
-Selection（選択）
+Structure → Slice → Δ → Stability → Update
 ```
 
 ---
 
-## 🧠 v2 核概念
+## 🧠 核概念
 
 ### Slice
 
-* 構造の再構成
-* 単なる読み取りではない
+構造の再構成
 
 ### Δ（Deviation）
 
-* 観測間の不一致
-* 必ず存在する
-* 第一級の変数
+観測間のズレ（必ず存在）
 
 ### Stability
 
-* ズレの許容度
-* 正しさではなく「成立性」
+ズレの許容
 
-### Selection
+### Update
 
-* 表現の選択
-* 真理ではなく運用上の選好
+観測の更新
 
 ### Void
 
-* ズレ評価不能領域
-* 探索を生む領域
+評価不能領域
 
 ### Jump
 
-* Sliceの変更（観測枠の再構成）
-
-### Reduction
-
-* Slice結果の性質
-* 操作ではない
+観測枠の変更
 
 ---
 
-## 🏗️ システム構成
+## 🏗️ アーキテクチャ
 
 ```text
-データ空間（Structure）
-        ↓
-   Slice Engine
-        ↓
-複数表現（X1, X2, X3...）
-        ↓
-     Δ Engine
-        ↓
-   ズレマップ / 時系列
-        ↓
-  Stability Engine
-        ↓
- 安定性スコア
-        ↓
- Selection Engine
-        ↓
- 選択された表現
-        ↓
- Action / 実行制御
-        ↓
- 状態更新
-
-        ↘
-       Jump Engine
-        ↓
- Slice再構成
-
- + Void Handling
- + Consciousness Layer（メタ制御）
+状態（Structure）
+   ↓
+Slice Engine
+   ↓
+表現（X + Δ）
+   ↓
+Deviation Engine
+   ↓
+Stability Engine
+   ↓
+Update Engine
+   ↓
+Loop Controller
+   ↓
+次の観測
 ```
 
 ---
 
 ## 🔧 コアエンジン
 
-### Slice Engine
-
-* 複数の観測を生成
-* 観測戦略を管理
-
-### Δ Engine
-
-* 観測間のズレを計算
-* 時系列管理
-* ズレ分類
-
-### Stability Engine
-
-* ズレを安定性へ変換
-* 許容・持続性の評価
-
-### Selection Engine
-
-* 表現の選択
-* 重み付き選択対応
-
-### Jump Engine
-
-* 不安定・未解釈の検出
-* Sliceの再構成
-
-### Void Handling
-
-* 未定義領域の管理
-* 再観測誘導
-
-### Consciousness Layer（高度）
-
-* Slice戦略更新
-* Δ最適化
+* Slice Engine（複数観測）
+* Deviation Engine（Δ計算）
+* Stability Engine（許容評価）
+* Update Engine（観測更新）
+* Loop Controller（非停止系）
+* Void / Jump
+* Consciousness Layer
 
 ---
 
@@ -174,31 +117,23 @@ Selection（選択）
 
 従来：
 
-* 正しい値を求める
-* 一貫性を前提とする
+* 正解を求める
 
 GyroOS：
 
-* 安定性を評価する
-* 複数表現を扱う
-* 不一致を前提とする
+* 観測を進化させる
 
 👉 計算とは：
 
-**ズレを含む観測の中で、安定な選択を繰り返すプロセスである**
+**ズレの中で観測を更新し続けるプロセスである**
 
 ---
 
-## 📦 リポジトリ構成
+## 📦 構成
 
 ```text
 gyroos/
   src/
-    core/
-    engines/
-    runtime/
-    api/
-    storage/
   docs/
   examples/
   paper/
@@ -207,123 +142,32 @@ gyroos/
 
 ---
 
-## 📚 ドキュメント
+## 📄 DOI
 
-以下を docs に整理：
+本プロジェクトはZenodoにて公開：
 
-* 実行モデル
-* Slice設計
-* Δ計算
-* Stability評価
-* Selectionロジック
-* Jump / Void処理
-* API仕様
-
-👉 `docs/00_positioning.md` から開始
-
-- 理論と実装の対応関係（Gyro Logic → GyroOS）
+👉 https://doi.org/XXXXX
 
 ---
 
-## 🚀 現在のステータス
+## 🔐 応用：GyroAuth
 
-* [x] Gyro Logic v2 対応
-* [x] アーキテクチャ定義
-* [x] 実行モデル定義
-* [ ] 各エンジン実装
-* [ ] API設計
-* [ ] プロトタイプ
+GyroAuth（認証）：
 
----
+👉 ズレ前提認証システム
 
-## 🧪 研究方向
-
-GyroOSが扱うテーマ：
-
-* ズレを前提とした計算
-* Stabilityを計算原理とする
-* 多視点表現システム
-* ズレの中の同一性
-* 動的観測構造
-
----
-
-## 📄 論文化
-
-予定論文：
-
-**GyroOS: ズレ前提・安定性駆動計算アーキテクチャ**
-
-投稿予定：
-
-* arXiv
-* Jxiv
-* Zenodo（DOI）
-
----
-
-## 📦 ライセンス
-
-予定：
-
-* 研究用途：オープン
-* 商用用途：ライセンス提供
-
----
-
-## 💼 商用展開
-
-GyroOSはプロダクトではなく**基盤技術**です。
-
-応用領域：
-
-* 適応システム
-* 同一性モデル
-* 認証（GyroAuth）
-* 自律制御
-* 多文脈AI
-
-## 🔐 応用層：GyroAuth
-
-GyroOSは、Gyro Logicを実行する基盤であり、その上に応用システムが構築されます。
-
-代表的な応用が：
-
-👉 **GyroAuth（認証システム）**
-
-GyroAuthは認証を以下のように再定義します：
-
-* 一致判定ではない
-* 再現性でもない
-* **ズレの中で成立するかどうか**
-
-リポジトリ：
 https://github.com/gitGyro-Dev/gyroauth
 
 ---
 
-GyroAuthは別レイヤーで開発されます：
+## 🚀 状態
 
-* Gyro Logic（理論の純度維持）
-* GyroOS（実装の整合性維持）
-* GyroAuth（応用の柔軟性確保）
-
-
-
----
-
-## 🤝 共同研究・ライセンス
-
-対応可能：
-
-* 共同研究
-* PoC開発
-* ライセンス契約
-* システム導入
-
-連絡：
-
-* GitHub Issues / Discussions
+* [x] Gyro Logic v2.6 対応
+* [x] ループモデル実装設計
+* [x] アーキテクチャ定義
+* [ ] 実装
+* [ ] API
+* [ ] PoC
 
 ---
 
@@ -331,18 +175,10 @@ GyroAuthは別レイヤーで開発されます：
 
 GyroOSとは：
 
-**ズレを含む複数の観測の中で、安定な表現を選択し続ける計算システムである**
+**ズレの中で安定性に基づき観測を更新し続ける実行系である**
 
 ---
 
 ## 🔴 最後の一行
 
-👉 GyroOSは、ズレを処理するのではなく、ズレの上で動作する
-
----
-
-## 📄 DOI
-
-本プロジェクトはZenodoにて公開されています：
-
-https://doi.org/10.5281/zenodo.19676566
+👉 GyroOSは、ズレを処理するのではなく、ズレの上で進化する
