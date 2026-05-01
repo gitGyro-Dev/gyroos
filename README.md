@@ -1,219 +1,186 @@
-# GyroOS
+# GyroOS Roadmap
 
-**Execution Architecture for Slice-based, Deviation-aware, Stability-driven Computation**
+GyroOS is an execution system that evolves by implementing Gyro Logic.
 
----
-
-## 🧭 What is GyroOS?
-
-GyroOS is the execution system for **Gyro Logic (v2.6)**.
-
-It implements a computational framework where:
-
-* Observation is inherently partial (**Slice**)
-* Inconsistency is unavoidable (**Δ: Deviation**)
-* Meaning emerges from tolerance (**Stability**)
-
-👉 GyroOS does not eliminate deviation
-👉 It operates **on top of deviation**
+It progresses through phases that expand its capability as a dynamic, loop-based computational system.
 
 ---
 
-## 🔁 Gyro Loop (Core Principle)
+## 🧭 Core Principle (Invariant)
 
-GyroOS is not a one-shot system.
-
-It operates as a continuous loop:
-
-```text
-Oₙ(S) = Xₙ + Δₙ
-Stabₙ = Φ(Xₙ, Δₙ)
-Oₙ₊₁ = Ψ(Oₙ, Stabₙ)
-```
-
-👉 Observation and evaluation continuously update each other
-
----
-
-## 🧩 Position in the Stack
-
-```text
-Gyro Logic   = Theory
-GyroOS       = Execution System (this repository)
-GyroAuth     = Application
-```
-
-* Gyro Logic defines **what exists**
-* GyroOS defines **how it runs**
-* GyroAuth defines **how it is used**
-
----
-
-## 🔁 Core Computational Flow
-
-```text
 Structure → Slice → Δ → Stability → Update
-```
+
+👉 This execution loop is invariant across all phases
 
 ---
 
-## 🧠 Key Concepts
+## 🔁 Phase 1 — Static Execution Model (v1.x)
 
-### Slice
+### Status: Archived
 
-Reconstruction of structure into representations
+### Characteristics
 
-### Δ (Deviation)
+* Single Slice
+* Implicit deviation (Δ not explicit)
+* Stability as score
+* One-shot execution
 
-Difference between observations (always present)
+### Limitation
 
-### Stability
-
-Tolerance of deviation
-
-### Update
-
-Modification of observation strategy
-
-### Void
-
-Region where deviation cannot be evaluated
-
-### Jump
-
-Change of Slice (reconstruction of observation space)
+* No multi-view representation
+* No deviation modeling
+* No loop
 
 ---
 
-## 🏗️ Architecture
+## 🔄 Phase 2 — Multi-Slice & Stability (v2.x)
 
-```text
-Raw State
-   ↓
-Slice Engine
-   ↓
-Representations (X + Δ)
-   ↓
-Deviation Engine
-   ↓
-Stability Engine
-   ↓
-Update Engine
-   ↓
-Loop Controller
-   ↓
-Next Observation
-```
+### Status: Completed
 
----
+### Characteristics
 
-## 🔧 Core Engines
+* Multi-slice observation
+* Explicit Stability evaluation
+* Selection-based execution
+* Initial deviation handling
 
-* Slice Engine (multi-slice observation)
-* Deviation Engine (Δ computation)
-* Stability Engine (tolerance evaluation)
-* Update Engine (Slice policy update)
-* Loop Controller (continuous execution)
-* Void / Jump handling
-* Consciousness Layer (meta-control)
+### Capability
+
+* Multiple representations
+* Stability-based decision
+
+### Limitation
+
+* Δ not first-class
+* Still partially static
+* Loop not formalized
 
 ---
 
-## 🧠 Computational Perspective
+## ⚙️ Phase 3 — Deviation-aware Execution (v3.x)
 
-Traditional systems:
+### Status: Current (v3.1)
 
-* Assume consistency
-* Compute outputs
+### Characteristics
 
-GyroOS:
+* Δ as first-class entity
+* Explicit deviation computation
+* Stability = tolerance of Δ
+* Selection under inconsistency
+* Jump / Void handling
 
-* Assumes inconsistency
-* Evolves observation
+### Capability
 
-👉 Computation is:
+* Multi-view computation
+* Inconsistency-aware processing
+* Dynamic representation selection
 
-> Continuous adaptation of observation under deviation
+### Key Shift
 
----
-
-## 📦 Repository Structure
-
-```text
-gyroos/
-  src/
-    core/
-    engines/
-    runtime/
-    api/
-  docs/
-  examples/
-  paper/
-  archive_2/
-```
+👉 Computation under deviation
 
 ---
 
-## 📄 DOI
+## 🔁 Phase 4 — Gyro Loop Execution (v4.x)
 
-This project is archived on Zenodo:
+### Status: Next
 
-👉 https://doi.org/XXXXX
+### Characteristics
 
----
+* Full loop implementation:
+  Oₙ(S) → Δ → Stabₙ → Oₙ₊₁
+* Update Engine introduced
+* Slice policy evolution
+* Non-terminating execution model
 
-## 🔐 Application Layer: GyroAuth
+### Capability
 
-GyroOS serves as the foundation for:
+* Self-updating observation system
+* Continuous adaptation
+* Observation evolution
 
-👉 GyroAuth — deviation-aware authentication
+### Key Shift
 
-https://github.com/gitGyro-Dev/gyroauth
-
----
-
-## 🚀 Current Status
-
-* [x] Gyro Logic v2.6 mapping
-* [x] Loop-based execution model
-* [x] Core architecture defined
-* [ ] Engine implementation
-* [ ] API layer
-* [ ] Runtime prototype
+👉 Computation as evolving observation
 
 ---
 
-## 📄 Publication
+## 🧠 Phase 5 — Adaptive Meta-System (v5.x)
 
-Planned:
+### Status: Planned
 
-* arXiv
-* Jxiv
-* Zenodo (DOI)
+### Characteristics
+
+* Consciousness Layer activation
+* Dynamic slice strategy learning
+* Stability threshold adaptation
+* Long-term behavior optimization
+
+### Capability
+
+* Self-optimizing system
+* Context-aware adaptation
+* Autonomous observation control
+
+### Key Shift
+
+👉 System learns how to observe
+
+---
+
+## 🌌 Phase 6 — Distributed / Multi-Agent GyroOS (v6.x)
+
+### Status: Vision
+
+### Characteristics
+
+* Multiple Gyro loops interacting
+* Cross-system Δ computation
+* Shared stability space
+* Distributed identity formation
+
+### Capability
+
+* Collective intelligence
+* Multi-agent systems
+* Networked stability computation
+
+---
+
+## 📊 Summary
+
+| Phase | Focus                  | Status    |
+| ----- | ---------------------- | --------- |
+| v1.x  | Static execution       | Archived  |
+| v2.x  | Multi-slice stability  | Completed |
+| v3.x  | Deviation-aware system | Current   |
+| v4.x  | Loop-based execution   | Next      |
+| v5.x  | Meta-adaptive system   | Planned   |
+| v6.x  | Distributed system     | Vision    |
+
+---
+
+## 🚧 Philosophy
+
+* Preserve theoretical consistency (Gyro Logic)
+* Expand execution capability (GyroOS)
+* Maintain loop structure
+* Never reduce to static models
+
+---
+
+## 📌 Key Insight
+
+GyroOS evolves not by adding features, but by:
+
+👉 **deepening the execution of the Gyro Loop**
 
 ---
 
 ## 🧠 One-line Definition
 
-GyroOS is:
+GyroOS evolves as:
 
-> A system that continuously evolves observation through stability under deviation
+A system that progressively enables the continuous evolution of observation under deviation.
 
 ---
-
-## 🔴 Final Statement
-
-GyroOS does not resolve deviation.
-
-👉 It evolves by adapting to deviation.
-
-
-## 🔁 Gyro Loop
-
-GyroOS operates as a continuous loop:
-
-Oₙ(S) = Xₙ + Δₙ  
-Stabₙ = Φ(Xₙ, Δₙ)  
-Oₙ₊₁ = Ψ(Oₙ, Stabₙ)
-
-Observation and evaluation continuously update each other.
