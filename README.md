@@ -206,3 +206,14 @@ GyroOS is:
 GyroOS does not resolve deviation.
 
 👉 It evolves by adapting to deviation.
+
+
+## 🔁 Gyro Loop
+
+GyroOS operates as a continuous loop:
+
+Oₙ(S) = Xₙ + Δₙ  
+Stabₙ = Φ(Xₙ, Δₙ)  
+Oₙ₊₁ = Ψ(Oₙ, Stabₙ)
+
+Observation and evaluation continuously update each other.
