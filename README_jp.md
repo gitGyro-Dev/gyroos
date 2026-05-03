@@ -171,6 +171,65 @@ https://github.com/gitGyro-Dev/gyroauth
 
 ---
 
+## 🧭 ロードマップ
+
+GyroOSは、Gyro Logicを実行システムとして実装することで進化します。
+
+---
+
+### 🔁 コア原則（不変）
+
+```text
+Structure → Slice → Δ → Stability → Update
+```
+
+このループは全フェーズで不変です。
+
+---
+
+### ⚙️ Phase 3 — Deviation対応実行（現在）
+
+* Δ（ズレ）を第一級変数として扱う
+* Stability = ズレの許容
+* 複数Slice
+* Selectionによる実行
+* Jump / Void
+
+👉 ズレ前提計算
+
+---
+
+### 🔁 Phase 4 — Gyro Loop実行（次）
+
+* 完全ループ実装
+* 観測更新（Oₙ → Oₙ₊₁）
+* Slice戦略進化
+* 非停止系
+
+👉 観測が進化する計算
+
+---
+
+### 🧠 Phase 5 — メタ適応システム
+
+* Consciousness Layer
+* Slice学習
+* Stability適応
+
+👉 観測の仕方を学習する
+
+---
+
+### 🌌 Phase 6 — 分散GyroOS
+
+* マルチエージェント
+* Stability共有
+* Δの相互作用
+
+👉 分散安定性計算
+
+
+
 ## 🧠 一行定義
 
 GyroOSとは：
