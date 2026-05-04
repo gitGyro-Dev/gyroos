@@ -1,139 +1,412 @@
 # GyroOS
 
-**Execution Architecture for Slice-based, Deviation-aware, Stability-driven Computation**
+**Execution Architecture for Gyro Process, Operator Response, and Deviation-aware Runtime Systems**
 
 ---
 
 ## 🧭 What is GyroOS?
 
-GyroOS is the execution system for **Gyro Logic (v2.6)**.
+GyroOS is the execution layer of **Gyro Logic**.
 
-It implements a computational framework where:
+It does not redefine Gyro Logic.  
+It implements Gyro Logic as a runtime system.
 
-* Observation is inherently partial (**Slice**)
-* Inconsistency is unavoidable (**Δ: Deviation**)
-* Meaning emerges from tolerance (**Stability**)
-
-👉 GyroOS does not eliminate deviation
-👉 It operates **on top of deviation**
-
----
-
-## 🔁 Gyro Loop (Core Principle)
-
-GyroOS is not a one-shot system.
-
-It operates as a continuous loop:
+The invariant theoretical core is:
 
 ```text
-Oₙ(S) = Xₙ + Δₙ
-Stabₙ = Φ(Xₙ, Δₙ)
-Oₙ₊₁ = Ψ(Oₙ, Stabₙ)
+Structure → Slice → Stability
 ```
 
-👉 Observation and evaluation continuously update each other
+GyroOS expands this timeless structure into a temporal execution process:
+
+```text
+Structure
+→ Operator Orientation
+→ slice-ing
+→ slice-done
+→ Stability
+→ Operator Response
+→ Next Process
+```
+
+GyroOS is not an application layer.  
+GyroAuth is the application layer built on top of GyroOS.
 
 ---
 
 ## 🧩 Position in the Stack
 
 ```text
-Gyro Logic   = Theory
-GyroOS       = Execution System (this repository)
-GyroAuth     = Application
+Gyro Logic   = Theory Layer
+GyroOS       = Execution Layer
+GyroAuth     = Application Layer
 ```
 
-* Gyro Logic defines **what exists**
-* GyroOS defines **how it runs**
-* GyroAuth defines **how it is used**
+Rules:
+
+```text
+Gyro Logic does not depend on GyroOS.
+GyroOS implements Gyro Logic.
+GyroAuth applies GyroOS.
+```
+
+GyroOS must not modify Gyro Logic definitions for implementation convenience.
 
 ---
 
-## 🔁 Core Computational Flow
+## 🔁 Core Principle
+
+The core principle remains:
 
 ```text
-Structure → Slice → Δ → Stability → Update
+Structure → Slice → Stability
 ```
+
+This is the timeless Gyro Unit.
+
+GyroOS implements its runtime expansion as a Gyro Process:
+
+```text
+Structure
+→ Operator Orientation
+→ slice-ing
+→ slice-done
+→ Stability
+→ Operator Response
+```
+
+A Gyro Loop is not a replacement for Structure → Slice → Stability.
+
+A Gyro Loop is the repetition of Gyro Process through Operator Response.
+
+---
+
+## 🧠 Gyro Unit / Process / Loop
+
+### Gyro Unit
+
+```text
+Gyro Unit = Structure → Slice → Stability
+```
+
+The Gyro Unit is timeless.
+
+It does not contain Operator Orientation, Operator Response, or Loop.
+
+---
+
+### Gyro Process
+
+```text
+Gyro Process
+= Structure
+→ Operator Orientation
+→ slice-ing
+→ slice-done
+→ Stability
+→ Operator Response
+```
+
+The Gyro Process is one temporal execution cycle.
+
+Time appears mainly in:
+
+```text
+slice-ing
+Operator Response
+```
+
+---
+
+### Gyro Loop
+
+```text
+Gyro Loop = repetition of Gyro Process
+```
+
+More precisely:
+
+```text
+Gyro Processₙ
+→ Operator Responseₙ
+→ Gyro Processₙ₊₁
+```
+
+The Loop is controlled by Operator Response, not by Stability directly.
 
 ---
 
 ## 🧠 Key Concepts
 
+### Structure
+
+Structure is the underlying state, relation, or field to be sliced.
+
+---
+
+### Operator Orientation
+
+Operator Orientation is the pre-Slice direction, weight, request, or constraint.
+
+It is not Slice itself.
+
+```text
+Structure → Operator Orientation → slice-ing
+```
+
+---
+
 ### Slice
 
-Reconstruction of structure into representations
+Slice is the general operation by which Structure appears as representation.
 
-### Δ (Deviation)
+In GyroOS, Slice is implemented through slice-ing and slice-done.
 
-Difference between observations (always present)
+---
+
+### slice-ing
+
+slice-ing is the temporal execution process of Slice.
+
+```text
+slice-ing = Slice in progress
+```
+
+This is where computation, transformation, or observation execution occurs.
+
+---
+
+### slice-done
+
+slice-done is the completed result of Slice.
+
+```text
+slice-done = X + Δ
+```
+
+where:
+
+```text
+X = representation produced by Slice
+Δ = deviation between Structure and Representation
+```
+
+slice-done is passed to Stability.
+
+---
+
+### Δ / Deviation
+
+Deviation is not an error to be eliminated.
+
+```text
+Δ = deviation between Structure and Representation
+```
+
+GyroOS preserves and evaluates Δ.
+
+---
 
 ### Stability
 
-Tolerance of deviation
+Stability is a state quantity appearing in slice-done.
 
-### Update
+It is not a controller.
 
-Modification of observation strategy
+```text
+Stability = state quantity of slice-done
+```
+
+Stability is observed, measured, stored, and passed to Operator Response.
+
+---
+
+### Operator Response
+
+Operator Response is the post-Stability reaction of the Operator.
+
+In GyroOS v4.0, this is implemented primarily by the Loop Controller.
+
+It may decide:
+
+```text
+Continue
+Adjust
+Stop
+Jump
+Void handling
+```
+
+---
 
 ### Void
 
-Region where deviation cannot be evaluated
+Void is a region or state where Stability is undefined, too low, or not evaluable.
+
+Void does not act by itself.
+
+Operator Response decides how to handle Void.
+
+---
 
 ### Jump
 
-Change of Slice (reconstruction of observation space)
+Jump is a non-continuous reconstruction of Orientation, Slice, or Structure mapping.
+
+Jump is selected by Operator Response.
 
 ---
 
 ## 🏗️ Architecture
 
 ```text
-Raw State
+Raw Structure
+   ↓
+Operator Orientation
    ↓
 Slice Engine
    ↓
-Representations (X + Δ)
+slice-ing
+   ↓
+slice-done = X + Δ
    ↓
 Deviation Engine
    ↓
 Stability Engine
    ↓
-Update Engine
+Stability
    ↓
 Loop Controller
    ↓
-Next Observation
+Operator Response
+   ├─ Continue
+   ├─ Adjust → Update Engine
+   ├─ Jump → Update Engine
+   ├─ Void Handling → Update Engine if needed
+   └─ Stop
+   ↓
+Next Orientation / Next Process
 ```
 
 ---
 
-## 🔧 Core Engines
+## 🔧 Core Runtime Components
 
-* Slice Engine (multi-slice observation)
-* Deviation Engine (Δ computation)
-* Stability Engine (tolerance evaluation)
-* Update Engine (Slice policy update)
-* Loop Controller (continuous execution)
-* Void / Jump handling
-* Consciousness Layer (meta-control)
+### Slice Engine
+
+Executes slice-ing and produces slice-done.
 
 ---
 
-## 🧠 Computational Perspective
+### Deviation Engine
 
-Traditional systems:
+Extracts and preserves Δ.
 
-* Assume consistency
-* Compute outputs
+---
+
+### Stability Engine
+
+Measures Stability as a state quantity of slice-done.
+
+It does not control the Loop.
+
+---
+
+### Loop Controller
+
+Implements Operator Response.
+
+It owns the response decision after Stability is available.
+
+Correct relation:
+
+```text
+Stability
+→ Loop Controller / Operator Response
+→ Next Process
+```
+
+---
+
+### Update Engine
+
+Applies updates only when requested by Operator Response.
+
+It is not the center of GyroOS v4.0.
+
+Correct relation:
+
+```text
+Loop Controller / Operator Response
+→ Update Engine if needed
+→ Next Orientation
+```
+
+---
+
+### Slice Policy
+
+Slice Policy is an implementation representation of Operator Orientation.
+
+It may define:
+
+```text
+active slices
+weights
+resolution
+target dimensions
+update rules
+context dependency
+```
+
+---
+
+## 🔁 GyroOS v4.0 Runtime Flow
+
+At each process cycle:
+
+```text
+1. Receive Structure
+2. Apply Operator Orientation
+3. Execute slice-ing
+4. Produce slice-done = X + Δ
+5. Measure Stability
+6. Execute Operator Response through Loop Controller
+7. Apply Update Engine if required
+8. Prepare Next Orientation or Next Process
+```
+
+---
+
+## ❌ What GyroOS Does Not Do
+
+GyroOS does not:
+
+```text
+redefine Structure → Slice → Stability
+treat Stability as a controller
+erase Δ
+collapse slice-ing and slice-done
+make Update Engine the loop owner
+treat Void as an actor
+mix GyroAuth authentication logic into GyroOS
+```
+
+---
+
+## ⭕ What GyroOS Does
 
 GyroOS:
 
-* Assumes inconsistency
-* Evolves observation
-
-👉 Computation is:
-
-> Continuous adaptation of observation under deviation
+```text
+implements Gyro Process
+preserves Δ
+measures Stability
+implements Operator Response
+manages Gyro Loop repetition
+supports Jump / Void handling
+prepares the next Orientation
+```
 
 ---
 
@@ -141,175 +414,88 @@ GyroOS:
 
 ```text
 gyroos/
+  docs/
+    11_loop_controller.md
+    12_update_engine.md
+    13_slice_policy.md
   src/
     core/
     engines/
     runtime/
     api/
-  docs/
   examples/
   paper/
-  archive_2/
 ```
 
 ---
 
-## 📄 DOI
+## 🧭 Roadmap
 
-This project is archived on Zenodo:
+GyroOS evolves by progressively implementing Gyro Logic as a runtime system.
 
-👉 https://doi.org/XXXXX
+### Phase 3 — Deviation-aware Execution
+
+```text
+Structure → Slice → Δ → Stability
+```
+
+Focus:
+
+```text
+Deviation preservation
+Stability measurement
+Multi-slice representation
+Void / Jump concepts
+```
+
+---
+
+### Phase 4 — Gyro Process / Operator Response Execution
+
+Focus:
+
+```text
+Operator Orientation
+slice-ing
+slice-done
+Operator Response
+Loop Controller
+Update Engine as response support
+```
+
+Core runtime form:
+
+```text
+Gyro Processₙ
+→ Operator Responseₙ
+→ Gyro Processₙ₊₁
+```
+
+---
+
+### Phase 5 — Adaptive Meta-System
+
+Focus:
+
+```text
+Adaptive Orientation
+History-based Response
+Meta-level observation strategy
+```
 
 ---
 
 ## 🔐 Application Layer: GyroAuth
 
-GyroOS serves as the foundation for:
+GyroAuth is an application built on top of GyroOS.
 
-👉 GyroAuth — deviation-aware authentication
+GyroAuth must not be mixed into GyroOS core definitions.
 
-https://github.com/gitGyro-Dev/gyroauth
-
----
-
-## 🚀 Current Status
-
-* [x] Gyro Logic v2.6 mapping
-* [x] Loop-based execution model
-* [x] Core architecture defined
-* [ ] Engine implementation
-* [ ] API layer
-* [ ] Runtime prototype
-
-
-## 🧭 Roadmap
-
-GyroOS evolves by progressively implementing Gyro Logic as a dynamic execution system.
-
----
-
-### 🔁 Core Principle (Invariant)
+Repository:
 
 ```text
-Structure → Slice → Δ → Stability → Update
+https://github.com/gitGyro-Dev/gyroauth
 ```
-
-This loop remains constant across all phases.
-
----
-
-### ⚙️ Phase 3 — Deviation-aware Execution (Current)
-
-* Δ (Deviation) as a first-class entity
-* Stability as tolerance of deviation
-* Multi-slice representation
-* Selection-based execution
-* Jump / Void handling
-
-👉 Computation under deviation
-
----
-
-### 🔁 Phase 4 — Gyro Loop Execution (Next)
-
-* Full loop implementation
-* Observation update: Oₙ → Oₙ₊₁
-* Slice policy evolution
-* Non-terminating execution
-
-👉 Computation as evolving observation
-
----
-
-### 🧠 Phase 5 — Adaptive Meta-System (Planned)
-
-* Consciousness Layer activation
-* Dynamic slice strategy learning
-* Stability adaptation
-
-👉 System learns how to observe
-
----
-
-### 🌌 Phase 6 — Distributed GyroOS (Vision)
-
-* Multi-agent Gyro systems
-* Shared stability space
-* Cross-system deviation
-
-👉 Networked stability computation
-
-
-
----
-
-## 🔄 GyroOS v4.0 — Loop-based Execution System
-
-GyroOS v4.0 introduces a fundamental shift in the execution model.
-
-Instead of producing a single output from an input,  
-GyroOS v4.0 continuously **updates its own observation process**.
-
----
-
-### Core Concept
-
-GyroOS v4.0 implements the **Gyro Loop** defined in Gyro Logic v2.6:
-
-Structure → Slice → Representation + Δ → Stability → Update → next Slice ↺
-
-This loop is **non-terminating**.
-
-The system does not converge to a final answer.  
-It evolves its observation policy through stability feedback.
-
----
-
-### Key Properties
-
-- ❌ Not an input-output system  
-- ❌ Not a reduction-based model  
-- ❌ Not a single-pass inference  
-
-- ⭕ Continuous observation update  
-- ⭕ Deviation (Δ) is preserved and evaluated  
-- ⭕ Stability drives future observation  
-- ⭕ Execution is inherently dynamic and non-terminating  
-
----
-
-### Execution Loop
-
-At each cycle:
-
-1. Observe the structure using a Slice Policy  
-2. Extract representation (Xₙ) and deviation (Δₙ)  
-3. Evaluate stability (Stabₙ = Φ(Xₙ, Δₙ))  
-4. Update observation policy (Oₙ₊₁ = Ψ(Oₙ, Stabₙ))  
-5. Continue to next cycle  
-
----
-
-### New Components in v4.0
-
-- Loop Controller  
-- Update Engine  
-- Slice Policy  
-- Observation History  
-- Stability Feedback  
-
-These components enable **self-evolving observation**.
-
----
-
-### Design Principle
-
-GyroOS v4.0 is not a system that finds answers.
-
-It is a system that **evolves how it observes**.
-
----
-
 
 ---
 
@@ -317,12 +503,22 @@ It is a system that **evolves how it observes**.
 
 GyroOS is:
 
-> A system that continuously evolves observation through stability under deviation
+> The execution layer that expands Structure → Slice → Stability into Gyro Process and repeats it through Operator Response.
 
 ---
 
 ## 🔴 Final Statement
 
-GyroOS does not resolve deviation.
+GyroOS does not let Stability directly control the Loop.
 
-👉 It evolves by adapting to deviation.
+GyroOS implements:
+
+```text
+Stability → Operator Response → Next Process
+```
+
+while preserving the invariant core:
+
+```text
+Structure → Slice → Stability
+```
