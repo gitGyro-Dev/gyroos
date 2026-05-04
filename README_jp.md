@@ -228,6 +228,74 @@ Structure → Slice → Δ → Stability → Update
 
 👉 分散安定性計算
 
+---
+
+## 🔄 GyroOS v4.0 — ループ型実行システム
+
+GyroOS v4.0 は、実行モデルを根本的に変更する。
+
+従来の「入力 → 出力」ではなく、  
+**観測の仕方そのものを更新し続けるシステム**である。
+
+---
+
+### コア概念
+
+GyroOS v4.0 は、Gyro Logic v2.6 の **Gyro Loop** を実装する：
+
+Structure → Slice → Representation + Δ → Stability → Update → next Slice ↺
+
+このループは **非停止**である。
+
+最終的な答えに収束するのではなく、  
+安定性フィードバックによって観測方針を進化させ続ける。
+
+---
+
+### 特徴
+
+- ❌ 入出力モデルではない  
+- ❌ Reduction中心のモデルではない  
+- ❌ 単発の推論ではない  
+
+- ⭕ 観測を更新し続ける  
+- ⭕ Δ（ズレ）を保持・評価する  
+- ⭕ Stabilityが次の観測を決める  
+- ⭕ 実行は非停止の動的プロセス  
+
+---
+
+### 実行ループ
+
+各サイクルで以下を行う：
+
+1. Slice Policyに基づき観測  
+2. 表現（Xₙ）とズレ（Δₙ）を取得  
+3. Stabilityを評価（Stabₙ = Φ(Xₙ, Δₙ)）  
+4. 観測方針を更新（Oₙ₊₁ = Ψ(Oₙ, Stabₙ)）  
+5. 次サイクルへ  
+
+---
+
+### v4.0で追加された要素
+
+- Loop Controller  
+- Update Engine  
+- Slice Policy  
+- Observation History  
+- Stability Feedback  
+
+これにより、**観測の自己進化**が可能になる。
+
+---
+
+### 設計思想
+
+GyroOS v4.0 は答えを出すシステムではない。
+
+**観測の仕方を進化させ続けるシステムである。**
+
+---
 
 
 ## 🧠 一行定義

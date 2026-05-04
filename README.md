@@ -243,6 +243,76 @@ This loop remains constant across all phases.
 
 ---
 
+## 🔄 GyroOS v4.0 — Loop-based Execution System
+
+GyroOS v4.0 introduces a fundamental shift in the execution model.
+
+Instead of producing a single output from an input,  
+GyroOS v4.0 continuously **updates its own observation process**.
+
+---
+
+### Core Concept
+
+GyroOS v4.0 implements the **Gyro Loop** defined in Gyro Logic v2.6:
+
+Structure → Slice → Representation + Δ → Stability → Update → next Slice ↺
+
+This loop is **non-terminating**.
+
+The system does not converge to a final answer.  
+It evolves its observation policy through stability feedback.
+
+---
+
+### Key Properties
+
+- ❌ Not an input-output system  
+- ❌ Not a reduction-based model  
+- ❌ Not a single-pass inference  
+
+- ⭕ Continuous observation update  
+- ⭕ Deviation (Δ) is preserved and evaluated  
+- ⭕ Stability drives future observation  
+- ⭕ Execution is inherently dynamic and non-terminating  
+
+---
+
+### Execution Loop
+
+At each cycle:
+
+1. Observe the structure using a Slice Policy  
+2. Extract representation (Xₙ) and deviation (Δₙ)  
+3. Evaluate stability (Stabₙ = Φ(Xₙ, Δₙ))  
+4. Update observation policy (Oₙ₊₁ = Ψ(Oₙ, Stabₙ))  
+5. Continue to next cycle  
+
+---
+
+### New Components in v4.0
+
+- Loop Controller  
+- Update Engine  
+- Slice Policy  
+- Observation History  
+- Stability Feedback  
+
+These components enable **self-evolving observation**.
+
+---
+
+### Design Principle
+
+GyroOS v4.0 is not a system that finds answers.
+
+It is a system that **evolves how it observes**.
+
+---
+
+
+---
+
 ## 🧠 One-line Definition
 
 GyroOS is:
