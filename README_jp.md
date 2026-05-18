@@ -1,6 +1,6 @@
 # GyroOS
 
-**Gyro Process、Operator Response、Deviation-aware Runtime System のための実行アーキテクチャ**
+**Gyro Process、Operator Response、Context-aware Runtime、Dynamic Equivalence のための実行アーキテクチャ**
 
 ---
 
@@ -91,7 +91,7 @@ Gyro Unit = Structure → Slice → Stability
 
 Gyro Unit は時間なしの理論構造である。
 
-Operator Orientation、Operator Response、Loop は含まない。
+Operator Orientation、Operator Response、Context Loop、Dynamic Equivalence は含まない。
 
 ---
 
@@ -191,7 +191,15 @@ X = Slice によって得られた Representation
 Δ = Structure と Representation のズレ
 ```
 
-slice-done が Stability に渡される。
+GyroOS では、slice-done の周辺に追加のランタイム情報を保持できる。
+
+```text
+Context
+Void
+Metadata
+```
+
+これらは不変コアを変更しない。
 
 ---
 
@@ -204,6 +212,45 @@ Deviation は、消すべきエラーではない。
 ```
 
 GyroOS は Δ を保持し、評価対象として扱う。
+
+---
+
+### Context
+
+Context は、Slice によって明示的に表現されなかったが、Operator によって推定可能な周辺 Structure である。
+
+```text
+Context = inferred surrounding structure
+```
+
+Context は次の性質を持つ。
+
+```text
+operator-relative
+slice-dependent
+provisional
+inferred
+```
+
+Context は Representation ではない。  
+Context は Void でもない。
+
+---
+
+### Re-Slice
+
+Re-Slice は、既存のランタイム結果、特に Context に対して行われる二次的な Slice である。
+
+```text
+Re-Slice = Slice over Context or prior SliceDone
+```
+
+重要：
+
+```text
+Re-Slice は Operator Response によって選択される。
+Stability が Re-Slice を直接開始するわけではない。
+```
 
 ---
 
@@ -225,7 +272,7 @@ Stability は観測・測定・保存され、Operator Response に渡される�
 
 Operator Response は、Stability 後に Operator が行う反応である。
 
-GyroOS v4.0 では、主に Loop Controller によって実装される。
+GyroOS v4.0以降では、主に Loop Controller によって実装される。
 
 Operator Response は次を決定しうる。
 
@@ -233,6 +280,8 @@ Operator Response は次を決定しうる。
 Continue
 Adjust
 Stop
+Re-Slice Context
+Defer Void
 Jump
 Void handling
 ```
@@ -241,7 +290,7 @@ Void handling
 
 ### Void
 
-Void は、Stability が未定義、低すぎる、または評価不能になる領域・状態である。
+Void は、現在の Slice では接続・推定・評価できない領域または状態である。
 
 Void は自分で作用しない。
 
@@ -257,6 +306,31 @@ Jump は Operator Response によって選択される。
 
 ---
 
+### Dynamic Equivalence
+
+Dynamic Equivalence は、Trajectory に基づく等価性である。
+
+2つの状態は、静的には異なっていても、Stability を保持する Trajectory によって接続されるなら、動的に等価でありうる。
+
+```text
+A ≠ B
+but
+A ≈_T B
+```
+
+Dynamic Equivalence は単なる類似度ではない。
+
+必要条件：
+
+```text
+Trajectory
+Stability preservation
+allowed Δ
+Context consistency
+```
+
+---
+
 ## 🏗️ アーキテクチャ
 
 ```text
@@ -268,21 +342,28 @@ Slice Engine
    ↓
 slice-ing
    ↓
-slice-done = X + Δ
+SliceDone {
+  representation: X,
+  deviation: Δ,
+  context: C,
+  void: V,
+  metadata: M
+}
    ↓
 Deviation Engine
    ↓
 Stability Engine
    ↓
-Stability
+StabilityResult
    ↓
 Loop Controller
    ↓
 Operator Response
    ├─ Continue
    ├─ Adjust → Update Engine
+   ├─ Re-Slice Context → Re-Slice Engine
+   ├─ Defer Void
    ├─ Jump → Update Engine
-   ├─ Void Handling → Update Engine if needed
    └─ Stop
    ↓
 Next Orientation / Next Process
@@ -295,6 +376,20 @@ Next Orientation / Next Process
 ### Slice Engine
 
 slice-ing を実行し、slice-done を生成する。
+
+---
+
+### Context Runtime
+
+SliceDone の周辺情報として、推定された周辺 Structure を保持する。
+
+Context は将来的な Re-Slice 対象になりうる。
+
+---
+
+### Re-Slice Engine
+
+Operator Response によって要求された場合に、Context または既存の SliceDone に対して二次的 Slice を実行する。
 
 ---
 
@@ -332,7 +427,7 @@ Stability
 
 Operator Response に要求された場合にのみ更新を適用する。
 
-GyroOS v4.0 の中心ではない。
+GyroOS の中心ではない。
 
 正しい関係：
 
@@ -344,24 +439,19 @@ Loop Controller / Operator Response
 
 ---
 
-### Slice Policy
+### Dynamic Equivalence Runtime
 
-Slice Policy は、Operator Orientation の実装上の表現である。
+2つの状態が、静的な一致ではなく、Trajectory 上で等価に接続されうるかを評価する。
 
-次を定義しうる。
+出力：
 
 ```text
-active slices
-weights
-resolution
-target dimensions
-update rules
-context dependency
+equivalent | not_equivalent | undecidable
 ```
 
 ---
 
-## 🔁 GyroOS v4.0 ランタイムフロー
+## 🔁 GyroOS Runtime Flow
 
 各プロセス周期で次を行う。
 
@@ -369,10 +459,10 @@ context dependency
 1. Structure を受け取る
 2. Operator Orientation を適用する
 3. slice-ing を実行する
-4. slice-done = X + Δ を生成する
+4. SliceDone = X + Δ と runtime Context / Void を生成する
 5. Stability を測定する
 6. Loop Controller により Operator Response を実行する
-7. 必要に応じて Update Engine を適用する
+7. 選択に応じて Re-Slice Context / Defer Void / Jump / Stop / Continue を行う
 8. Next Orientation または Next Process を準備する
 ```
 
@@ -388,7 +478,10 @@ Stability を制御者として扱う
 Δ を消す
 slice-ing と slice-done を同一視する
 Update Engine を Loop の所有者にする
+Context を Representation として扱う
 Void を作用主体として扱う
+Context や Stability から Re-Slice を自動起動する
+Dynamic Equivalence を単なる類似度に還元する
 GyroAuth の認証仕様を GyroOS の中核定義に混ぜる
 ```
 
@@ -401,10 +494,12 @@ GyroOS は次を行う。
 ```text
 Gyro Process を実装する
 Δ を保持する
+Context と Void を runtime field として保持する
 Stability を測定する
 Operator Response を実装する
-Gyro Loop の反復を管理する
-Jump / Void handling を支援する
+Gyro Loop と Context Loop の反復を管理する
+Re-Slice / Defer / Jump handling を支援する
+Dynamic Equivalence runtime check を支援する
 Next Orientation を準備する
 ```
 
@@ -418,6 +513,12 @@ gyroos/
     11_loop_controller.md
     12_update_engine.md
     13_slice_policy.md
+    14_api_design.md
+    15_context_runtime.md
+    16_reslice_engine.md
+    17_context_loop_controller.md
+    18_void_defer_jump.md
+    19_dynamic_equivalence_runtime.md
   src/
     core/
     engines/
@@ -433,37 +534,7 @@ gyroos/
 
 GyroOS は、Gyro Logic を実行可能なランタイムシステムとして段階的に実装する。
 
-### Phase 3 — Deviation-aware Execution
-
-```text
-Structure → Slice → Δ → Stability
-```
-
-Focus:
-
-```text
-Deviation preservation
-Stability measurement
-Multi-slice representation
-Void / Jump concepts
-```
-
----
-
 ### Phase 4 — Gyro Process / Operator Response Execution
-
-Focus:
-
-```text
-Operator Orientation
-slice-ing
-slice-done
-Operator Response
-Loop Controller
-Update Engine as response support
-```
-
-中心となるランタイム形式：
 
 ```text
 Gyro Processₙ
@@ -471,17 +542,21 @@ Gyro Processₙ
 → Gyro Processₙ₊₁
 ```
 
----
-
-### Phase 5 — Adaptive Meta-System
+### Phase 5 — Context-aware Runtime
 
 Focus:
 
 ```text
-Adaptive Orientation
-History-based Response
-Meta-level observation strategy
+Context Runtime
+Re-Slice Engine
+Context Loop Controller
+Void / Defer / Jump handling
+Dynamic Equivalence Runtime
 ```
+
+### Phase 6 — Application Connection
+
+GyroAuth は GyroOS の出力を利用してよいが、GyroOS の中核を再定義してはならない。
 
 ---
 
@@ -503,7 +578,7 @@ https://github.com/gitGyro-Dev/gyroauth
 
 GyroOS とは：
 
-> Structure → Slice → Stability を Gyro Process として展開し、Operator Response によって反復する実装層である。
+> Structure → Slice → Stability を Gyro Process として展開し、Operator Response によって反復し、Context-aware Re-Slice と Dynamic Equivalence を runtime で支援する実装層である。
 
 ---
 
