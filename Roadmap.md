@@ -197,44 +197,155 @@ To implement Gyro Logic as a runtime system without changing its theoretical cor
 
 ---
 
-## 🧠 Phase 5 — Adaptive Orientation
+## 🧠 Phase 5 — Context-aware Runtime
 
-### Focus
+### Status
 
-- History-based Operator Response
-- Adaptive Orientation update
-- Context-sensitive Slice Policy
-- Stability-over-time analysis
-- Response trajectory analysis
+Current Expansion Target
+
+### Concept
+
+GyroOS extends Gyro Process runtime with Context, Re-Slice, Context Loop, Void / Defer / Jump handling, and Dynamic Equivalence.
+
+These additions do not replace:
+
+```text
+Structure → Slice → Stability
+```
+
+They extend runtime behavior around slice-done and Operator Response.
+
+---
 
 ### Runtime Form
 
 ```text
-History
-→ Operator Response
-→ Adaptive Orientation
-→ Next Gyro Process
+Structure
+→ Operator Orientation
+→ slice-ing
+→ SliceDone {
+     representation: X,
+     deviation: Δ,
+     context: C,
+     void: V
+  }
+→ Stability
+→ Loop Controller / Operator Response
+→ Continue | Re-Slice | Defer | Jump | Stop
+→ Next Process
 ```
+
+---
+
+### Focus
+
+```text
+Context Runtime
+Re-Slice Engine
+Context Loop Controller
+Void / Defer / Jump handling
+Dynamic Equivalence Runtime
+Trajectory-aware runtime analysis
+```
+
+---
+
+### New Runtime Concepts
+
+#### Context
+
+```text
+Context = inferred surrounding structure
+```
+
+#### Re-Slice
+
+```text
+Re-Slice = Slice over Context or prior SliceDone
+```
+
+#### Context Loop
+
+```text
+Gyro Loop whose next Slice target is Context
+```
+
+#### Dynamic Equivalence
+
+```text
+A ≠ B may still satisfy A ≈_T B
+```
+
+under trajectory and stability preservation.
+
+---
+
+### Important Constraints
+
+Context-aware Runtime must not:
+
+```text
+redefine Structure → Slice → Stability
+treat Stability as controller
+automatically trigger Re-Slice from Stability
+reduce Dynamic Equivalence to similarity
+allow uncontrolled recursive Context Loop
+mix GyroAuth authentication logic into GyroOS core
+```
+
+---
+
+### Runtime Decision Structure
+
+Correct runtime relation:
+
+```text
+slice-done
+→ Stability
+→ Loop Controller / Operator Response
+→ Re-Slice | Defer | Jump | Stop
+```
+
+Incorrect relation:
+
+```text
+Stability
+→ automatic Re-Slice
+```
+
+---
+
+### Capabilities
+
+- Context-aware runtime execution
+- Re-Slice over Context
+- Context chain tracking
+- Deferred Void handling
+- Non-continuous Jump support
+- Dynamic Equivalence runtime checks
+- Trajectory-aware process analysis
+
+---
+
+### Goal
+
+To implement Gyro Logic v2.7 runtime concepts while preserving the invariant theoretical core.
+
+---
+
+## 🌌 Phase 6 — Adaptive Meta-System
+
+### Focus
+
+- Meta-level Orientation generation
+- Runtime self-analysis
+- Multi-context trajectory optimization
+- Adaptive Process topology
+- Dynamic runtime policy generation
 
 ### Status
 
 Planned
-
----
-
-## 🌌 Phase 6 — Void / Jump Topology
-
-### Focus
-
-- Void handling
-- Jump transition design
-- Non-continuous reconstruction
-- Structural absence and instability regions
-- Fallback / reset / re-orientation patterns
-
-### Status
-
-Concept
 
 ---
 
@@ -245,6 +356,7 @@ Concept
 - GyroAuth connection
 - Application-level convergence
 - Authentication as application of GyroOS runtime
+- Dynamic Equivalence for identity continuity
 
 ### Constraint
 
@@ -264,8 +376,8 @@ Future / Application Layer
 | Phase 2 | Deviation-aware Execution | Historical |
 | Phase 3 | Process-aware Execution | Current Foundation |
 | Phase 4 | Operator Response / Gyro Loop | Current Design Target |
-| Phase 5 | Adaptive Orientation | Planned |
-| Phase 6 | Void / Jump Topology | Concept |
+| Phase 5 | Context-aware Runtime | Current Expansion Target |
+| Phase 6 | Adaptive Meta-System | Planned |
 | Phase 7 | Application Connection | Future |
 
 ---
@@ -277,9 +389,12 @@ Future / Application Layer
 - Do not collapse slice-ing and slice-done
 - Do not make Update Engine the loop owner
 - Preserve Δ
+- Preserve Context as inferred structure
+- Treat Void as unresolved region, not actor
+- Treat Dynamic Equivalence as trajectory-based continuity
 - Keep GyroAuth outside GyroOS core definitions
-- Treat Slice Policy as an implementation representation of Operator Orientation
-- Treat Loop Controller as the implementation of Operator Response
+- Treat Slice Policy as implementation representation of Operator Orientation
+- Treat Loop Controller as implementation of Operator Response
 
 ---
 
@@ -298,5 +413,7 @@ Gyro Processₙ
 → Operator Responseₙ
 → Gyro Processₙ₊₁
 ```
+
+and further into Context-aware runtime systems with Re-Slice and Dynamic Equivalence,
 
 without changing the invariant theoretical core.
