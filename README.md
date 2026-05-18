@@ -1,6 +1,6 @@
 # GyroOS
 
-**Execution Architecture for Gyro Process, Operator Response, and Deviation-aware Runtime Systems**
+**Execution Architecture for Gyro Process, Operator Response, Context-aware Runtime, and Dynamic Equivalence**
 
 ---
 
@@ -91,7 +91,7 @@ Gyro Unit = Structure → Slice → Stability
 
 The Gyro Unit is timeless.
 
-It does not contain Operator Orientation, Operator Response, or Loop.
+It does not contain Operator Orientation, Operator Response, Context Loop, or Dynamic Equivalence.
 
 ---
 
@@ -191,7 +191,15 @@ X = representation produced by Slice
 Δ = deviation between Structure and Representation
 ```
 
-slice-done is passed to Stability.
+GyroOS may store additional runtime fields alongside slice-done:
+
+```text
+Context
+Void
+Metadata
+```
+
+These do not change the invariant core.
 
 ---
 
@@ -204,6 +212,45 @@ Deviation is not an error to be eliminated.
 ```
 
 GyroOS preserves and evaluates Δ.
+
+---
+
+### Context
+
+Context is inferred surrounding Structure that was not explicitly represented by Slice.
+
+```text
+Context = inferred surrounding structure
+```
+
+Context is:
+
+```text
+operator-relative
+slice-dependent
+provisional
+inferred
+```
+
+Context is not Representation.
+Context is not Void.
+
+---
+
+### Re-Slice
+
+Re-Slice is a secondary Slice over an existing runtime result, especially Context.
+
+```text
+Re-Slice = Slice over Context or prior SliceDone
+```
+
+Important:
+
+```text
+Re-Slice is selected by Operator Response.
+Stability does not directly start Re-Slice.
+```
 
 ---
 
@@ -225,7 +272,7 @@ Stability is observed, measured, stored, and passed to Operator Response.
 
 Operator Response is the post-Stability reaction of the Operator.
 
-In GyroOS v4.0, this is implemented primarily by the Loop Controller.
+In GyroOS v4.0+, this is implemented primarily by the Loop Controller.
 
 It may decide:
 
@@ -233,6 +280,8 @@ It may decide:
 Continue
 Adjust
 Stop
+Re-Slice Context
+Defer Void
 Jump
 Void handling
 ```
@@ -241,7 +290,7 @@ Void handling
 
 ### Void
 
-Void is a region or state where Stability is undefined, too low, or not evaluable.
+Void is a region or state that cannot be connected, inferred, or evaluated by the current Slice.
 
 Void does not act by itself.
 
@@ -257,6 +306,31 @@ Jump is selected by Operator Response.
 
 ---
 
+### Dynamic Equivalence
+
+Dynamic Equivalence is trajectory-based equivalence.
+
+Two states may be statically different but dynamically equivalent if they remain connected through a stability-preserving trajectory.
+
+```text
+A ≠ B
+but
+A ≈_T B
+```
+
+Dynamic Equivalence is not simple similarity.
+
+It requires:
+
+```text
+Trajectory
+Stability preservation
+allowed Δ
+Context consistency
+```
+
+---
+
 ## 🏗️ Architecture
 
 ```text
@@ -268,21 +342,28 @@ Slice Engine
    ↓
 slice-ing
    ↓
-slice-done = X + Δ
+SliceDone {
+  representation: X,
+  deviation: Δ,
+  context: C,
+  void: V,
+  metadata: M
+}
    ↓
 Deviation Engine
    ↓
 Stability Engine
    ↓
-Stability
+StabilityResult
    ↓
 Loop Controller
    ↓
 Operator Response
    ├─ Continue
    ├─ Adjust → Update Engine
+   ├─ Re-Slice Context → Re-Slice Engine
+   ├─ Defer Void
    ├─ Jump → Update Engine
-   ├─ Void Handling → Update Engine if needed
    └─ Stop
    ↓
 Next Orientation / Next Process
@@ -295,6 +376,20 @@ Next Orientation / Next Process
 ### Slice Engine
 
 Executes slice-ing and produces slice-done.
+
+---
+
+### Context Runtime
+
+Stores inferred surrounding structure alongside SliceDone.
+
+Context may become a future Re-Slice target.
+
+---
+
+### Re-Slice Engine
+
+Executes secondary Slice over Context or prior SliceDone when requested by Operator Response.
 
 ---
 
@@ -332,7 +427,7 @@ Stability
 
 Applies updates only when requested by Operator Response.
 
-It is not the center of GyroOS v4.0.
+It is not the center of GyroOS.
 
 Correct relation:
 
@@ -344,24 +439,19 @@ Loop Controller / Operator Response
 
 ---
 
-### Slice Policy
+### Dynamic Equivalence Runtime
 
-Slice Policy is an implementation representation of Operator Orientation.
+Evaluates whether two states are equivalent across trajectory without reducing them to static equality.
 
-It may define:
+Output:
 
 ```text
-active slices
-weights
-resolution
-target dimensions
-update rules
-context dependency
+equivalent | not_equivalent | undecidable
 ```
 
 ---
 
-## 🔁 GyroOS v4.0 Runtime Flow
+## 🔁 GyroOS Runtime Flow
 
 At each process cycle:
 
@@ -369,10 +459,10 @@ At each process cycle:
 1. Receive Structure
 2. Apply Operator Orientation
 3. Execute slice-ing
-4. Produce slice-done = X + Δ
+4. Produce SliceDone = X + Δ plus runtime Context / Void
 5. Measure Stability
 6. Execute Operator Response through Loop Controller
-7. Apply Update Engine if required
+7. Re-Slice Context, Defer Void, Jump, Stop, or Continue as selected
 8. Prepare Next Orientation or Next Process
 ```
 
@@ -388,7 +478,10 @@ treat Stability as a controller
 erase Δ
 collapse slice-ing and slice-done
 make Update Engine the loop owner
+treat Context as Representation
 treat Void as an actor
+automatically trigger Re-Slice from Context or Stability
+reduce Dynamic Equivalence to similarity
 mix GyroAuth authentication logic into GyroOS
 ```
 
@@ -401,10 +494,12 @@ GyroOS:
 ```text
 implements Gyro Process
 preserves Δ
+stores Context and Void as runtime fields
 measures Stability
 implements Operator Response
-manages Gyro Loop repetition
-supports Jump / Void handling
+manages Gyro Loop and Context Loop repetition
+supports Re-Slice / Defer / Jump handling
+supports Dynamic Equivalence runtime checks
 prepares the next Orientation
 ```
 
@@ -418,6 +513,12 @@ gyroos/
     11_loop_controller.md
     12_update_engine.md
     13_slice_policy.md
+    14_api_design.md
+    15_context_runtime.md
+    16_reslice_engine.md
+    17_context_loop_controller.md
+    18_void_defer_jump.md
+    19_dynamic_equivalence_runtime.md
   src/
     core/
     engines/
@@ -433,37 +534,7 @@ gyroos/
 
 GyroOS evolves by progressively implementing Gyro Logic as a runtime system.
 
-### Phase 3 — Deviation-aware Execution
-
-```text
-Structure → Slice → Δ → Stability
-```
-
-Focus:
-
-```text
-Deviation preservation
-Stability measurement
-Multi-slice representation
-Void / Jump concepts
-```
-
----
-
 ### Phase 4 — Gyro Process / Operator Response Execution
-
-Focus:
-
-```text
-Operator Orientation
-slice-ing
-slice-done
-Operator Response
-Loop Controller
-Update Engine as response support
-```
-
-Core runtime form:
 
 ```text
 Gyro Processₙ
@@ -471,17 +542,21 @@ Gyro Processₙ
 → Gyro Processₙ₊₁
 ```
 
----
-
-### Phase 5 — Adaptive Meta-System
+### Phase 5 — Context-aware Runtime
 
 Focus:
 
 ```text
-Adaptive Orientation
-History-based Response
-Meta-level observation strategy
+Context Runtime
+Re-Slice Engine
+Context Loop Controller
+Void / Defer / Jump handling
+Dynamic Equivalence Runtime
 ```
+
+### Phase 6 — Application Connection
+
+GyroAuth may use GyroOS outputs, but must not redefine GyroOS core.
 
 ---
 
@@ -503,7 +578,7 @@ https://github.com/gitGyro-Dev/gyroauth
 
 GyroOS is:
 
-> The execution layer that expands Structure → Slice → Stability into Gyro Process and repeats it through Operator Response.
+> The execution layer that expands Structure → Slice → Stability into Gyro Process, repeats it through Operator Response, and supports Context-aware Re-Slice and Dynamic Equivalence at runtime.
 
 ---
 
