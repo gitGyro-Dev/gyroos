@@ -843,3 +843,61 @@ It does not modify the invariant Core.
 ```text
 Priority C-3: Boundary-aware SliceDone
 ```
+
+---
+
+## Priority C-10 Refinement
+
+The following distinctions refine the runtime reading without changing the Boundary State definition.
+
+### Boundary readability and target-relation readability
+
+A Boundary State requires a Boundary relation that is sufficiently identifiable for the classification to remain traceable.
+
+```text
+Boundary relation readability
+≠ target relation readability
+```
+
+For `Void` as a Boundary State:
+
+```text
+the relevant Boundary is identifiable,
+but the target relation cannot currently be read or connected sufficiently relative to that Boundary
+```
+
+When the Boundary distinction itself is not sufficiently readable, GyroOS should retain:
+
+```text
+unclassified Boundary evidence
+or
+unreadable distinction evidence
+```
+
+It must not automatically assign `VOID` as a Boundary State.
+
+### Confidence naming
+
+The recommended field name in `BoundaryStateRecord` is:
+
+```python
+boundary_state_confidence: float | None
+```
+
+This value is distinct from:
+
+```text
+boundary_readability
+Stability
+response_confidence
+```
+
+### Candidate-set status
+
+The full candidate set remains:
+
+```text
+NORMAL | NON | UN | ABSENCE | BLANK | UNKNOWN | VOID
+```
+
+A bounded PoC may implement only `NORMAL | UNKNOWN | VOID`, but that subset must not be treated as the closed GyroOS enum.

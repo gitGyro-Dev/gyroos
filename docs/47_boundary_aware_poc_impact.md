@@ -759,3 +759,46 @@ The next step is:
 ```text
 Priority C-10: Priority C Review and Refinement
 ```
+
+---
+
+## Priority C-10 Refinement
+
+The first Boundary-aware PoC may retain the bounded subset:
+
+```text
+NORMAL | UNKNOWN | VOID
+```
+
+This is an implementation subset only. It must not be declared as the closed GyroOS Boundary State enum; the broader candidate set remains available to the runtime design.
+
+Use the preferred minimal object names:
+
+```text
+BoundaryEvidence
+BoundaryStateRecord
+VoidEvidence
+```
+
+The PoC output should display separately:
+
+```text
+boundary_readability
+boundary_state_type
+boundary_state_confidence
+stability
+operator_response
+response_confidence when implemented
+```
+
+The `VOID` scenario must establish:
+
+```text
+the relevant Boundary is identifiable
+and
+the target relation is not sufficiently readable or connectable relative to it
+```
+
+If the Boundary distinction itself is unreadable, the PoC should emit unclassified Boundary evidence rather than automatically assigning `VOID`.
+
+The deterministic decision rules remain PoC policy only. No rule may collapse Boundary State, Stability, and Operator Response into one value.

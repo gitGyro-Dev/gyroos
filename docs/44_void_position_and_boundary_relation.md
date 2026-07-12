@@ -848,3 +848,48 @@ Stability
 ```text
 Priority C-7: Boundary Memory and Trajectory Preservation
 ```
+
+---
+
+## Priority C-10 Refinement
+
+Void as a Boundary State must be read with two different readability questions kept separate:
+
+```text
+Boundary relation readability
+≠ target relation readability
+```
+
+The refined relation is:
+
+```text
+Void as Boundary State
+= the relevant Boundary is identifiable,
+  but the target relation cannot currently be read or connected sufficiently relative to that Boundary
+```
+
+Therefore:
+
+```text
+Boundary distinction itself is unreadable
+≠ automatic Void as Boundary State
+```
+
+When the distinction itself is not sufficiently readable, retain one of the following without forcing classification:
+
+```text
+unclassified Boundary evidence
+unreadable distinction evidence
+VoidEvidence not yet attached to a Boundary State
+```
+
+This preserves the separation among:
+
+```text
+Void as Boundary State
+VoidEvidence
+Void reference
+Operator Response
+```
+
+Void remains non-acting and does not independently select `DEFER`, `RESLICE`, `JUMP`, or `STOP`.
