@@ -8,9 +8,7 @@ This document defines **Stop** in GyroOS after the Gyro Logic v3.1 Core Definiti
 
 Stop is not a theoretical endpoint of Gyro Logic.
 
-Stop is an Operator Response that terminates or suspends a current runtime connection while preserving the evidence required to understand what has been established and how continuity may later be resumed, reconstructed, or referenced.
-
-The invariant theoretical core remains:
+The invariant theoretical Core remains:
 
 ```text
 Structure → Slice → Stability
@@ -21,7 +19,9 @@ Structure → Slice → Stability
 ## Core Definition
 
 ```text
-Stop is an Operator Response that ends the current runtime continuation without redefining Stability as termination and without erasing established trajectory evidence.
+Stop is an Operator Response that ends the current execution connection
+within the active control scope without redefining Stability as termination
+and without erasing established trajectory evidence.
 ```
 
 Japanese:
@@ -29,20 +29,15 @@ Japanese:
 ```text
 Stopとは、Stabilityを終了とみなすことなく、
 成立したTrajectory evidenceを消去せずに、
-現在のRuntime continuationを終了または停止するOperator Responseである。
+現在のcontrol scopeにおけるexecution connectionを終了する
+Operator Responseである。
 ```
+
+The phrase `within the active control scope` is essential. Stop does not assert the disappearance of all future connectability.
 
 ---
 
 ## Stop Is Not the End of the Core
-
-The Core is not:
-
-```text
-beginning → processing → end
-```
-
-Therefore:
 
 ```text
 Stability ≠ Stop
@@ -52,21 +47,17 @@ Stop ≠ deletion of Structure
 Stop ≠ deletion of Trajectory
 ```
 
-Stop occurs after Stability has become available and Operator Response has selected that the current execution connection should not continue immediately.
+Stop occurs after runtime evidence becomes available and Operator Response selects that the current execution connection must end.
 
 ---
 
-## Relation to Runtime Continuity
+## Stop and Runtime Continuity
 
-Runtime Continuity is the condition in which an established Slice result remains connectable to a subsequent Structure, Slice, Process, or Trajectory relation.
-
-Stop changes the current connection state.
+Runtime Continuity may preserve established or retained traceable relations beyond active execution.
 
 ```text
-Runtime Continuity
-→ Operator Response
-→ STOP
-→ current execution connection ends
+Operator Response = STOP
+→ current execution connection ends within the active control scope
 ```
 
 However:
@@ -74,17 +65,18 @@ However:
 ```text
 current execution connection ends
 ≠ all continuity evidence disappears
+≠ a pending relation is automatically created
 ```
 
-A stopped runtime may still preserve:
+A stopped runtime may preserve:
 
 ```text
 SliceDone
 StabilityResult
-Deviation
+Δ
 Boundary / Boundary State
 Context
-Void
+Void reference
 Operator Response history
 Trajectory references
 Memory references
@@ -92,39 +84,36 @@ Memory references
 
 ---
 
-## Stop and Connectability
+## Stop and Defer
 
-Stop does not necessarily destroy future connectability.
-
-A stopped process may later be:
+Stop and Defer must remain distinct.
 
 ```text
-resumed
-restarted from a retained Structure
-re-sliced
-reconstructed through Jump
-referenced by another Trajectory
-archived as completed runtime evidence
+STOP
+= end the current execution connection within the active control scope
+
+DEFER
+= retain the current relation as pending for possible future reconnection
 ```
 
-Therefore:
+Stop may preserve evidence and may allow later resume or reconstruction metadata. That does not make Stop a pending relation.
 
 ```text
-Stop ends current continuation.
-Stop does not necessarily eliminate future connection.
+preserved evidence
+≠ pending relation
 ```
+
+A later runtime may use retained Stop evidence as input to Continue, Re-Slice, Jump, or another Process. That later action is separate from Stop itself.
 
 ---
 
 ## Stop as Operator Response
 
-Stop is selected by Operator Response.
-
 Correct relation:
 
 ```text
-SliceDone
-→ Stability
+SliceDone / retained runtime evidence
+→ Stability or not-evaluable result
 → Loop Controller / Operator Response
 → STOP
 ```
@@ -135,54 +124,44 @@ Incorrect relations:
 low Stability → automatic Stop
 Void → automatic Stop
 Boundary State → automatic Stop
-Gyro-OOM Damper → direct Stop
+Gyro-OOM pressure → direct Stop
 ```
 
-Stability, Void, Boundary State, pressure signals, and Trajectory history may orient the response space, but they do not independently execute Stop.
+These may orient the response space, but the Loop Controller owns the decision.
 
 ---
 
 ## Stop Conditions
 
-Possible runtime conditions that may orient toward Stop include:
+Possible implementation-level conditions include:
 
 ```text
 continuation is no longer permitted
 required resources are unavailable
 runtime safety boundary is reached
-maximum bounded execution is reached
+bounded execution limit is reached
 external cancellation is requested
 current trajectory is intentionally closed
-recovery is deferred to a later runtime
+current control scope is complete
 ```
 
-These are implementation-level conditions.
-
-They are not Gyro Logic definitions.
+These are not Gyro Logic definitions.
 
 ---
 
 ## Stop Types
 
-GyroOS may distinguish the following implementation-level Stop types.
-
 ### Controlled Stop
 
-```text
-The current process ends after runtime state is preserved.
-```
+The current execution ends after required runtime state is preserved.
 
 ### External Stop
 
-```text
-The current process ends because an external operator or system requests cancellation.
-```
+The current execution ends because an external operator or system requests cancellation.
 
 ### Bounded Stop
 
-```text
-The current process ends because an implementation limit has been reached.
-```
+The current execution ends because an implementation limit has been reached.
 
 Examples:
 
@@ -196,73 +175,39 @@ memory safety threshold
 
 ### Protective Stop
 
-```text
-The current process ends because continued execution would violate a runtime safety or consistency condition.
-```
+The current execution ends because further execution would violate a runtime safety or consistency condition.
 
 ### Trajectory Closure
 
-```text
-The current trajectory is intentionally marked as closed while its records remain readable.
-```
+The active trajectory branch is marked as closed while its records remain readable.
 
-These are runtime classifications, not new Gyro Logic concepts.
+These are implementation classifications, not new Gyro Logic concepts.
 
 ---
 
-## Stop and Continue
-
-Continue preserves the current connection into a subsequent runtime relation.
-
-Stop ends that current connection.
+## Relation to Other Responses
 
 ```text
-Continue
-= preserve immediate runtime connectability
+CONTINUE
+= connect now through the current established path
 
-Stop
-= end immediate runtime continuation while preserving established evidence
+ADJUST
+= connect now with bounded continuous modification
+
+RESLICE
+= request a new Slice over a retained source
+
+JUMP
+= request a non-continuous reconstruction
+
+DEFER
+= retain the current relation as pending
+
+STOP
+= end the current execution connection in the active control scope
 ```
 
-They are different Operator Responses.
-
-However, Stop is not the absolute negation of all future continuity.
-
----
-
-## Stop and Defer
-
-Defer preserves an unresolved continuation for later handling.
-
-Stop ends the current execution connection.
-
-```text
-Defer
-= do not resolve now, but retain as pending
-
-Stop
-= do not continue the current execution connection
-```
-
-A Stop may contain deferred records, but Stop and Defer are not identical.
-
----
-
-## Stop and Jump
-
-Jump reconstructs a runtime path when local continuity cannot be maintained.
-
-Stop does not reconstruct a new path.
-
-```text
-Jump
-= reconnect through non-continuous reconstruction
-
-Stop
-= terminate the current runtime continuation
-```
-
-A later runtime may use retained Stop evidence as input to a new Jump or Slice, but that later action is separate from the Stop itself.
+Stop does not itself prepare a new path. Jump and Re-Slice do.
 
 ---
 
@@ -274,31 +219,32 @@ Void does not stop the runtime by itself.
 Void ≠ Stop
 ```
 
-Possible Operator Responses to Void include:
+Possible responses to Void include:
 
 ```text
 DEFER_VOID
-RESLICE_CONTEXT
+RESLICE
 JUMP
 STOP
+VOID_HOLD
 ```
 
 Stop is only one possible response.
 
 ---
 
-## Stop and Memory Runtime
+## Memory Runtime and Trajectory Cache
 
-Before Stop is finalized, Memory Runtime should preserve required continuity evidence.
+Before Stop is finalized, required continuity evidence should be preserved.
 
-Recommended retained objects:
+Recommended retained material:
 
 ```text
-final SliceDone
-final StabilityResult
+final SliceDone or retained source reference
+final StabilityResult if available
 final OperatorResponse
 Trajectory summary
-Deviation summary
+Δ summary
 Context references
 Void references
 Stop reason
@@ -306,53 +252,33 @@ Stop type
 resume or reconstruction metadata
 ```
 
-Stop must not silently erase:
-
-```text
-Δ
-Void
-Boundary State
-Trajectory branch references
-Dynamic Equivalence evidence
-```
-
----
-
-## Stop and Trajectory Cache
-
-Trajectory Cache should record Stop as a trajectory event.
-
-Example:
+Trajectory Cache should record Stop as a readable event.
 
 ```python
 class StopRecord:
     process_index: int
     stop_type: str
     reason: str
-    final_slice_ref: str
-    final_stability_ref: str
+    final_slice_ref: str | None
+    final_stability_ref: str | None
+    trajectory_id: str
     resumable: bool
     reconstruction_allowed: bool
+    pending_relation_created: bool = False
     metadata: dict
 ```
 
-A stopped trajectory may be marked:
+Recommended invariant:
 
 ```text
-closed
-suspended
-archived
-restartable
-reconstructable
+pending_relation_created is false unless a separate DEFER response is selected.
 ```
-
-These labels are implementation-level states.
 
 ---
 
 ## API Implications
 
-A `/loop/step` result selecting Stop may include:
+A `/loop/step` result may include:
 
 ```json
 {
@@ -361,20 +287,18 @@ A `/loop/step` result selecting Stop may include:
   "stop_type": "controlled",
   "reason": "bounded execution completed",
   "trajectory_preserved": true,
+  "pending_relation": false,
   "resumable": false,
   "reconstruction_allowed": true
 }
 ```
 
-Important:
-
 ```text
-STOP response
-≠ HTTP error by definition
-≠ runtime failure by definition
+STOP response ≠ HTTP error by definition
+STOP response ≠ runtime failure by definition
 ```
 
-Stop may be a valid and expected runtime result.
+Stop may be a valid runtime result.
 
 ---
 
@@ -389,6 +313,8 @@ automatically follow low Stability
 be triggered directly by Void or Boundary State
 erase trajectory evidence
 silently delete Δ, Context, or Void
+be treated as Defer
+create a pending relation implicitly
 be treated as authentication failure
 ```
 
@@ -396,10 +322,10 @@ Stop MUST:
 
 ```text
 be selected through Operator Response
-end the current runtime continuation clearly
+end the active control-scope execution connection clearly
 preserve required established evidence
-record why the runtime stopped
-state whether resume or reconstruction is possible
+record why execution stopped
+state whether later resume or reconstruction is possible
 remain an implementation-level runtime response
 ```
 
@@ -407,34 +333,20 @@ remain an implementation-level runtime response
 
 ## Key Insight
 
-Stop is not the end of Gyro Logic.
-
-Stop is the end of one current runtime continuation.
-
-In short:
-
 ```text
-Stop ends execution connection, not established meaning.
+Stop ends the current execution connection,
+not established meaning and not all future connectability.
 ```
+
+Stop preserves evidence. Defer preserves a pending relation. The two responsibilities must not be collapsed.
 
 ---
 
-## Summary
+## Refinement Record
 
-Stop is an Operator Response that ends or suspends the current runtime continuation after Stability has become available.
-
-It does not turn Stability into an endpoint, and it does not erase the Slice result, Trajectory, or other continuity evidence.
-
-The invariant core remains:
+This document incorporates the Priority B refinement pass defined in:
 
 ```text
-Structure → Slice → Stability
-```
-
----
-
-## Next
-
-```text
-Priority B-4: Jump
+docs/35_priority_b_runtime_continuity_review.md
+docs/37_priority_b_refinement_pass.md
 ```
