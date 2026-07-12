@@ -6,31 +6,13 @@
 
 This document defines **Runtime Continuity** in GyroOS after the refinement of the Gyro Logic v3.1 Core Definitions.
 
-The purpose is not to redefine Gyro Logic.
-
-The purpose is to clarify how the invariant Core:
+GyroOS does not redefine Gyro Logic. The invariant Core remains:
 
 ```text
-Structure
-↓
-Slice
-↓
-Stability
+Structure → Slice → Stability
 ```
 
-is mapped into a continuing runtime without being reduced to:
-
-```text
-start
-↓
-processing
-↓
-finish
-```
-
-This document addresses **Priority B-1: Runtime Continuity**.
-
-Detailed definitions of individual Operator Responses such as Continue, Stop, Jump, Re-Slice, and Defer are handled in subsequent documents or revisions.
+This Core is not a complete runtime lifecycle. It is a local establishment section within continuing change.
 
 ---
 
@@ -49,35 +31,36 @@ Stability
 = the state in which the opened path becomes readable as an establishment that can continue
 ```
 
-Therefore:
-
-```text
-Structure → Slice → Stability
-```
-
-is not a complete runtime lifecycle.
-
-It is a local establishment section within continuing change.
+Stability is an establishment point within continuity. It is not a controller and does not select the next action.
 
 ---
 
 ## 3. Working Definition
 
 ```text
-Runtime Continuity is the runtime condition in which an established Slice result remains connectable to a subsequent Structure, Slice, Process, or Trajectory relation.
+Runtime Continuity is the runtime condition in which an established runtime result
+or a retained traceable runtime relation remains connectable to a subsequent
+Structure, Slice, Process, or Trajectory relation.
 ```
 
 Japanese:
 
 ```text
 Runtime Continuityとは、
-成立したSlice結果が、次のStructure・Slice・Process・Trajectory関係へ
+成立したRuntime結果、または追跡可能な形で保持されたRuntime関係が、
+次のStructure・Slice・Process・Trajectory関係へ
 接続可能な状態として保持されていることである。
 ```
 
-Runtime Continuity does not mean that the same process must continue unchanged.
+The primary source is normally an established Slice result. However, a deferred, held, or not-yet-evaluable relation may also remain a valid continuity source when sufficient traceability is retained.
 
-It means that the current establishment is not treated as an isolated terminal output.
+```text
+continuity source
+= established runtime result
+  or retained traceable runtime relation
+```
+
+This refinement does not weaken Stability. It distinguishes an established point from the runtime evidence that may be retained before or around such a point.
 
 ---
 
@@ -88,17 +71,14 @@ Runtime Continuity must not be inserted into the Core.
 Incorrect:
 
 ```text
-Structure
-→ Slice
-→ Stability
-→ Runtime Continuity
+Structure → Slice → Stability → Runtime Continuity
 ```
 
 Correct:
 
 ```text
 Runtime Continuity
-contains or connects repeated local Core establishments.
+contains or connects local Core establishments and retained traceable relations.
 ```
 
 A safe representation is:
@@ -107,87 +87,56 @@ A safe representation is:
 Runtime Continuity
 ...
 → Structure_n
-→ Slice_n
+→ Slice_n {
+    Operator Orientation_n
+    → slice-ing_n
+    → slice-done_n
+  }
 → Stability_n
 → Operator Response_n
-→ Structure_n+1 / next runtime relation
-→ Slice_n+1
-→ Stability_n+1
+→ continuity relation_n
+→ next runtime section
 → ...
 ```
 
-Runtime Continuity is the connectability across these local establishments.
-
 ---
 
-## 5. Stability as an Establishment Point
-
-Stability is not the end of Runtime Continuity.
-
-Stability is:
-
-```text
-an establishment point within continuity
-```
-
-At runtime, Stability indicates that the opened path and its Slice result have become readable as an establishment from which continuation is possible.
-
-```text
-Slice result
-↓
-Stability
-= readable continuing establishment
-```
-
-However:
-
-```text
-Stability does not select the next action.
-```
-
-The next runtime relation is selected through Operator Response.
-
----
-
-## 6. Operator Response as Continuity Selection
+## 5. Operator Response as Continuity Selection
 
 Operator Response is not part of the invariant Core.
 
-In GyroOS, it selects how the current establishment is connected, suspended, redirected, reconstructed, or bounded at runtime.
+It selects how the current established or retained runtime relation is:
 
 ```text
-Stability
-↓
-Operator Response
-↓
-continuity disposition
+connected
+adjusted
+re-sliced
+reconstructed
+held pending
+or ended within the current control scope
 ```
 
-Candidate continuity dispositions include:
+Candidate responses include:
 
 ```text
-Continue
-Adjust
-Stop
-Jump
-Re-Slice
-Defer
-Void Hold
+CONTINUE
+ADJUST
+RESLICE
+JUMP
+DEFER
+STOP
+DEFER_VOID / VOID_HOLD
 ```
 
-These do not all mean the same form of continuation.
-
-They are different runtime relations to continuity.
-
-Detailed semantics are intentionally deferred to Priority B-2 through B-6.
+These responses are different runtime relations to continuity. None is automatically selected by Stability, Boundary State, Void, Δ, or another single signal.
 
 ---
 
-## 7. Runtime Continuity Is Not Continuous Execution
+## 6. Runtime Continuity Is Not Continuous Execution
 
-Runtime Continuity must not be reduced to uninterrupted execution.
+Runtime Continuity does not require uninterrupted execution.
 
-The following may still preserve Runtime Continuity:
+The following may preserve sufficient connectability:
 
 ```text
 waiting
@@ -197,7 +146,7 @@ branching
 jumping
 re-slicing
 archiving
-holding unresolved Void
+holding unresolved evidence
 ```
 
 Therefore:
@@ -205,18 +154,15 @@ Therefore:
 ```text
 Runtime Continuity ≠ always running
 Runtime Continuity ≠ no interruption
-Runtime Continuity ≠ same process repetition
+Runtime Continuity ≠ same Process repetition
+Runtime Continuity ≠ permanent retention of all data
 ```
-
-A runtime may pause or change its path while preserving sufficient relation for later continuation.
 
 ---
 
-## 8. Runtime Continuity and Gyro Process
+## 7. Relation to Gyro Process and Gyro Loop
 
 A Gyro Process is a bounded runtime reading of one local Core establishment and its Operator Response.
-
-A safe runtime representation is:
 
 ```text
 Gyro Process_n
@@ -231,75 +177,30 @@ Structure_n
 → Operator Response_n
 ```
 
-Runtime Continuity is broader than one Gyro Process.
-
-```text
-Runtime Continuity
-= the connectability among Gyro Processes and other retained runtime relations
-```
-
-Therefore:
+A Gyro Loop is a repetition or connection pattern among Gyro Processes.
 
 ```text
 Gyro Process ≠ Runtime Continuity
 Gyro Loop ≠ Runtime Continuity
 ```
 
-Gyro Process is a local execution section.
-
-Gyro Loop is repeated connection of Gyro Processes.
-
-Runtime Continuity is the more general runtime property that allows such connections to remain meaningful.
+Runtime Continuity is broader. It is the connectability among established Processes and other retained traceable runtime relations.
 
 ---
 
-## 9. Runtime Continuity and Gyro Loop
-
-The existing Gyro Loop form remains useful:
-
-```text
-Gyro Process_n
-→ Operator Response_n
-→ Gyro Process_n+1
-```
-
-However, Loop is only one runtime form of continuity.
-
-Runtime Continuity may also include:
-
-```text
-process continuation
-context re-slice
-trajectory branching
-deferred continuation
-jump reconstruction
-bounded stop with retained history
-void hold
-```
-
-Thus:
-
-```text
-Loop is a repetition pattern within Runtime Continuity.
-```
-
-Runtime Continuity should not be defined only by Loop repetition.
-
----
-
-## 10. Continuity Source and Continuity Target
-
-For implementation, a continuity relation may be represented using a source and a target.
+## 8. Continuity Source and Target
 
 ```text
 continuity source
-= the current established runtime result
+= established runtime result
+  or retained traceable runtime relation
 
 continuity target
-= the next Structure, Slice target, Process, branch, deferred state, or retained reference
+= next Structure, Slice target, Process, branch,
+  deferred state, retained reference, or trajectory section
 ```
 
-Example:
+Examples:
 
 ```text
 Stability_n
@@ -307,42 +208,36 @@ Stability_n
 → Structure_n+1
 ```
 
-Example:
-
 ```text
 Stability_n
-→ Operator Response_n(RESLICE_CONTEXT)
-→ Context_n as next Slice target
+→ Operator Response_n(RESLICE)
+→ ReSliceRequest
+→ retained source as a new Slice target
 ```
-
-Example:
 
 ```text
-Stability_n or not-evaluable result
+not-yet-evaluable retained relation
 → Operator Response_n(DEFER)
-→ deferred runtime reference
+→ DeferredRuntimeRecord
 ```
 
-The response determines the relation type.
-
-It does not alter the definition of Stability.
+The response determines the relation type. It does not alter the definition of Stability.
 
 ---
 
-## 11. Continuity Record
+## 9. Continuity Record
 
-A minimal implementation object may be introduced later.
-
-Candidate model:
+A provisional implementation model is:
 
 ```python
 class ContinuityRecord:
     continuity_id: str
     source_process_id: str
+    source_type: str
+    source_ref: str
     source_stability_ref: str | None
 
     relation_type: str
-
     target_type: str | None
     target_ref: str | None
 
@@ -351,49 +246,39 @@ class ContinuityRecord:
     preserved_void_refs: list[str]
 
     resumable: bool
-    terminal_for_current_process: bool
-
+    terminal_for_current_control_scope: bool
     metadata: dict
 ```
 
-This model is provisional.
-
-It is not yet a canonical GyroOS API object.
-
-The important distinction is:
+Important:
 
 ```text
-terminal_for_current_process
-≠
-end of all Runtime Continuity
+terminal_for_current_control_scope
+≠ end of all Runtime Continuity
 ```
+
+This model is provisional and is not yet a canonical API object.
 
 ---
 
-## 12. Runtime Continuity and Memory
+## 10. Relation to Memory and Trajectory
 
-Runtime Continuity depends on more than active execution.
+Memory Runtime and Trajectory Cache support Runtime Continuity by preserving sufficient relations.
 
-It may require preservation of:
+They may retain:
 
 ```text
 SliceDone
 StabilityResult
-Deviation
-Boundary
-Boundary State
+Δ
+Boundary / Boundary State
 Context
-Void
+Void reference
+Operator Orientation
 Operator Response
 Trajectory references
-Orientation references
+pending or reconstruction metadata
 ```
-
-Memory Runtime and Trajectory Cache support continuity by preserving sufficient runtime relations.
-
-They do not create Stability.
-
-They do not decide Operator Response.
 
 ```text
 Memory Runtime
@@ -403,239 +288,100 @@ Trajectory Cache
 = continuity evidence substrate
 ```
 
----
-
-## 13. Runtime Continuity and Boundary
-
-Boundary is not a Runtime Continuity stage.
-
-Boundary is a Slice-relative distinction that becomes readable in a Slice result.
-
-Boundary may affect what continuation relations are available or meaningful.
-
-Examples:
-
-```text
-Normal
-→ ordinary continuation may remain available
-
-Un
-→ adjustment or waiting may remain available
-
-Unknown
-→ re-slice or defer may remain available
-
-Void
-→ hold, defer, jump, sandbox, or controlled stop may be considered
-```
-
-But:
-
-```text
-Boundary State does not determine Operator Response automatically.
-```
-
-Runtime Continuity remains selected through Operator Response using the full runtime context.
+They do not create Stability and do not select Operator Response.
 
 ---
 
-## 14. Runtime Continuity and Stop
-
-Stop requires special care.
-
-At this stage, the following distinction is adopted provisionally:
-
-```text
-Stop may terminate the repetition of the current runtime process.
-Stop does not retroactively erase the established trajectory.
-```
-
-Therefore:
-
-```text
-Stop of current execution
-≠ theoretical endpoint of Gyro Logic
-≠ deletion of Runtime Continuity evidence
-```
-
-Whether Stop preserves resumability, closes a branch, or terminates a session must be defined separately in Priority B-3.
-
----
-
-## 15. Runtime Continuity and Jump
-
-Jump may break local continuity of path while preserving broader trajectory relation.
-
-Provisional distinction:
-
-```text
-continuous path relation
-may be broken
-
-trajectory-level relation
-may still be retained
-```
-
-Jump is therefore not automatically the destruction of all Runtime Continuity.
-
-Its exact semantics are deferred to Priority B-4.
-
----
-
-## 16. Runtime Continuity and Defer
-
-Defer demonstrates why Runtime Continuity is not equivalent to active execution.
-
-```text
-Defer
-= suspend immediate continuation while preserving a relation that may be resumed or re-evaluated later
-```
-
-This is a provisional runtime reading.
-
-Detailed semantics are deferred to Priority B-6.
-
----
-
-## 17. Runtime Continuity and Void Hold
-
-Void is not an actor.
-
-Void Hold is a possible Operator Response relation in which unresolved runtime material remains retained without forcing immediate resolution.
-
-```text
-Void
-≠ response
-
-Void Hold
-= possible continuity disposition selected by Operator Response
-```
-
-Void Hold may preserve:
-
-```text
-source Slice reference
-current Boundary conditions
-Context references
-reason for unreadability
-future Re-Slice possibility
-```
-
----
-
-## 18. Runtime Continuity Invariants
-
-GyroOS Runtime Continuity MUST preserve the following invariants:
-
-```text
-Structure → Slice → Stability remains unchanged.
-
-Stability is a state, not a controller.
-
-Operator Response selects the next runtime relation.
+## 11. Relation to Boundary and Void
 
 Boundary and Boundary State remain Slice-derived.
 
-Void does not act by itself.
+They may orient the response space, but they do not determine a response automatically.
 
-Current process termination does not silently erase trajectory evidence.
-
-Deferred or held states remain traceable where implementation resources allow.
+```text
+Boundary State ≠ Operator Response
+Void ≠ Operator Response
 ```
+
+A Void-related reference may remain a retained traceable runtime relation through `DEFER_VOID` or `VOID_HOLD` when sufficient source, Context, Boundary, and Trajectory references are preserved.
 
 ---
 
-## 19. What Runtime Continuity Is Not
+## 12. Response Relations
 
-Runtime Continuity is not:
+```text
+CONTINUE
+= connect through the current established path
+
+ADJUST
+= connect through the current path with bounded continuous modification
+
+RESLICE
+= request a new Slice over a retained source
+
+JUMP
+= request non-continuous reconstruction of the runtime connection
+
+DEFER
+= retain a pending relation for possible future reconnection
+
+STOP
+= end the execution connection within the current control scope
+```
+
+A bounded Stop may preserve evidence without preserving a pending relation. Defer explicitly preserves a pending relation.
+
+---
+
+## 13. Runtime Continuity Invariants
+
+GyroOS Runtime Continuity MUST preserve:
+
+```text
+Structure → Slice → Stability remains unchanged.
+Stability is a state, not a controller.
+Operator Response selects the next runtime relation.
+Boundary and Boundary State remain Slice-derived.
+Void does not act by itself.
+Established and retained sources remain distinguishable.
+Current control-scope termination does not silently erase trajectory evidence.
+Deferred or held relations remain traceable within bounded resource policy.
+```
+
+Runtime Continuity MUST NOT become:
 
 ```text
 a new Core element
 a mandatory Runtime Stage
 a separate controller
 an infinite loop
-uninterrupted execution
-permanent retention of all data
 automatic Continue after Stability
-identical repetition of the same Process
+silent retention without resource bounds
 ```
 
 ---
 
-## 20. Initial Runtime Mapping
+## 14. Priority B-1 Decision
 
-The initial GyroOS mapping is:
-
-```text
-Runtime Continuity
-...
-→ Runtime Structure_n
-→ Slice_n {
-    Operator Orientation_n
-    → slice-ing_n
-    → slice-done_n
-  }
-→ Stability_n
-→ Operator Response_n
-→ continuity relation_n
-→ next runtime section
-→ ...
-```
-
-The `continuity relation_n` may later be classified as:
+The adopted GyroOS working definition is:
 
 ```text
-continue
-adjust
-stop
-jump
-reslice
-defer
-void_hold
+Runtime Continuity is the runtime condition in which an established runtime result
+or a retained traceable runtime relation remains connectable to a subsequent
+Structure, Slice, Process, or Trajectory relation.
 ```
 
-These classifications are implementation-level responses, not Core elements.
+This definition is subordinate to Gyro Logic v3.1 and does not modify the invariant Core.
 
 ---
 
-## 21. Impact on Existing GyroOS Documents
+## 15. Refinement Record
 
-This definition implies later review of:
-
-```text
-docs/11_loop_controller.md
-docs/14_api_design.md
-docs/17_context_loop_controller.md
-docs/18_void_defer_jump.md
-docs/21_memory_runtime.md
-docs/22_trajectory_cache.md
-docs/25_local_inertia.md
-docs/26_poc_runtime_object_graph.md
-docs/27_claude_poc_implementation_prompt.md
-```
-
-No immediate rewrite of those documents is performed by this document.
-
-The next step is to define individual continuity dispositions carefully.
-
----
-
-## 22. Priority B-1 Decision
-
-The following definition is adopted as the current GyroOS working definition:
+This document incorporates the Priority B refinement pass defined in:
 
 ```text
-Runtime Continuity is the runtime condition in which an established Slice result remains connectable to a subsequent Structure, Slice, Process, or Trajectory relation.
+docs/35_priority_b_runtime_continuity_review.md
+docs/37_priority_b_refinement_pass.md
 ```
 
-This definition is subordinate to Gyro Logic v3.1.
-
-It does not modify the invariant Core.
-
----
-
-## 23. Next
-
-```text
-Priority B-2: Continue
-```
+The refinement expands the continuity source without treating unresolved evidence as Stability.
