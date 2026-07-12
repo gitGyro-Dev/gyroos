@@ -6,41 +6,101 @@
 
 This document defines **Re-Slice** in GyroOS after the Gyro Logic v3.1 Core Definition refinement.
 
-GyroOS does not redefine Gyro Logic.
-
-The invariant Core remains:
+GyroOS does not redefine Gyro Logic. The invariant Core remains:
 
 ```text
-Structure
-↓
-Slice
-↓
-Stability
+Structure → Slice → Stability
 ```
 
-Re-Slice is not a new Core element.
-
-Re-Slice is a runtime relation in which Operator Response selects a new Slice over an already established or retained runtime source.
+Re-Slice is not a fourth Core stage.
 
 ---
 
-## 2. Core Definition
+## 2. Decision and Operation
 
 ```text
-Re-Slice is an Operator Response that opens a new Slice path
-from an established or retained runtime source
-when the current Slice result should not be used as the only readable path.
+RESLICE is an Operator Response that requests a new Slice
+from an established or retained traceable runtime source.
+```
+
+```text
+Re-Slice is the runtime operation that opens and executes that new Slice path.
 ```
 
 Japanese:
 
 ```text
-Re-Sliceとは、現在のSlice結果だけを唯一の読めるPathとして扱わず、
-成立済みまたは保持されているRuntime sourceから
-新しいSlice Pathを開くOperator Responseである。
+RESLICEとは、成立済みまたは追跡可能な形で保持されたRuntime sourceから、
+新しいSliceを開始することを要求するOperator Responseである。
+
+Re-Sliceとは、その要求に基づいて新しいSlice Pathを開き、
+Structure → Slice → Stability を再び実行するRuntime operationである。
 ```
 
-Possible Re-Slice sources include:
+The distinction is mandatory:
+
+```text
+RESLICE decision ≠ Re-Slice operation
+```
+
+---
+
+## 3. Runtime Flow
+
+```text
+SliceDone / retained traceable runtime source
+↓
+Stability or not-evaluable result
+↓
+Loop Controller / Operator Response
+↓
+RESLICE
+↓
+ReSliceRequest
+↓
+Re-Slice Engine
+↓
+new Structure condition
+↓
+new Slice {
+  Operator Orientation
+  → slice-ing
+  → slice-done
+}
+↓
+new Stability
+↓
+ReSliceResult
+```
+
+The Loop Controller owns the RESLICE decision. The Re-Slice Engine owns execution.
+
+---
+
+## 4. Re-Slice and the Core
+
+Each Re-Slice follows the same invariant Core:
+
+```text
+retained source
+→ new Structure condition
+→ new Slice
+→ new Stability
+```
+
+Therefore:
+
+```text
+Re-Slice ≠ fourth Core stage
+Re-Slice ≠ extension after Stability inside the Core
+RESLICE ≠ Slice itself
+```
+
+---
+
+## 5. Re-Slice Sources
+
+Possible sources include:
 
 ```text
 Context
@@ -51,60 +111,34 @@ Unknown relation
 Void reference
 Trajectory section
 retained Structure condition
+other retained traceable runtime relation
 ```
+
+A source does not automatically trigger RESLICE.
+
+```text
+Context existence ≠ RESLICE
+Boundary State ≠ RESLICE
+Void ≠ RESLICE
+large Δ ≠ RESLICE
+low Stability ≠ RESLICE
+```
+
+These may orient the response space, but the Loop Controller owns the decision.
 
 ---
 
-## 3. Re-Slice and the Core
+## 6. Re-Slice and Runtime Continuity
 
-Re-Slice does not modify:
-
-```text
-Structure → Slice → Stability
-```
-
-Each Re-Slice still follows the Core.
+Re-Slice may preserve Runtime Continuity by opening another readable path from retained evidence.
 
 ```text
-Retained Runtime Source
-↓
-new Structure condition
-↓
-new Slice
-↓
-new Stability
+prior path remains traceable
++
+new Slice path is opened
 ```
 
-A Re-Slice may begin from information produced or retained by a previous Core establishment, but the new Slice remains a Slice.
-
-Therefore:
-
-```text
-Re-Slice ≠ fourth Core stage
-Re-Slice ≠ extension after Stability inside the Core
-```
-
----
-
-## 4. Re-Slice and Runtime Continuity
-
-Re-Slice is one way of preserving Runtime Continuity.
-
-```text
-Current established Slice result
-↓
-Operator Response selects Re-Slice
-↓
-new Slice source / condition
-↓
-new path opening
-↓
-next established result
-```
-
-The original path is not necessarily invalidated.
-
-Instead, GyroOS may preserve:
+Re-Slice must not silently replace:
 
 ```text
 prior SliceDone
@@ -116,17 +150,20 @@ prior Void reference
 Trajectory relation
 ```
 
-Re-Slice therefore preserves continuity by opening another readable path without silently erasing the previous one.
+```text
+Re-Slice does not erase the prior path.
+Re-Slice makes another path readable.
+```
 
 ---
 
-## 5. Re-Slice Is Not Retry
+## 7. Re-Slice Is Not Retry
 
 ```text
 Re-Slice ≠ simple retry
 ```
 
-A retry usually repeats the same operation under substantially the same conditions.
+A retry usually repeats substantially the same operation under substantially the same conditions.
 
 Re-Slice may change:
 
@@ -142,169 +179,93 @@ Boundary condition
 Trajectory section
 ```
 
-A retry may be implemented as a special case, but it is not the definition of Re-Slice.
+Retry may be implemented as a constrained special case, but it is not the definition.
 
 ---
 
-## 6. Re-Slice Is Not Continue
-
-Continue preserves connectability through the current established Slice result.
-
-Re-Slice opens another Slice path from a retained source.
+## 8. Relation to Other Responses
 
 ```text
-Continue:
-current established path remains the selected connection
+CONTINUE
+= use the current established path as the direct connection substrate
 
-Re-Slice:
-a new Slice path is selected from retained runtime evidence
+ADJUST
+= preserve the current path with bounded continuous modification
+
+RESLICE
+= request a new Slice from a retained direct source
+
+JUMP
+= request non-continuous reconstruction of source or connection
+
+DEFER
+= retain the relation pending possible later action
+
+STOP
+= end the current execution connection in the active control scope
 ```
 
-Re-Slice is not the opposite of Continue.
+### Re-Slice and Continue
 
-Both may preserve Runtime Continuity in different ways.
+Continue uses the current established path directly. Re-Slice opens another Slice path.
 
----
+### Re-Slice and Adjust
 
-## 7. Re-Slice Is Not Jump
+Adjust modifies the existing path continuously. Re-Slice starts a new Slice execution.
 
-Re-Slice and Jump must remain distinct.
-
-```text
-Re-Slice
-= opens a new Slice while retaining a readable relation to the current or prior source
-
-Jump
-= discontinues the current local path and establishes a non-continuous connection
-```
-
-A safe distinction is:
+### Re-Slice and Jump
 
 ```text
 Re-Slice preserves source-relative path continuity.
-Jump may break local path continuity while preserving trajectory-level traceability.
+Jump may replace direct source continuity with a traceable non-continuous relation.
 ```
 
 Re-Slice should be preferred when the retained source can still support another readable Slice.
 
-Jump may be selected when source-relative continuation is insufficient or inappropriate.
+### Re-Slice and Defer
+
+Defer may preserve a future Re-Slice possibility without executing it now.
 
 ---
 
-## 8. Re-Slice and Operator Response
+## 9. Re-Slice Types
 
-Re-Slice is selected by Operator Response.
-
-```text
-SliceDone
-↓
-Stability
-↓
-Loop Controller / Operator Response
-↓
-RESLICE
-```
-
-The following do not automatically trigger Re-Slice:
-
-```text
-Context existence alone
-Boundary existence alone
-Boundary State alone
-Unknown alone
-Void alone
-large Δ alone
-low Stability alone
-```
-
-These may orient the response space, but they do not determine the response.
-
-The Loop Controller may consider:
-
-```text
-Stability
-Δ
-Boundary State
-Context inferability
-Void readability
-Trajectory history
-recoverability
-criticality
-cost and depth limits
-Operator Orientation
-```
-
----
-
-## 9. Re-Slice Sources
-
-### 9.1 Context Re-Slice
+### Context Re-Slice
 
 ```text
 Context_n
-↓
-RESLICE_CONTEXT
-↓
-Slice_{n+1}
+→ RESLICE_CONTEXT
+→ ReSliceRequest
+→ Slice_n+1
 ```
 
 Context becomes a target only when Operator Response selects it.
 
-Context existence does not automatically create a Context Loop.
+### Prior SliceDone Re-Slice
 
----
+A prior Slice result is read under a different Orientation, resolution, or policy without rewriting the original record.
 
-### 9.2 Prior SliceDone Re-Slice
+### Boundary-aware Re-Slice
 
-A prior Slice result may be re-read under a different Orientation, resolution, or target relation.
+Boundary-related evidence may orient a different Slice condition.
 
-```text
-SliceDone_n
-↓
-new Orientation / Policy
-↓
-Re-Slice
-```
-
-This does not rewrite the prior SliceDone record.
-
----
-
-### 9.3 Boundary-aware Re-Slice
-
-Boundary or Boundary State may indicate that the current distinction is insufficient, ambiguous, or too coarse.
-
-Possible cases:
+Examples:
 
 ```text
 Unknown → higher-resolution Re-Slice
-Blank → Context completion Re-Slice
+Blank → Context-completion Re-Slice
 Un → convergence-oriented Re-Slice
 Non → alternate Boundary Re-Slice
-Void → Re-Slice only if a new readable condition can be formed
+Void → Re-Slice only when a new readable condition can be formed
 ```
 
-Boundary State does not itself execute Re-Slice.
+### Trajectory Re-Slice
+
+A prior Trajectory section becomes the source of a later Slice when new Context makes it newly readable.
 
 ---
 
-### 9.4 Trajectory Re-Slice
-
-A prior Trajectory section may become a new Slice source.
-
-```text
-Trajectory section
-↓
-new Orientation
-↓
-Re-Slice
-```
-
-This is useful when a later state makes an earlier relation newly readable.
-
----
-
-## 10. Re-Slice Depth and Bounded Execution
+## 10. Bounded Execution
 
 Re-Slice must not recurse without limit.
 
@@ -327,7 +288,7 @@ DEFER
 VOID_HOLD
 JUMP
 STOP
-CONTINUE with retained unresolved state
+CONTINUE with retained unresolved evidence
 ```
 
 The Re-Slice Engine does not select these responses by itself.
@@ -336,12 +297,11 @@ The Re-Slice Engine does not select these responses by itself.
 
 ## 11. Runtime Objects
 
-### ReSliceRequest
-
 ```python
 class ReSliceRequest:
     request_id: str
     process_index: int
+    response_ref: str
 
     source_type: str
     source_ref: str
@@ -350,7 +310,7 @@ class ReSliceRequest:
     slice_policy: SlicePolicy
 
     parent_process_id: str
-    parent_slice_id: str
+    parent_slice_id: str | None
     parent_trajectory_id: str | None
 
     reslice_depth: int
@@ -358,84 +318,42 @@ class ReSliceRequest:
     metadata: dict
 ```
 
-Possible `source_type` values:
-
-```text
-context
-slice_done
-boundary
-boundary_state
-void_reference
-trajectory_section
-structure_reference
-```
-
----
-
-### ReSliceResult
-
 ```python
 class ReSliceResult:
     request_id: str
+    status: str
     process_index: int
-
-    slice_done: SliceDone
-    stability: StabilityResult
-
+    slice_done: SliceDone | None
+    stability: StabilityResult | None
     parent_source_ref: str
     trajectory_relation: str
+    failure_reason: str | None
     metadata: dict
 ```
 
----
-
-## 12. Runtime Flow
+Recommended statuses:
 
 ```text
-Current Structure
-↓
-Slice {
-  Operator Orientation
-  → slice-ing
-  → slice-done
-}
-↓
-Stability
-↓
-Loop Controller / Operator Response
-↓
-RESLICE
-↓
-ReSliceRequest {
-  source_ref,
-  new orientation,
-  new policy,
-  depth,
-  reason
-}
-↓
-Re-Slice Engine
-↓
-new Slice {
-  Operator Orientation
-  → slice-ing
-  → slice-done
-}
-↓
-new Stability
+RESLICE_PREPARED
+RESLICE_COMPLETED
+RESLICE_DEFERRED
+RESLICE_REJECTED
+RESLICE_FAILED
 ```
+
+A failed operation does not silently become Continue or Jump. A new Operator Response is required.
 
 ---
 
-## 13. API Implications
+## 12. API Implications
 
-The main runtime API remains:
+The canonical runtime API remains:
 
 ```text
 POST /loop/step
 ```
 
-A Re-Slice may be represented as an Operator Response result:
+A RESLICE response may return a request:
 
 ```json
 {
@@ -443,7 +361,7 @@ A Re-Slice may be represented as an Operator Response result:
     "type": "RESLICE_CONTEXT",
     "reason": "context may resolve unknown boundary relation",
     "next_request": {
-      "mode": "reslice",
+      "request_id": "reslice-001",
       "source_type": "context",
       "source_ref": "context-123",
       "reslice_depth": 1
@@ -452,19 +370,17 @@ A Re-Slice may be represented as an Operator Response result:
 }
 ```
 
-Possible support endpoint:
+A support endpoint may execute the request:
 
 ```text
 POST /reslice/execute
 ```
 
-This support endpoint must not redefine `/loop/step` as the canonical runtime relation.
+That endpoint performs the Re-Slice operation. It does not own the RESLICE decision and does not replace `/loop/step` as the canonical response-selection boundary.
 
 ---
 
-## 14. Memory Runtime and Trajectory Cache
-
-Re-Slice must preserve parent-child traceability.
+## 13. Memory and Trajectory
 
 Memory Runtime should retain:
 
@@ -478,122 +394,84 @@ reslice_depth
 reason
 resulting SliceDone
 resulting StabilityResult
+operation status
 ```
 
-Trajectory Cache should represent:
+Trajectory Cache should represent a Re-Slice as an explicit branch or relation:
 
 ```text
 Trajectory_n
 ├─ SliceDone_n
-└─ ReSliceBranch
+└─ ReSliceRelation
    └─ SliceDone_n+1
 ```
 
 A Re-Slice branch is not silent replacement.
 
-The prior path remains traceable.
+---
+
+## 14. Relation to Other Runtime Components
+
+Dynamic Equivalence Runtime may use Re-Slice results as additional evidence, but Re-Slice does not guarantee equivalence.
+
+Gyro-OOM Damper may report recursion or memory pressure, but it does not independently select RESLICE, JUMP, DEFER, or STOP.
 
 ---
 
-## 15. Relation to Dynamic Equivalence
+## 15. Design Constraints
 
-Re-Slice may produce additional evidence for Dynamic Equivalence.
-
-```text
-previously undecidable
-↓
-Re-Slice under new Context / Orientation
-↓
-additional Trajectory evidence
-↓
-equivalent | not_equivalent | still undecidable
-```
-
-Re-Slice does not guarantee equivalence.
-
-Dynamic Equivalence Runtime remains responsible only for evaluating trajectory-based equivalence.
-
----
-
-## 16. Relation to Gyro-OOM Damper
-
-Repeated Re-Slice may create runtime pressure.
-
-Possible pressure signals:
-
-```text
-reslice_depth_exceeded
-context_chain_growth
-branch_explosion
-cycle_detected
-memory_pressure
-cost_budget_exceeded
-```
-
-Gyro-OOM Damper may report or apply selected damping actions, but it does not independently decide Re-Slice, Jump, or Stop.
-
----
-
-## 17. Design Constraints
-
-Re-Slice MUST NOT:
+RESLICE MUST NOT:
 
 ```text
 be added to the Core
 be treated as automatic retry
-be triggered automatically by Context or Void existence
+be triggered automatically by Context, Boundary, Void, Δ, or Stability alone
 replace prior SliceDone silently
 erase Δ, Boundary, Context, or Void
-be treated as Jump
+be treated as JUMP
+imply operation completion when only a decision exists
 recurse without limits
 make GyroAuth decisions
 ```
 
-Re-Slice MUST:
+RESLICE MUST:
 
 ```text
-be selected through Operator Response
+remain an Operator Response
+produce an explicit ReSliceRequest
+identify a retained traceable source
+preserve parent-source traceability
+```
+
+Re-Slice operation MUST:
+
+```text
+be executed by the Re-Slice Engine or equivalent runtime component
 open a new Slice path
-retain parent-source traceability
+produce an explicit operation result
+produce a new SliceDone and StabilityResult when completed
 preserve prior runtime evidence
-support bounded execution
-produce a new SliceDone and StabilityResult
-remain compatible with Runtime Continuity
+remain bounded
 ```
 
 ---
 
-## 18. Key Insight
-
-Re-Slice does not repeat the same answer-seeking operation.
-
-It opens another path through retained runtime evidence.
+## 16. Key Insight
 
 ```text
-Re-Slice does not erase the prior path.
-Re-Slice makes another path readable.
+RESLICE selects another Slice.
+Re-Slice performs that Slice.
 ```
+
+The decision and execution boundaries must remain separate.
 
 ---
 
-## 19. Summary
+## 17. Refinement Record
 
-Re-Slice is an Operator Response that opens a new Slice from an established or retained runtime source.
-
-It preserves Runtime Continuity by retaining prior evidence while allowing another path to become readable.
-
-It remains subordinate to:
+This document incorporates the Priority B refinement pass defined in:
 
 ```text
-Structure → Slice → Stability
-```
-
-and is selected only through Operator Response.
-
----
-
-## Next
-
-```text
-Priority B-6: Defer
+docs/35_priority_b_runtime_continuity_review.md
+docs/37_priority_b_refinement_pass.md
 ```
