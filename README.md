@@ -17,17 +17,21 @@ The invariant theoretical core is:
 Structure → Slice → Stability
 ```
 
-GyroOS expands this timeless structure into a temporal execution process:
+GyroOS maps this core into runtime continuity. The internal runtime reading of Slice is:
 
 ```text
 Structure
-→ Operator Orientation
-→ slice-ing
-→ slice-done
+→ Slice {
+    Operator Orientation
+    → slice-ing
+    → slice-done
+  }
 → Stability
 → Operator Response
 → Next Process
 ```
+
+Operator Orientation, slice-ing, and slice-done are internal distinctions of Slice. They are not additional core stages.
 
 GyroOS is not an application layer.  
 GyroAuth is the application layer built on top of GyroOS.
@@ -64,13 +68,15 @@ Structure → Slice → Stability
 
 This is the timeless Gyro Unit.
 
-GyroOS implements its runtime expansion as a Gyro Process:
+GyroOS implements its runtime reading as a Gyro Process:
 
 ```text
 Structure
-→ Operator Orientation
-→ slice-ing
-→ slice-done
+→ Slice {
+    Operator Orientation
+    → slice-ing
+    → slice-done
+  }
 → Stability
 → Operator Response
 ```
@@ -91,7 +97,7 @@ Gyro Unit = Structure → Slice → Stability
 
 The Gyro Unit is timeless.
 
-It does not contain Operator Orientation, Operator Response, Context Loop, or Dynamic Equivalence.
+Operator Orientation, slice-ing, and slice-done may be read as internal distinctions of Slice. Operator Response, Context Loop, and Dynamic Equivalence remain outside the invariant core sequence.
 
 ---
 
@@ -100,14 +106,16 @@ It does not contain Operator Orientation, Operator Response, Context Loop, or Dy
 ```text
 Gyro Process
 = Structure
-→ Operator Orientation
-→ slice-ing
-→ slice-done
+→ Slice {
+    Operator Orientation
+    → slice-ing
+    → slice-done
+  }
 → Stability
 → Operator Response
 ```
 
-The Gyro Process is one temporal execution cycle.
+The Gyro Process is one temporal runtime section within continuing trajectory.
 
 Time appears mainly in:
 
@@ -140,45 +148,65 @@ The Loop is controlled by Operator Response, not by Stability directly.
 
 ### Structure
 
-Structure is the underlying state, relation, or field to be sliced.
+Structure is the runtime mode in which an establishment remains possible.
+
+It may appear as a state, relation, field, process condition, or runtime configuration, but it is not limited to an input value or fixed container.
+
+A current Runtime Structure may retain prior transformation while remaining open to the next Slice.
 
 ---
 
 ### Operator Orientation
 
-Operator Orientation is the pre-Slice direction, weight, request, or constraint.
+Operator Orientation is the directional condition at the entrance and within Slice.
 
-It is not Slice itself.
+It may express what is being sought, which Difference matters, which direction should be opened, and which granularity or Context is relevant.
+
+It is not an independent core stage and is not Slice itself.
 
 ```text
-Structure → Operator Orientation → slice-ing
+Slice {
+  Operator Orientation
+  → slice-ing
+  → slice-done
+}
 ```
 
 ---
 
 ### Slice
 
-Slice is the general operation by which Structure appears as representation.
+Slice is the runtime process by which a path is opened through Structure toward an establishment.
 
-In GyroOS, Slice is implemented through slice-ing and slice-done.
+It may be implemented through computation, transformation, observation, search, selection, or interpretation, but it is not reducible to any one of them.
+
+In GyroOS, the internal runtime reading of Slice is:
+
+```text
+Operator Orientation
+→ slice-ing
+→ slice-done
+```
 
 ---
 
 ### slice-ing
 
-slice-ing is the temporal execution process of Slice.
+slice-ing is the time-including runtime process through which the path is being opened.
 
 ```text
 slice-ing = Slice in progress
 ```
 
-This is where computation, transformation, or observation execution occurs.
+This is where computation, transformation, observation, search, or recognition may occur.
 
 ---
 
 ### slice-done
 
-slice-done is the completed result of Slice.
+slice-done is the state in which Slice has become readable as an established result.
+
+GyroOS may represent this established Slice result as:
 
 ```text
 slice-done = X + Δ
@@ -194,12 +222,14 @@ X = representation produced by Slice
 GyroOS may store additional runtime fields alongside slice-done:
 
 ```text
+Boundary
+Boundary State
 Context
 Void
 Metadata
 ```
 
-These do not change the invariant core.
+These are readable or derived relations of the Slice result. They do not change the invariant core.
 
 ---
 
@@ -256,12 +286,12 @@ Stability does not directly start Re-Slice.
 
 ### Stability
 
-Stability is a state quantity appearing in slice-done.
+Stability is the state in which the path opened through Slice becomes readable as an establishment that can continue.
 
-It is not a controller.
+It is not a controller, success flag, termination state, or stop condition.
 
 ```text
-Stability = state quantity of slice-done
+Stability = continuing established state of the opened path
 ```
 
 Stability is observed, measured, stored, and passed to Operator Response.
@@ -334,20 +364,22 @@ Context consistency
 ## 🏗️ Architecture
 
 ```text
-Raw Structure
+Runtime Structure
    ↓
-Operator Orientation
-   ↓
-Slice Engine
-   ↓
-slice-ing
-   ↓
-SliceDone {
-  representation: X,
-  deviation: Δ,
-  context: C,
-  void: V,
-  metadata: M
+Slice Engine {
+   Operator Orientation / Slice Policy
+      ↓
+   slice-ing
+      ↓
+   SliceDone {
+     representation: X,
+     deviation: Δ,
+     boundary: B,
+     boundary_state: BS,
+     context: C,
+     void: V,
+     metadata: M
+   }
 }
    ↓
 Deviation Engine
@@ -375,7 +407,7 @@ Next Orientation / Next Process
 
 ### Slice Engine
 
-Executes slice-ing and produces slice-done.
+Applies the runtime representation of Operator Orientation, executes slice-ing, and produces a readable slice-done result.
 
 ---
 
@@ -401,7 +433,7 @@ Extracts and preserves Δ.
 
 ### Stability Engine
 
-Measures Stability as a state quantity of slice-done.
+Reads whether the path established in slice-done can continue as an establishment.
 
 It does not control the Loop.
 
@@ -456,11 +488,11 @@ equivalent | not_equivalent | undecidable
 At each process cycle:
 
 ```text
-1. Receive Structure
-2. Apply Operator Orientation
+1. Read the current Runtime Structure
+2. Enter Slice under Operator Orientation / Slice Policy
 3. Execute slice-ing
-4. Produce SliceDone = X + Δ plus runtime Context / Void
-5. Measure Stability
+4. Produce a readable SliceDone = X + Δ plus Boundary / Boundary State / Context / Void
+5. Read Stability as a continuing establishment
 6. Execute Operator Response through Loop Controller
 7. Re-Slice Context, Defer Void, Jump, Stop, or Continue as selected
 8. Prepare Next Orientation or Next Process
@@ -578,7 +610,7 @@ https://github.com/gitGyro-Dev/gyroauth
 
 GyroOS is:
 
-> The execution layer that expands Structure → Slice → Stability into Gyro Process, repeats it through Operator Response, and supports Context-aware Re-Slice and Dynamic Equivalence at runtime.
+> The execution layer that maps Structure → Slice → Stability into runtime continuity, repeats established sections through Operator Response, and supports Context-aware Re-Slice and Dynamic Equivalence at runtime.
 
 ---
 
