@@ -868,3 +868,61 @@ Structure → Slice → Stability
 ```text
 Priority C-9: Boundary-aware PoC Impact
 ```
+
+---
+
+## Priority C-10 Refinement
+
+The API naming rule is:
+
+```text
+*_evidence
+= directly embedded evidence objects
+
+*_records
+= identified classification records with lineage
+
+*_refs
+= identifiers of separately stored objects
+```
+
+A response may therefore expose either embedded values:
+
+```json
+{
+  "boundary_evidence": [],
+  "boundary_state_records": [],
+  "void_evidence": []
+}
+```
+
+or external references:
+
+```json
+{
+  "boundary_refs": [],
+  "boundary_state_refs": [],
+  "void_refs": []
+}
+```
+
+or both when explicitly documented.
+
+The following API values must remain separate:
+
+```text
+boundary_readability
+boundary_state_confidence
+stability
+response_confidence
+```
+
+An unreadable Boundary distinction should be represented as unclassified or unreadable Boundary evidence. It must not be converted automatically into:
+
+```text
+boundary_state = VOID
+operator_response = DEFER
+HTTP error
+```
+
+`VOID` is valid only when the relevant Boundary is identifiable and the target relation is insufficiently readable or connectable relative to it.

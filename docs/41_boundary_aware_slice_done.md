@@ -725,3 +725,55 @@ It does not modify the invariant Core.
 ```text
 Priority C-4: Boundary Readability and Stability
 ```
+
+---
+
+## Priority C-10 Refinement
+
+The recommended naming for directly embedded objects and external references is:
+
+```text
+*_evidence
+= directly retained evidence objects
+
+*_records
+= identified classification records with lineage
+
+*_refs
+= references to externally retained records
+```
+
+A refined embedded form is:
+
+```python
+class SliceDone:
+    boundary_evidence: list[BoundaryEvidence]
+    boundary_state_records: list[BoundaryStateRecord]
+    void_evidence: list[VoidEvidence]
+
+    boundary_refs: list[str]
+    boundary_state_refs: list[str]
+    void_refs: list[str]
+```
+
+Implementations may use embedded objects, references, or both, but the naming must reveal which form is being used.
+
+`BoundaryStateRecord` is the preferred name for an identified provisional classification with lineage. `BoundaryStateEvidence` should be reserved for unregistered evidence that has not yet become such a record.
+
+The following values must remain separate:
+
+```text
+boundary_readability
+boundary_state_confidence
+Stability
+response_confidence
+```
+
+Also:
+
+```text
+Boundary not sufficiently readable
+≠ automatic VOID Boundary State
+```
+
+In that case, `SliceDone` may retain unclassified or unreadable Boundary evidence without forcing a Boundary State classification.

@@ -710,3 +710,46 @@ Structure → Slice → Stability
 ```text
 Priority C-8: Boundary-aware API Mapping
 ```
+
+---
+
+## Priority C-10 Refinement
+
+Boundary-related storage should use the following naming discipline:
+
+```text
+BoundaryEvidence
+BoundaryStateRecord
+VoidEvidence
+```
+
+References to separately stored objects should use:
+
+```text
+boundary_refs
+boundary_state_refs
+void_refs
+```
+
+The memory layer must preserve the difference between:
+
+```text
+an unreadable Boundary distinction
+and
+a readable Boundary with a target relation classified as VOID
+```
+
+These must not share one undifferentiated `void` record.
+
+Recommended trajectory evidence keeps separate values for:
+
+```text
+boundary_readability
+boundary_state_confidence
+Stability
+response_confidence
+```
+
+Compression or resolution decay may summarize these values, but it must not merge them into one confidence score.
+
+A later readable Boundary or reclassification may supersede a record for the current scope, but the earlier unreadable distinction evidence, Boundary State record, and Operator Response evidence remain traceable through lineage.
