@@ -17,17 +17,21 @@ Gyro Logic を実行可能なランタイムシステムとして実装する。
 Structure → Slice → Stability
 ```
 
-GyroOS は、この時間なしの構造を、時間ありの実行過程として展開する。
+GyroOS は、このコアを Runtime Continuity へ写像する。Slice の内部的なRuntime読解は次である。
 
 ```text
 Structure
-→ Operator Orientation
-→ slice-ing
-→ slice-done
+→ Slice {
+    Operator Orientation
+    → slice-ing
+    → slice-done
+  }
 → Stability
 → Operator Response
 → Next Process
 ```
+
+Operator Orientation、slice-ing、slice-done は Slice 内部の区別であり、追加のCore Stageではない。
 
 GyroOS は応用層ではない。  
 GyroAuth は GyroOS の上に構築される応用層である。
@@ -64,13 +68,15 @@ Structure → Slice → Stability
 
 これは時間なしの Gyro Unit である。
 
-GyroOS は、この構造を Gyro Process として実行時に展開する。
+GyroOS は、この構造を Gyro Process としてRuntime上で読む。
 
 ```text
 Structure
-→ Operator Orientation
-→ slice-ing
-→ slice-done
+→ Slice {
+    Operator Orientation
+    → slice-ing
+    → slice-done
+  }
 → Stability
 → Operator Response
 ```
@@ -91,7 +97,7 @@ Gyro Unit = Structure → Slice → Stability
 
 Gyro Unit は時間なしの理論構造である。
 
-Operator Orientation、Operator Response、Context Loop、Dynamic Equivalence は含まない。
+Operator Orientation、slice-ing、slice-done は Slice 内部の区別として読める。Operator Response、Context Loop、Dynamic Equivalence は不変のCore Sequenceには含まれない。
 
 ---
 
@@ -100,14 +106,16 @@ Operator Orientation、Operator Response、Context Loop、Dynamic Equivalence �
 ```text
 Gyro Process
 = Structure
-→ Operator Orientation
-→ slice-ing
-→ slice-done
+→ Slice {
+    Operator Orientation
+    → slice-ing
+    → slice-done
+  }
 → Stability
 → Operator Response
 ```
 
-Gyro Process は、時間ありの一周期の実行過程である。
+Gyro Process は、継続するTrajectory内に現れる時間ありの一つのRuntime断面である。
 
 時間は主に次に現れる。
 
@@ -140,45 +148,65 @@ Loop は Stability が直接制御するのではなく、Operator Response に�
 
 ### Structure
 
-Structure は、Slice される対象となる状態・関係・場である。
+Structure は、何かが成立し得るRuntime上の様式である。
+
+状態・関係・場・処理条件・Runtime Configurationとして現れうるが、単なる入力値や固定Containerには限定されない。
+
+現在のRuntime Structureは、過去の変化を保持しながら、次のSliceへ開かれている。
 
 ---
 
 ### Operator Orientation
 
-Operator Orientation は、Slice の前にある方向性・重み・要求・制約である。
+Operator Orientation は、Slice の入口および内部にある方向条件である。
 
-Slice そのものではない。
+何を求めるか、どのDifferenceを重視するか、どの方向を開くか、どの粒度やContextを関連づけるかを表現しうる。
+
+独立したCore Stageではなく、Sliceそのものでもない。
 
 ```text
-Structure → Operator Orientation → slice-ing
+Slice {
+  Operator Orientation
+  → slice-ing
+  → slice-done
+}
 ```
 
 ---
 
 ### Slice
 
-Slice は、Structure が Representation として現れるための作用概念である。
+Slice は、Structure の中に一つの成立へ向かうRuntime Pathが開かれる過程である。
 
-GyroOS では、Slice は slice-ing と slice-done によって実装される。
+計算・変換・観測・探索・選択・解釈などによって実装されうるが、そのいずれか一つに還元されない。
+
+GyroOS におけるSlice内部のRuntime読解は次である。
+
+```text
+Operator Orientation
+→ slice-ing
+→ slice-done
+```
 
 ---
 
 ### slice-ing
 
-slice-ing は、Slice が進行している時間ありの実行過程である。
+slice-ing は、道筋が開かれている時間を含むRuntime過程である。
 
 ```text
 slice-ing = Slice in progress
 ```
 
-計算・変換・観測処理はこの段階で行われる。
+計算・変換・観測・探索・認識などはこの過程で行われうる。
 
 ---
 
 ### slice-done
 
-slice-done は、Slice が完了した結果である。
+slice-done は、Slice が一つの成立した結果として読める状態である。
+
+GyroOS は、この成立したSlice Resultを次のように表現できる。
 
 ```text
 slice-done = X + Δ
@@ -194,12 +222,14 @@ X = Slice によって得られた Representation
 GyroOS では、slice-done の周辺に追加のランタイム情報を保持できる。
 
 ```text
+Boundary
+Boundary State
 Context
 Void
 Metadata
 ```
 
-これらは不変コアを変更しない。
+これらはSlice Resultから読まれる、または派生する関係であり、不変コアを変更しない。
 
 ---
 
@@ -256,12 +286,12 @@ Stability が Re-Slice を直接開始するわけではない。
 
 ### Stability
 
-Stability は、slice-done に現れる状態量である。
+Stability は、Slice によって開かれた道筋が、継続可能な一つの成立として読める状態である。
 
-制御者ではない。
+制御者、Success Flag、終了状態、Stop条件ではない。
 
 ```text
-Stability = slice-done に現れる状態量
+Stability = opened path の continuing established state
 ```
 
 Stability は観測・測定・保存され、Operator Response に渡される。
@@ -334,20 +364,22 @@ Context consistency
 ## 🏗️ アーキテクチャ
 
 ```text
-Raw Structure
+Runtime Structure
    ↓
-Operator Orientation
-   ↓
-Slice Engine
-   ↓
-slice-ing
-   ↓
-SliceDone {
-  representation: X,
-  deviation: Δ,
-  context: C,
-  void: V,
-  metadata: M
+Slice Engine {
+   Operator Orientation / Slice Policy
+      ↓
+   slice-ing
+      ↓
+   SliceDone {
+     representation: X,
+     deviation: Δ,
+     boundary: B,
+     boundary_state: BS,
+     context: C,
+     void: V,
+     metadata: M
+   }
 }
    ↓
 Deviation Engine
@@ -375,7 +407,7 @@ Next Orientation / Next Process
 
 ### Slice Engine
 
-slice-ing を実行し、slice-done を生成する。
+Operator Orientation のRuntime表現を適用し、slice-ing を実行し、読めるslice-done Resultを生成する。
 
 ---
 
@@ -401,7 +433,7 @@ Operator Response によって要求された場合に、Context または既存
 
 ### Stability Engine
 
-slice-done の状態量として Stability を測定する。
+slice-done に成立した道筋が、一つの成立として継続可能かを読む。
 
 Loop を制御しない。
 
@@ -456,11 +488,11 @@ equivalent | not_equivalent | undecidable
 各プロセス周期で次を行う。
 
 ```text
-1. Structure を受け取る
-2. Operator Orientation を適用する
+1. 現在のRuntime Structureを読む
+2. Operator Orientation / Slice Policyの下でSliceへ入る
 3. slice-ing を実行する
-4. SliceDone = X + Δ と runtime Context / Void を生成する
-5. Stability を測定する
+4. SliceDone = X + Δ と Boundary / Boundary State / Context / Void を、読めるSlice Resultとして生成する
+5. Stabilityを継続可能な成立として読む
 6. Loop Controller により Operator Response を実行する
 7. 選択に応じて Re-Slice Context / Defer Void / Jump / Stop / Continue を行う
 8. Next Orientation または Next Process を準備する
@@ -578,7 +610,7 @@ https://github.com/gitGyro-Dev/gyroauth
 
 GyroOS とは：
 
-> Structure → Slice → Stability を Gyro Process として展開し、Operator Response によって反復し、Context-aware Re-Slice と Dynamic Equivalence を runtime で支援する実装層である。
+> Structure → Slice → Stability を Runtime Continuity へ写像し、成立した断面を Operator Response によって反復し、Context-aware Re-Slice と Dynamic Equivalence を runtime で支援する実装層である。
 
 ---
 
