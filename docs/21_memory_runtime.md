@@ -2,184 +2,564 @@
 
 ---
 
-## Overview
+## 1. Overview
 
-This document defines the Memory Runtime model for GyroOS.
+This document defines the Memory Runtime model for GyroOS after the Gyro Logic v3.1 Core Definition refinement and the Priority B / Priority C Runtime alignment.
 
-Memory Runtime is the implementation layer that manages runtime history, Context, Trajectory, Void, and reduced-resolution references.
+Memory Runtime preserves runtime evidence, lineage, and reconstructable relations under bounded storage resources.
 
 It does not redefine Gyro Logic.
 
-The invariant theoretical core remains:
-
-```text
-Structure → Slice → Stability
-```
-
-Memory Runtime is a runtime support system.
-
-It preserves what is needed for future Gyro Processes without requiring all data to remain at full resolution.
-
----
-
-## Position in GyroOS
-
-GyroOS runtime flow:
+The invariant Core remains:
 
 ```text
 Structure
-→ Operator Orientation
-→ slice-ing
-→ SliceDone
-→ Stability
-→ Operator Response
-→ Next Process
+↓
+Slice
+↓
+Stability
 ```
 
-Memory Runtime supports this flow by preserving:
-
-```text
-SliceDone history
-Deviation history
-Stability history
-Operator Response history
-Context chains
-Void states
-Trajectory references
-Dynamic Equivalence evidence
-```
-
-Memory Runtime does not control the loop.
-
-The Loop Controller / Operator Response decides runtime transitions.
+Memory Runtime is not a Core element, Runtime Stage, controller, classifier, or response owner.
 
 ---
 
-## Core Principle
+## 2. Runtime Position
 
-Memory Runtime must preserve continuity while controlling storage cost.
+The aligned Runtime relation is:
 
 ```text
-Preserve trajectory.
-Reduce resolution when appropriate.
-Do not erase deviation.
-Do not destroy unresolved Void.
+Runtime Structure
+↓
+Slice {
+  Operator Orientation
+  Slice Policy
+  slice-ing
+  slice-done {
+    representation
+    Difference / Deviation
+    Boundary evidence if readable
+    Boundary State records if classifiable
+    Context evidence / references
+    Void evidence / references if retained
+  }
+}
+↓
+StabilityResult
+↓
+Loop Controller / Operator Response
+↓
+CONTINUE | ADJUST | RESLICE | JUMP | DEFER | STOP
+↓
+Runtime Continuity relation
+```
+
+Memory Runtime supports this relation by retaining evidence and references before, during, and after Process transitions.
+
+It does not decide any transition.
+
+---
+
+## 3. Core Principle
+
+```text
+Memory Runtime
+= bounded preservation of evidence, lineage, and future reconstructability
+```
+
+Its purpose is not to keep every object at full resolution forever.
+
+Its purpose is to preserve enough relation for later Runtime reading.
+
+Therefore:
+
+```text
+preservation
+≠ permanent full-resolution storage
+
+compression
+≠ forgetting
+
+latest record
+≠ complete history
+
+current-scope view
+≠ universal truth
 ```
 
 ---
 
-## Memory Objects
+## 4. Responsibility Boundary
 
-Recommended runtime memory objects:
+Memory Runtime may:
 
 ```text
+store
+reference
+index
+summarize
+compress
+archive
+retrieve
+materialize
+link lineage
+expose current-scope views
+report memory pressure
+```
+
+Memory Runtime must not:
+
+```text
+generate Boundary by itself
+classify Boundary State by itself
+measure Stability by itself
+select Operator Response
+start Re-Slice
+perform Jump
+Defer a relation by itself
+Stop execution
+make GyroAuth decisions
+```
+
+Correct relation:
+
+```text
+Runtime engine or controller produces a record or decision
+↓
+Memory Runtime preserves it
+```
+
+Incorrect relation:
+
+```text
+Memory record exists
+↓
+Memory Runtime selects next action
+```
+
+---
+
+## 5. Canonical Memory Objects
+
+Recommended object families:
+
+```text
+RuntimeStructureRecord
 SliceDoneRecord
-ContextRecord
-VoidRecord
-TrajectoryRecord
-StabilityRecord
 DeviationRecord
+BoundaryEvidence
+BoundaryStateRecord
+ContextEvidence
+VoidEvidence
+StabilityRecord
 OperatorResponseRecord
-EquivalenceRecord
+ContinuityRecord
+TrajectoryRecord
 CompressedReference
+CurrentScopeView
+```
+
+These names preserve the Priority C distinction:
+
+```text
+*_evidence
+= directly retained evidence objects
+
+*_records
+= identity-bearing Runtime records with lineage
+
+*_refs
+= references to separately retained records
 ```
 
 ---
 
-## SliceDoneRecord
+## 6. SliceDoneRecord
 
 ```python
 class SliceDoneRecord:
     slice_id: str
+    process_id: str
     process_index: int
     timestamp: float
 
     representation_ref: str
     deviation_ref: str
-    context_ref: str | None
-    void_ref: str | None
 
+    boundary_refs: list[str]
+    boundary_state_refs: list[str]
+    context_refs: list[str]
+    void_refs: list[str]
+
+    orientation_ref: str | None
+    slice_policy_ref: str | None
+    trajectory_ref: str | None
+
+    parent_slice_ref: str | None
+    source_refs: list[str]
+
+    readability_summary: dict
     resolution_level: str
     storage_tier: str
     metadata: dict
 ```
 
-SliceDoneRecord stores references, not necessarily full raw data.
+A `SliceDoneRecord` stores the readable established result of Slice and the references needed to reconstruct how it became readable.
+
+It is not a Stability record and does not contain Operator Response ownership.
 
 ---
 
-## ContextRecord
+## 7. BoundaryEvidence
 
 ```python
-class ContextRecord:
+class BoundaryEvidence:
+    boundary_id: str
+    source_slice_id: str
+    source_process_id: str
+
+    relation_refs: list[str]
+    evidence_refs: list[str]
+    context_refs: list[str]
+
+    orientation_ref: str | None
+    slice_policy_ref: str | None
+
+    boundary_readability: float | None
+    resolution: str | None
+    origin_mode: str | None
+
+    lineage_refs: list[str]
+    provisional: bool
+    resolution_level: str
+    storage_tier: str
+    metadata: dict
+```
+
+The canonical statement remains:
+
+```text
+The distinction became readable through the current Slice.
+```
+
+`origin_mode` such as `formed`, `exposed`, `retained`, or `unknown` is optional implementation metadata.
+
+---
+
+## 8. BoundaryStateRecord
+
+```python
+class BoundaryStateRecord:
+    boundary_state_id: str
+    boundary_ref: str
+    relation_ref: str | None
+
+    slice_ref: str
+    process_ref: str
+    trajectory_ref: str | None
+
+    state_type: str
+    boundary_state_confidence: float | None
+    relation_readability: float | None
+    inferability: float | None
+
+    evidence_refs: list[str]
+    context_refs: list[str]
+    orientation_ref: str | None
+
+    provisional: bool
+    lineage_relations: list[dict]
+    resolution_level: str
+    storage_tier: str
+    metadata: dict
+```
+
+Initial candidate values:
+
+```text
+NORMAL
+NON
+UN
+ABSENCE
+BLANK
+UNKNOWN
+VOID
+```
+
+These are provisional relation classifications, not permanent object properties.
+
+A later classification must not silently overwrite an earlier record.
+
+Recommended lineage relations include:
+
+```text
+refined_from
+reclassified_from
+conflicts_with
+coexists_with
+supersedes_for_current_scope
+reopened_from
+invalidated_by_evidence
+unreadable_under
+```
+
+---
+
+## 9. ContextEvidence
+
+```python
+class ContextEvidence:
     context_id: str
     source_slice_id: str
     source_process_id: str
 
-    inferred_structure_ref: str
-    confidence: float
-    inferability_score: float
+    relation_refs: list[str]
+    evidence_refs: list[str]
+    inferred_structure_ref: str | None
+
+    source_type: str
+    context_readability: float | None
+    context_confidence: float | None
+    inferability_score: float | None
 
     context_chain: list[str]
+    provisional: bool
     resolution_level: str
     storage_tier: str
     metadata: dict
 ```
 
-ContextRecord may become a future Re-Slice target.
+Context may become a future Re-Slice source candidate.
+
+It does not start Re-Slice by itself.
 
 ---
 
-## VoidRecord
+## 10. VoidEvidence
+
+Void-related memory must preserve the following separation:
+
+```text
+Void as Boundary State
+VoidEvidence
+Void reference
+retained pending relation
+DEFER response
+RESLICE response
+JUMP response
+STOP response
+```
+
+Recommended object:
 
 ```python
-class VoidRecord:
+class VoidEvidence:
     void_id: str
     source_slice_id: str
     source_process_id: str
 
-    reason: str
-    inferability: float
-    severity: float
+    boundary_ref: str | None
+    relation_ref: str | None
+    evidence_refs: list[str]
 
-    deferred: bool
-    resolved: bool
+    reason: str
+    relation_readability: float | None
+    connectability: float | None
+    inferability: float | None
+
+    lineage_refs: list[str]
+    resolution_level: str
+    storage_tier: str
+    metadata: dict
+```
+
+The following fields must not be embedded as intrinsic Void properties:
+
+```text
+deferred: bool
+resolved: bool
+response_type
+```
+
+Those properties belong to separate records or current-scope views.
+
+```text
+VoidEvidence
+≠ DEFER
+```
+
+A Void-related relation may later be reclassified or reconnected, but the original evidence remains traceable.
+
+---
+
+## 11. StabilityRecord
+
+```python
+class StabilityRecord:
+    stability_id: str
+    process_ref: str
+    slice_ref: str
+
+    value: float | None
+    status: str
+    continuability: bool | None
+    reason: str | None
+    evidence_refs: list[str]
 
     resolution_level: str
     storage_tier: str
     metadata: dict
 ```
 
-VoidRecord must not be silently deleted.
+Memory Runtime stores Stability results.
 
-It may be deferred or compressed.
+It does not infer that:
+
+```text
+stable → CONTINUE
+unstable → STOP
+not_evaluable → DEFER
+```
+
+Stability remains separate from Operator Response.
 
 ---
 
-## TrajectoryRecord
+## 12. OperatorResponseRecord
+
+```python
+class OperatorResponseRecord:
+    response_id: str
+    process_ref: str
+
+    response_type: str
+    reason: str
+
+    considered_evidence_refs: list[str]
+    decisive_evidence_refs: list[str]
+    conflicting_evidence_refs: list[str]
+
+    response_confidence: float | None
+    next_request_ref: str | None
+    continuity_effect_ref: str | None
+
+    resolution_level: str
+    storage_tier: str
+    metadata: dict
+```
+
+Canonical response types:
+
+```text
+CONTINUE
+ADJUST
+RESLICE
+JUMP
+DEFER
+STOP
+```
+
+Compatibility aliases such as `RESLICE_CONTEXT`, `CHANGE_ORIENTATION`, and `DEFER_VOID` should be normalized before long-term storage when possible.
+
+`VOID` is not an Operator Response.
+
+---
+
+## 13. ContinuityRecord
+
+```python
+class ContinuityRecord:
+    continuity_id: str
+    process_ref: str
+    response_ref: str
+
+    source_ref: str
+    target_ref: str | None
+    continuity_type: str
+
+    pending: bool
+    terminated_for_current_scope: bool
+    evidence_refs: list[str]
+
+    resolution_level: str
+    storage_tier: str
+    metadata: dict
+```
+
+This record preserves how the current establishment or retained relation connects to the next Runtime state.
+
+It does not decide the connection.
+
+---
+
+## 14. TrajectoryRecord
 
 ```python
 class TrajectoryRecord:
     trajectory_id: str
 
     process_refs: list[str]
+    structure_refs: list[str]
     slice_refs: list[str]
-    context_refs: list[str]
-    response_refs: list[str]
+    deviation_refs: list[str]
 
-    stability_summary: dict
-    deviation_summary: dict
+    boundary_refs: list[str]
+    boundary_state_refs: list[str]
+    context_refs: list[str]
+    void_refs: list[str]
+
+    stability_refs: list[str]
+    response_refs: list[str]
+    continuity_refs: list[str]
+
+    current_scope_refs: dict
+    summary_refs: list[str]
 
     resolution_level: str
     storage_tier: str
     metadata: dict
 ```
 
-TrajectoryRecord is central to Dynamic Equivalence and identity continuity.
+TrajectoryRecord preserves how Runtime readings changed across Processes.
+
+It must not store only the latest Boundary State or latest response.
 
 ---
 
-## Storage Tiers
+## 15. Current-Scope View
+
+Historical records remain immutable or traceable.
+
+Runtime may still require a concise view of what is active now.
+
+```python
+class CurrentScopeView:
+    scope_id: str
+    trajectory_ref: str
+
+    active_structure_ref: str | None
+    active_slice_ref: str | None
+    active_boundary_refs: list[str]
+    active_boundary_state_refs: list[str]
+    active_context_refs: list[str]
+    active_void_refs: list[str]
+    active_stability_ref: str | None
+    active_response_ref: str | None
+
+    updated_at: float
+    metadata: dict
+```
+
+A current-scope pointer does not erase prior records.
+
+```text
+supersedes_for_current_scope
+≠ universal invalidation
+```
+
+---
+
+## 16. Storage Tiers
 
 Recommended tiers:
 
@@ -192,200 +572,220 @@ external
 
 ### hot
 
-High-resolution active runtime data.
+High-resolution evidence needed by the active Process or immediate next decision.
 
 ### warm
 
-Recently used or context-relevant data.
+Recently used or likely to be retrieved for Re-Slice, comparison, or trajectory reading.
 
 ### cold
 
-Compressed trajectory or context summaries.
+Compressed summaries and lineage-preserving records not required for immediate execution.
 
 ### external
 
-World storage or remote reference.
+External storage with retained identifiers, hashes, retrieval rules, and lineage pointers.
 
 ---
 
-## Resolution Levels
+## 17. Resolution Levels
 
 Recommended levels:
 
 ```text
 full
-summary
-vector
-pointer
+structured_summary
+evidence_vector
+lineage_pointer
+external_reference
 ```
 
-### full
-
-Complete runtime data.
-
-### summary
-
-Reduced but human-readable or reconstructable summary.
-
-### vector
-
-Low-dimensional direction / trajectory representation.
-
-### pointer
-
-External reference or retrieval handle.
-
----
-
-## Resolution Decay
-
-Resolution decay reduces memory cost without erasing history.
-
-Correct:
+Safe decay:
 
 ```text
-full → summary → vector → pointer
+full
+→ structured summary
+→ evidence vector
+→ lineage pointer
+→ archived external reference
 ```
+
+The requirement is reconstructability appropriate to the retained relation.
 
 Incorrect:
 
 ```text
-full → delete
+full → delete latest-except
 ```
 
-Decay may depend on:
+when that deletion destroys lineage, conflict evidence, or reclassification history.
+
+---
+
+## 18. Resolution Decay Rules
+
+Resolution decay may consider:
 
 ```text
 age
 access frequency
-context relevance
-stability relevance
-trajectory importance
-void severity
-application demand
+active trajectory relevance
+Boundary lineage relevance
+Context relevance
+Void reconnectability
+response audit relevance
+reconstruction cost
+external retrieval availability
+memory pressure
+policy
+```
+
+The decay mechanism must not make semantic decisions such as:
+
+```text
+old record → irrelevant
+low confidence → delete
+superseded for current scope → universally invalid
+Void unresolved → permanent
 ```
 
 ---
 
-## Local Inertia
+## 19. Memory Lifecycle
 
-Local inertia determines which memory objects remain available locally.
-
-Objects gain local inertia when they are:
+Recommended storage lifecycle:
 
 ```text
-frequently accessed
-stability-relevant
-context-relevant
-part of active trajectory
-needed for Dynamic Equivalence
-associated with unresolved Void
-```
-
-Local inertia may prevent aggressive resolution decay.
-
----
-
-## World Storage References
-
-GyroOS may store large data externally and keep local references.
-
-Local runtime may store:
-
-```text
-external_uri
-content_hash
-trajectory_handle
-context_handle
-retrieval_policy
-```
-
-This allows local runtime to operate with references rather than full data.
-
----
-
-## Memory Lifecycle
-
-Recommended lifecycle:
-
-```text
-create
-activate
-stabilize
+record
+index
+activate_for_scope
 summarize
 compress
-defer
 archive
 retrieve
+materialize
+link_new_evidence
 ```
 
-### create
+### record
 
-A runtime object is created by SliceDone, Context, Void, or Operator Response.
+Persist a Runtime-produced evidence or decision record.
 
-### activate
+### index
 
-Object becomes part of an active Gyro Process.
+Create lookup relations across Process, Slice, Boundary, Context, Void, Trajectory, Stability, Response, and Continuity.
 
-### stabilize
+### activate_for_scope
 
-Object becomes relevant to stable trajectory.
+Point the current Runtime scope to selected retained records without rewriting history.
 
-### summarize
+### summarize / compress
 
-Object is reduced to summary form.
-
-### compress
-
-Object is reduced to vector or pointer.
-
-### defer
-
-Object is held unresolved for later processing.
+Reduce resolution while preserving required meaning and lineage.
 
 ### archive
 
-Object is moved to cold or external storage.
+Move data to cold or external storage while retaining reconstructable references.
 
-### retrieve
+### retrieve / materialize
 
-Object is restored or materialized for Re-Slice or Dynamic Equivalence.
+Restore sufficient evidence for Re-Slice, trajectory reading, Dynamic Equivalence, audit, or later classification.
+
+### link_new_evidence
+
+Append lineage or conflict relations without silently overwriting prior records.
+
+The storage lifecycle must not use `stabilize` or `defer` as Memory-owned semantic actions.
+
+Stability and DEFER belong to other Runtime responsibilities.
 
 ---
 
-## Interaction with Re-Slice
+## 20. Interaction with Re-Slice
 
-Re-Slice may require retrieving Context or prior SliceDone.
+Correct relation:
 
 ```text
-Operator Response
-→ RESLICE_CONTEXT
-→ Memory Runtime retrieves ContextRecord
-→ Re-Slice Engine executes
+Loop Controller selects RESLICE
+↓
+SliceRequest identifies retained source refs
+↓
+Memory Runtime retrieves or materializes source evidence
+↓
+Re-Slice Engine executes another Slice
 ```
 
 Memory Runtime does not decide to Re-Slice.
 
-It provides data when Operator Response requests it.
+Possible source refs include:
+
+```text
+SliceDoneRecord
+ContextEvidence
+BoundaryEvidence
+BoundaryStateRecord
+VoidEvidence
+Trajectory segment
+prior Process result
+retained relation
+```
 
 ---
 
-## Interaction with Dynamic Equivalence
+## 21. Interaction with DEFER
 
-Dynamic Equivalence requires trajectory evidence.
+DEFER is an Operator Response.
 
-Memory Runtime provides:
+Memory Runtime supports DEFER by preserving:
+
+```text
+pending source relation
+reason evidence
+revisit conditions
+current-scope pending pointer
+future retrieval references
+```
+
+Recommended separate record:
+
+```python
+class DeferredRelationRecord:
+    deferred_relation_id: str
+    source_ref: str
+    response_ref: str
+    deferred_at_process_ref: str
+    revisit_condition: dict | None
+    evidence_refs: list[str]
+    pending: bool
+    metadata: dict
+```
+
+This record references Void evidence when relevant, but it is not part of `VoidEvidence` itself.
+
+---
+
+## 22. Interaction with Dynamic Equivalence
+
+Dynamic Equivalence may consume:
 
 ```text
 TrajectoryRecord
-StabilityRecord
+SliceDoneRecord
 DeviationRecord
-ContextRecord
+BoundaryEvidence
+BoundaryStateRecord
+ContextEvidence
+VoidEvidence
+StabilityRecord
 OperatorResponseRecord
-Jump / Stop boundary evidence
+ContinuityRecord
 ```
 
-Without sufficient memory evidence, Dynamic Equivalence should return:
+Memory Runtime provides evidence only.
+
+It does not decide equivalence.
+
+When evidence is insufficient, the consuming runtime may return:
 
 ```text
 undecidable
@@ -393,68 +793,57 @@ undecidable
 
 ---
 
-## Interaction with Void / Defer
+## 23. Memory Pressure and Gyro-OOM
 
-Deferred Void must remain traceable.
-
-```text
-VoidRecord.deferred = true
-```
-
-Deferred Void may be stored at reduced resolution, but not silently deleted.
-
-Possible operations:
-
-```text
-defer
-compress
-revisit
-reslice
-resolve
-jump_boundary
-```
-
----
-
-## Gyro-OOM Preparation
-
-Memory Runtime prepares the foundation for Gyro-OOM damping.
-
-When runtime expansion becomes too large, Memory Runtime may request Operator Response support.
-
-Possible signals:
+Memory Runtime may report:
 
 ```text
 memory_pressure
-reslice_depth_exceeded
-context_chain_cycle
 hot_tier_overflow
-void_accumulation
-trajectory_explosion
+lineage_growth
+reslice_depth_growth
+context_chain_growth
+void_evidence_accumulation
+trajectory_branch_growth
+retrieval_cost_growth
 ```
 
-Memory Runtime does not kill the loop by itself.
+These are evidence inputs.
 
-It reports pressure to Loop Controller / Operator Response.
+They do not directly select:
+
+```text
+DEFER
+JUMP
+STOP
+RESLICE
+```
+
+The Loop Controller remains the response owner.
 
 ---
 
-## API Implications
+## 24. API Implications
 
-Possible future endpoints:
+Possible support endpoints:
 
 ```text
 GET  /memory/state
+GET  /memory/record/{record_id}
 GET  /memory/trajectory/{trajectory_id}
+GET  /memory/boundary/{boundary_id}
 GET  /memory/context/{context_id}
 GET  /memory/void/{void_id}
 POST /memory/retrieve
+POST /memory/materialize
 POST /memory/compress
 ```
 
-These are support endpoints.
+These endpoints expose or transform stored representations.
 
-The main runtime endpoint remains:
+They do not create Operator Responses.
+
+The primary Runtime endpoint remains:
 
 ```text
 POST /loop/step
@@ -462,57 +851,80 @@ POST /loop/step
 
 ---
 
-## Design Constraints
+## 25. Design Constraints
 
 Memory Runtime MUST NOT:
 
 ```text
 redefine Structure → Slice → Stability
-control the Loop directly
-delete Δ silently
-delete unresolved Void silently
+control the Loop
+store only the latest classification
+silently overwrite Boundary State history
+embed DEFER state inside VoidEvidence
 treat compression as forgetting
-treat Context as Representation
-make authentication decisions
+treat current-scope selection as universal truth
+automatically start Re-Slice
+automatically Jump or Stop
+make GyroAuth decisions
 ```
 
 Memory Runtime MUST:
 
 ```text
-preserve trajectory continuity
-preserve references to Δ
-preserve Void traceability
-support resolution decay
-support retrieval for Re-Slice
-support evidence for Dynamic Equivalence
-report memory pressure to Operator Response
+preserve SliceDone lineage
+preserve Difference / Deviation references
+preserve Boundary and Boundary State history
+preserve Context and Void evidence separately
+preserve Stability and Operator Response separately
+support current-scope views without deleting history
+support bounded resolution decay
+support reconstruction and retrieval
+report memory pressure as evidence
 ```
 
 ---
 
-## Key Insight
+## 26. Key Insight
 
-Memory Runtime is not storage only.
+Memory Runtime is not storage accumulation.
 
-It is trajectory preservation under limited resources.
-
-In short:
+It is controlled preservation of how Runtime relations became readable and how those readings changed.
 
 ```text
-Memory is not accumulation.
-Memory is controlled preservation of trajectory.
+Memory preserves evidence.
+Trajectory preserves change.
+Current scope selects a view.
+Operator Response selects what happens next.
 ```
 
 ---
 
-## Summary
+## 27. Summary
 
-Memory Runtime enables GyroOS to preserve runtime continuity without keeping all data at full resolution.
+Memory Runtime preserves evidence, lineage, and reconstructability across Gyro Processes while controlling storage cost.
 
-It supports Context, Re-Slice, Void, Trajectory, and Dynamic Equivalence while preserving the invariant core:
+It keeps the following distinct:
 
 ```text
-Structure → Slice → Stability
+SliceDone
+BoundaryEvidence
+BoundaryStateRecord
+ContextEvidence
+VoidEvidence
+StabilityRecord
+OperatorResponseRecord
+ContinuityRecord
+TrajectoryRecord
+```
+
+It supports Runtime Continuity without changing the invariant Core:
+
+```text
+Structure
+↓
+Slice
+↓
+Stability
 ```
 
 ---
