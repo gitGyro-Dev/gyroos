@@ -2,480 +2,690 @@
 
 ---
 
-## Overview
+## 1. Overview
 
-The Re-Slice Engine defines how GyroOS performs a secondary Slice over an existing runtime result, especially Context.
+This document defines the GyroOS **Re-Slice Engine** after the Gyro Logic v3.1 Core refinement and the Priority B / Priority C Runtime alignment.
 
-GyroOS does not redefine Gyro Logic.
-
-The invariant theoretical core remains:
-
-```text
-Structure → Slice → Stability
-```
-
-Re-Slice is an implementation-level runtime mode.
-
-It does not replace Slice.
-
-It applies Slice again to a previously produced runtime target such as Context or SliceDone.
-
----
-
-## Theoretical Definition
-
-In Gyro Logic v2.7:
-
-```text
-Re-Slice = secondary Slice performed over an existing Slice result,
-especially Context.
-```
-
-Core statement:
-
-```text
-Reading Context = Re-Slice over Context
-```
-
----
-
-## Runtime Position
-
-Base GyroOS flow:
+The invariant Core remains:
 
 ```text
 Structure
-→ Operator Orientation
-→ slice-ing
-→ slice-done
-→ Stability
-→ Operator Response
-→ Next Process
-```
-
-Re-Slice appears only after Operator Response selects it.
-
-Correct relation:
-
-```text
-slice-done
-→ Stability
-→ Loop Controller / Operator Response
-→ RESLICE_CONTEXT
-→ Re-Slice Engine
-→ Next Process
-```
-
-Incorrect relation:
-
-```text
+↓
+Slice
+↓
 Stability
-→ Re-Slice Engine
 ```
 
-Re-Slice is not directly triggered by Stability.
+Re-Slice is not a fourth Core element.
+
+Re-Slice is the Runtime operation that performs another Slice over a retained and traceable source after the Loop Controller has selected the `RESLICE` Operator Response.
+
+```text
+RESLICE
+= Operator Response requesting another Slice
+
+Re-Slice
+= Runtime operation executing that requested Slice
+```
+
+These must remain distinct.
 
 ---
 
-## Re-Slice Target
-
-A Re-Slice target may be:
+## 2. Canonical Definition
 
 ```text
-Context
-SliceDone
-Void-related deferred region
-previous Process output
+Re-Slice is another bounded Slice performed over a retained Runtime source relation, with explicit lineage to the prior Process and Slice from which that source became available.
 ```
 
-Primary target for v2.7:
+Japanese:
 
 ```text
-Context
+Re-Sliceとは、保持されたRuntime source relationに対して、
+そのsourceが成立した過去のProcessおよびSliceとのlineageを維持しながら、
+もう一度実行されるboundedなSliceである。
 ```
+
+Short reading:
+
+```text
+Re-Slice = Slice again over a retained source.
+```
+
+Re-Slice does not replace Slice.
+
+It uses the same conceptual relation:
+
+```text
+Structure-like source condition
+↓
+Slice {
+  Operator Orientation
+  Slice Policy
+  slice-ing
+  slice-done
+}
+↓
+Stability
+```
+
+The difference is the retained source and lineage, not the Core process.
 
 ---
 
-## Slice Request Model
+## 3. Runtime Position
 
-Use `SliceRequest` to distinguish initial Slice from Re-Slice.
+Correct responsibility chain:
+
+```text
+SliceDone_n
+↓
+StabilityResult_n
+↓
+Loop Controller / Operator Response
+↓
+RESLICE selected
+↓
+SliceRequest(mode="reslice")
+↓
+Re-Slice Engine
+↓
+Slice {
+  Operator Orientation
+  Slice Policy
+  slice-ing
+  slice-done
+}
+↓
+SliceDone_n+1
+↓
+StabilityResult_n+1
+```
+
+Incorrect:
+
+```text
+Context exists
+→ Re-Slice starts
+```
+
+Incorrect:
+
+```text
+Void exists
+→ Re-Slice starts
+```
+
+Incorrect:
+
+```text
+low Stability
+→ Re-Slice starts
+```
+
+Context, Void evidence, Boundary evidence, Difference / Deviation, and Stability may orient the response space.
+
+They do not start Re-Slice by themselves.
+
+---
+
+## 4. Re-Slice Source
+
+A Re-Slice source must be retained and traceable.
+
+Possible source types include:
+
+```text
+runtime_structure
+slice_done
+context_evidence
+boundary_evidence
+boundary_state_record
+void_evidence
+trajectory_segment
+prior_process_result
+retained_relation
+```
+
+The source is not required to be a complete prior object.
+
+It may be a selected relation or evidence reference preserved by Memory Runtime or Trajectory Cache.
+
+Important distinctions:
+
+```text
+ContextEvidence
+≠ automatic Re-Slice target
+
+VoidEvidence
+≠ Void acting
+
+BoundaryStateRecord
+≠ Re-Slice command
+```
+
+The Loop Controller selects `RESLICE` and identifies the retained source to be sliced again.
+
+---
+
+## 5. SliceRequest Model
+
+A provisional request model is:
 
 ```python
 class SliceRequest:
     request_id: str
     process_index: int
 
-    source_type: str   # "structure" | "context" | "slice_done" | "void"
+    mode: str  # slice | reslice
+    source_type: str
     source_ref: str
 
-    mode: str          # "slice" | "reslice"
     orientation: OperatorOrientation
+    slice_policy: dict
+
+    context_refs: list[str]
+    boundary_refs: list[str]
+    boundary_state_refs: list[str]
+    void_refs: list[str]
 
     parent_process_id: str | None
     parent_slice_id: str | None
+    parent_response_id: str | None
+
+    reslice_depth: int
+    trajectory_ref: str | None
     metadata: dict
 ```
 
-Important:
+`mode="reslice"` is an implementation marker.
+
+It does not define a new theoretical operation.
+
+The request must preserve:
 
 ```text
-mode = "reslice" does not create a new theory.
-It marks the runtime source as an existing Slice result or Context.
+which source is being sliced again
+why that source was selected
+which Operator Response requested it
+which prior Process and Slice supplied it
+which Orientation and Slice Policy are active
 ```
 
 ---
 
-## Process Types
+## 6. Re-Slice Engine Responsibilities
 
-Recommended process types:
+The Re-Slice Engine performs only the requested operation.
+
+### 6.1 Validate the Request
+
+It verifies that:
 
 ```text
-initial_slice
-context_reslice
-slice_done_reslice
-void_reslice
-orientation_reslice
+response_type = RESLICE
+source_ref is retained and resolvable
+parent lineage is available
+runtime limits permit another Slice
 ```
 
-### initial_slice
+It does not reconsider whether `RESLICE` should have been selected.
 
-A first Slice over Structure.
+### 6.2 Resolve the Retained Source
 
-### context_reslice
+The engine resolves the source reference through Memory Runtime, Trajectory Cache, or current LoopState.
 
-A Re-Slice over inferred Context.
+It must not convert missing source data into a new response by itself.
 
-### slice_done_reslice
+If the source cannot be resolved, the failure becomes Runtime evidence returned to the Loop Controller.
 
-A Re-Slice over a full SliceDone result.
+### 6.3 Execute Slice
 
-### void_reslice
+Re-Slice executes the normal internal Slice distinctions:
 
-A Re-Slice attempt over a deferred Void region.
+```text
+Operator Orientation
+↓
+Slice Policy
+↓
+slice-ing
+↓
+slice-done
+```
 
-### orientation_reslice
+Operator Orientation remains internal to Slice.
 
-A Re-Slice caused by changed Operator Orientation.
+### 6.4 Produce a New SliceDone
+
+Re-Slice always produces a new SliceDone identity when execution reaches slice-done.
+
+It must not overwrite the parent SliceDone.
+
+### 6.5 Preserve Lineage
+
+The new result must preserve relations such as:
+
+```text
+parent_process_ref
+parent_slice_ref
+parent_response_ref
+source_ref
+source_type
+resliced_from
+trajectory_ref
+reslice_depth
+```
 
 ---
 
-## Re-Slice Engine Responsibilities
+## 7. Boundary-aware SliceDone Output
 
-### 1. Accept Re-Slice Requests
-
-The Re-Slice Engine receives requests only from Loop Controller / Operator Response.
-
-```text
-Operator Response → Re-Slice Engine
-```
-
-It must not self-trigger.
-
----
-
-### 2. Resolve Source Target
-
-The engine resolves the source:
-
-```text
-Context
-SliceDone
-VoidState
-previous runtime result
-```
-
-It then prepares that target for slice-ing.
-
----
-
-### 3. Execute slice-ing
-
-Re-Slice still uses slice-ing.
-
-```text
-Re-Slice target
-→ Operator Orientation
-→ slice-ing
-→ slice-done
-```
-
-The difference is the source, not the core process.
-
----
-
-### 4. Produce new SliceDone
-
-Re-Slice produces a new SliceDone.
+A candidate result is:
 
 ```python
 class SliceDone:
     slice_id: str
-    process_index: int
+    process_id: str
+
     representation: dict
     deviation: dict
-    context: dict | None
-    void: dict | None
+
+    boundary_evidence: list[BoundaryEvidence]
+    boundary_state_records: list[BoundaryStateRecord]
+    context_evidence: list[ContextEvidence]
+    void_evidence: list[VoidEvidence]
+
+    boundary_refs: list[str]
+    boundary_state_refs: list[str]
+    context_refs: list[str]
+    void_refs: list[str]
+
+    orientation_ref: str
+    slice_policy_ref: str
+    parent_slice_ref: str | None
+    trajectory_ref: str | None
+
+    readability: dict
     metadata: dict
 ```
 
-This result is then passed to Stability Engine.
+Naming rule:
+
+```text
+*_evidence = directly retained evidence objects
+*_records = classified records with identity and lineage
+*_refs = references to separately retained records
+```
+
+Boundary-aware does not mean Boundary-required.
+
+A Re-Slice result may contain no readable Boundary.
 
 ---
 
-### 5. Preserve Parent Linkage
+## 8. Context and Re-Slice
 
-Re-Slice must preserve lineage.
-
-Recommended fields:
-
-```text
-parent_process_id
-parent_slice_id
-source_context_id
-reslice_depth
-context_chain
-```
-
-This allows trajectory and context chain analysis.
-
----
-
-## Re-Slice Depth
-
-Re-Slice may recurse.
-
-Therefore, GyroOS must control depth.
-
-Recommended fields:
-
-```python
-class ReSliceState:
-    reslice_depth: int
-    max_reslice_depth: int
-    context_chain: list[str]
-    cycle_detected: bool
-```
-
-Constraints:
-
-```text
-reslice_depth must have an upper bound
-context_chain must be checked for loops
-cyclic Re-Slice must be stopped, deferred, or jumped
-```
-
----
-
-## Relation to Context Runtime
-
-Context Runtime stores Context in SliceDone.
-
-Re-Slice Engine consumes Context as source.
-
-```text
-SliceDone.context
-→ ReSliceCandidate
-→ SliceRequest(mode="reslice")
-→ Re-Slice Engine
-```
-
-Context does not automatically become Re-Slice.
+Context may be selected as a Re-Slice source when it remains sufficiently retained and traceable.
 
 Correct:
 
 ```text
-Context is available.
-Operator Response selects RESLICE_CONTEXT.
-Re-Slice Engine executes.
+ContextEvidence retained
++
+other Runtime evidence
+↓
+Loop Controller selects RESLICE
+↓
+SliceRequest(source_type="context_evidence")
+↓
+Re-Slice Engine executes
 ```
 
 Incorrect:
 
 ```text
-Context exists, therefore Re-Slice starts automatically.
+Context exists
+→ RESLICE_CONTEXT
+```
+
+`RESLICE_CONTEXT` is a legacy compatibility name only.
+
+Canonical representation:
+
+```text
+response_type = RESLICE
+source_type = context_evidence
 ```
 
 ---
 
-## Relation to Stability
+## 9. Boundary and Re-Slice
 
-Stability is measured after Re-Slice produces SliceDone.
+Boundary-related evidence may orient Re-Slice when:
+
+```text
+Boundary is provisional
+Boundary evidence conflicts
+Boundary State remains Unknown
+resolution is insufficient
+another retained relation may expose a different distinction
+```
+
+However:
+
+```text
+Boundary State = UNKNOWN
+≠ automatic RESLICE
+
+Boundary State = VOID
+≠ automatic RESLICE
+```
+
+The Loop Controller must consider multiple inputs before selecting `RESLICE`.
+
+A later Slice may produce:
+
+```text
+refined Boundary
+new Boundary
+conflicting Boundary
+no readable Boundary
+reclassified Boundary State
+```
+
+The earlier records remain preserved.
+
+---
+
+## 10. Void and Re-Slice
+
+The engine must distinguish:
+
+```text
+Void as Boundary State
+VoidEvidence
+Void reference
+RESLICE response
+Re-Slice operation
+```
+
+A retained `VoidEvidence` object may be selected as source material.
+
+This does not mean that Void performs Re-Slice.
+
+Correct:
+
+```text
+VoidEvidence retained
++
+Re-Slice viability
++
+Context availability
++
+Stability
++
+Runtime limits
+↓
+Loop Controller selects RESLICE
+↓
+Re-Slice Engine executes
+```
+
+If the Boundary distinction itself was unreadable, the source should remain unclassified Boundary or unreadable-distinction evidence rather than being forced into `VOID`.
+
+---
+
+## 11. Stability Relation
+
+Re-Slice does not produce Stability directly.
 
 ```text
 Re-Slice Engine
-→ slice-done
-→ Stability Engine
-→ StabilityResult
+↓
+new SliceDone
+↓
+Stability Engine
+↓
+new StabilityResult
 ```
 
-Stability does not start Re-Slice.
+Stability does not initiate Re-Slice.
 
-Operator Response starts Re-Slice.
+Important:
+
+```text
+not_evaluable Stability
+≠ automatic RESLICE
+
+low Stability
+≠ automatic RESLICE
+```
+
+Stability is one input to Loop Controller response selection.
 
 ---
 
-## Relation to Operator Response
+## 12. Operator Response Relation
 
-Operator Response decides whether to Re-Slice.
-
-Possible response:
+The canonical response vocabulary is:
 
 ```text
-RESLICE_CONTEXT
+CONTINUE
+ADJUST
+RESLICE
+JUMP
+DEFER
+STOP
 ```
 
-Example response object:
+Re-Slice Engine runs only for:
+
+```text
+response_type = RESLICE
+```
+
+Legacy names map as follows:
+
+```text
+RESLICE_CONTEXT → RESLICE with Context source refs
+CHANGE_ORIENTATION → ADJUST
+DEFER_VOID → DEFER with Void-related evidence
+```
+
+`ADJUST` may alter Orientation continuously.
+
+A later `RESLICE` may then use the adjusted Orientation, but `orientation_reslice` is not a separate canonical response type.
+
+---
+
+## 13. Re-Slice Depth and Bounded Execution
+
+Re-Slice must remain bounded.
+
+Candidate state:
 
 ```python
-class OperatorResponse:
-    process_index: int
-    response_type: str  # CONTINUE | RESLICE_CONTEXT | CHANGE_ORIENTATION | DEFER_VOID | JUMP | STOP
-    reason: str
-    next_request: SliceRequest | None
+class ReSliceState:
+    reslice_depth: int
+    max_reslice_depth: int
+    source_chain: list[str]
+    visited_slice_refs: list[str]
+    cycle_detected: bool
+    metadata: dict
 ```
 
-If `response_type == "RESLICE_CONTEXT"`, Loop Controller may create a Re-Slice request.
-
----
-
-## Runtime Flow
+Required controls:
 
 ```text
-Process_n
-   ↓
-SliceDone_n {
-  representation: X,
-  deviation: Δ,
-  context: C,
-  void: V
-}
-   ↓
-StabilityResult_n
-   ↓
-Loop Controller / Operator Response
-   ↓
-RESLICE_CONTEXT
-   ↓
-SliceRequest(mode="reslice", source_type="context")
-   ↓
-Re-Slice Engine
-   ↓
-slice-ing
-   ↓
-SliceDone_{n+1}
-   ↓
-StabilityResult_{n+1}
+bounded reslice_depth
+bounded source_chain length
+cycle detection
+source resolution limits
+memory pressure checks
+trajectory branch limits
 ```
+
+When a limit is reached, the Re-Slice Engine does not select `DEFER`, `JUMP`, or `STOP` itself.
+
+It returns limit evidence to the Loop Controller.
+
+The Loop Controller then selects the next Operator Response.
 
 ---
 
-## API Implications
+## 14. API Mapping
 
-`POST /loop/step` may trigger a Re-Slice step when Operator Response selects it.
+The main endpoint remains:
 
-Example response:
+```text
+POST /loop/step
+```
+
+Example response selecting another Slice:
 
 ```json
 {
   "loop_id": "gyro_loop_001",
   "process_index": 8,
   "operator_response": {
-    "response_type": "RESLICE_CONTEXT",
-    "reason": "context has high inferability and unresolved deviation"
+    "response_type": "RESLICE",
+    "reason": "retained context may expose a more readable path",
+    "decisive_evidence_refs": ["ctx_007", "stability_008"]
   },
   "next_request": {
     "mode": "reslice",
-    "source_type": "context",
-    "source_ref": "ctx_007"
+    "source_type": "context_evidence",
+    "source_ref": "ctx_007",
+    "parent_process_id": "process_008",
+    "parent_slice_id": "slice_008",
+    "reslice_depth": 1
   }
 }
 ```
 
-Optional lower-level endpoint:
+An optional lower-level endpoint may exist:
 
 ```text
-POST /reslice
+POST /reslice/execute
 ```
 
-However, `/reslice` should not be the main runtime endpoint.
-
-The main runtime endpoint remains:
+But it only executes an already selected request.
 
 ```text
-POST /loop/step
+POST /reslice/execute
+≠ Operator Response owner
 ```
 
 ---
 
-## Design Constraints
+## 15. Memory and Trajectory Preservation
+
+Re-Slice must preserve:
+
+```text
+prior SliceDone
+prior Boundary evidence
+prior Boundary State records
+prior Context evidence
+prior Void evidence
+prior StabilityResult
+Operator Response that selected RESLICE
+new SliceRequest
+new SliceDone
+```
+
+The relation may be expressed as:
+
+```text
+SliceDone_B.resliced_from = SliceDone_A
+```
+
+or with more specific lineage:
+
+```text
+refined_from
+reclassified_from
+conflicts_with
+coexists_with
+reopened_from
+```
+
+Later results must not silently overwrite earlier records.
+
+---
+
+## 16. Design Constraints
 
 The Re-Slice Engine MUST NOT:
 
 ```text
 redefine Structure → Slice → Stability
-replace Slice Engine entirely
+act as Loop Controller
+self-trigger from Context
+self-trigger from Boundary State
+self-trigger from Void
 self-trigger from Stability
-self-trigger from Context existence
-make Re-Slice the main loop controller
-treat Context as Representation
-treat Void as Context
-mix GyroAuth authentication logic into GyroOS
+convert missing source into an Operator Response
+silently overwrite prior SliceDone or evidence
+create GyroAuth application decisions
+run without bounded limits
 ```
 
 The Re-Slice Engine MUST:
 
 ```text
-run only when requested by Operator Response
-preserve parent linkage
+run only after RESLICE is selected
+execute another bounded Slice
+resolve a retained and traceable source
+preserve parent and response lineage
 produce a new SliceDone
-pass result to Stability Engine
-track reslice_depth
-prevent uncontrolled recursive Re-Slice
-preserve Δ and Context history
+pass the new result to Stability Engine
+return limit or resolution problems as evidence
+preserve Memory and Trajectory history
 ```
 
 ---
 
-## Key Insight
-
-Re-Slice is not a new core operation.
-
-It is Slice applied again to a runtime result.
-
-In short:
+## 17. Key Insight
 
 ```text
-Slice reads Structure.
-Re-Slice reads Context or prior Slice result.
+RESLICE requests another Slice.
+Re-Slice executes that request.
+The source changes; the Core does not.
 ```
+
+Re-Slice is therefore not a special escape from Gyro Logic.
+
+It is the Runtime repetition of Slice over a retained relation.
 
 ---
 
-## Summary
-
-The Re-Slice Engine enables GyroOS to process Context without changing the invariant core.
-
-It is selected by Operator Response, executed as a runtime mode, and produces a new SliceDone.
+## 18. Summary
 
 Correct flow:
 
 ```text
-Operator Response
-→ Re-Slice Engine
-→ slice-done
-→ Stability
+SliceDone_n
+↓
+StabilityResult_n
+↓
+Loop Controller selects RESLICE
+↓
+Re-Slice Engine executes Slice over retained source
+↓
+SliceDone_n+1
+↓
+StabilityResult_n+1
 ```
 
-not:
+Incorrect flow:
 
 ```text
-Stability
-→ Re-Slice
+Context / Void / Boundary State / Stability
+→ Re-Slice automatically
 ```
 
----
-
-## Next
+Next alignment target:
 
 ```text
 docs/17_context_loop_controller.md
