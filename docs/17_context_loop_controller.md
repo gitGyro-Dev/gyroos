@@ -2,405 +2,433 @@
 
 ---
 
-## Overview
+## 1. Overview
 
-This document defines how GyroOS controls **Context Loop** execution.
+This document defines how GyroOS handles a **Context-linked Loop** after the Gyro Logic v3.1 Core Definition refinement and the Priority B / Priority C Runtime alignment.
 
-Context Loop is a special case of Gyro Loop in which Context produced by a completed Slice becomes the target of a subsequent Re-Slice.
-
-GyroOS does not redefine Gyro Logic.
-
-The invariant theoretical core remains:
-
-```text
-Structure → Slice → Stability
-```
-
-Context Loop is an implementation-level runtime pattern.
-
----
-
-## Theoretical Definition
-
-In Gyro Logic v2.7:
-
-```text
-Context Loop = a Gyro Loop connected by treating Context as a Re-Slice target.
-```
-
-Core form:
-
-```text
-Process_n
-→ SliceDone_n
-→ Context_n
-→ OperatorResponse_n
-→ ReSlice(Context_n)
-→ Process_{n+1}
-```
-
----
-
-## Relation to Gyro Loop
-
-Base Gyro Loop:
-
-```text
-Gyro Processₙ
-→ Operator Responseₙ
-→ Gyro Processₙ₊₁
-```
-
-Context Loop is not a different core structure.
-
-It is a Gyro Loop where the next process source is Context.
-
-```text
-Gyro Processₙ
-→ Operator Responseₙ(RESLICE_CONTEXT)
-→ ReSlice(Contextₙ)
-→ Gyro Processₙ₊₁
-```
-
----
-
-## Runtime Position
+The invariant Core remains:
 
 ```text
 Structure
-→ Operator Orientation
-→ slice-ing
-→ SliceDone {
-     representation: X,
-     deviation: Δ,
-     context: C,
-     void: V
+↓
+Slice
+↓
+Stability
+```
+
+Context Loop is not a new Core form and does not introduce a second controller.
+
+It is a Runtime pattern in which retained Context evidence is selected as a source for a later Slice.
+
+---
+
+## 2. Core Definition
+
+```text
+Context-linked Loop
+= a Gyro Loop in which Operator Response selects RESLICE
+  and the next SliceRequest references retained Context evidence as its source
+```
+
+Short form:
+
+```text
+Gyro Processₙ
+→ Operator Responseₙ: RESLICE
+→ SliceRequest(source_type="context_evidence")
+→ Gyro Processₙ₊₁
+```
+
+Context does not repeat the Loop by itself.
+
+The Loop Controller selects the response.
+
+The Re-Slice Engine executes the selected request.
+
+---
+
+## 3. Responsibility Separation
+
+```text
+ContextEvidence
+= Slice-relative surrounding or retained relation evidence
+
+StabilityResult
+= whether the opened Path is readable as an establishment that can continue
+
+Loop Controller
+= selects OperatorResponse
+
+RESLICE
+= Operator Response requesting another Slice
+
+Re-Slice Engine
+= executes the selected SliceRequest
+```
+
+Therefore:
+
+```text
+ContextEvidence
+≠ Context Loop Controller
+≠ RESLICE
+≠ Re-Slice execution
+```
+
+No separate theoretical or control owner is introduced by Context-linked behavior.
+
+---
+
+## 4. Runtime Position
+
+```text
+Runtime Structure
+↓
+Slice {
+  Operator Orientation
+  Slice Policy
+  slice-ing
+  slice-done {
+    representation
+    Difference / Deviation
+    Boundary evidence
+    Boundary State records
+    Context evidence / references
+    Void evidence / references
   }
-→ Stability
-→ Loop Controller / Operator Response
-→ RESLICE_CONTEXT
-→ Re-Slice Engine
-→ Next Process
+}
+↓
+StabilityResult
+↓
+Loop Controller / Operator Response
+↓
+CONTINUE | ADJUST | RESLICE | JUMP | DEFER | STOP
 ```
 
-The Context Loop Controller is not a separate theoretical controller.
+When `RESLICE` is selected with Context source references:
 
-It is a Loop Controller responsibility specialized for Context.
+```text
+OperatorResponse: RESLICE
+↓
+SliceRequest(mode="reslice", source_type="context_evidence")
+↓
+Re-Slice Engine
+↓
+new Slice
+↓
+new SliceDone
+↓
+new StabilityResult
+```
 
 ---
 
-## Responsibilities
+## 5. Context Candidate Evaluation
 
-### 1. Detect Context Availability
+The Loop Controller may evaluate whether retained Context evidence is usable as a next Slice source.
 
-The controller checks whether `SliceDone.context` exists and whether it is inferable enough to become a Re-Slice candidate.
+Candidate evidence may include:
 
-Example:
-
-```python
-if slice_done.context and slice_done.context["confidence"] >= context_threshold:
-    candidate_available = True
+```text
+context_readability
+context_confidence
+inferability_score
+source_type
+relation_refs
+Boundary relevance
+Difference / Deviation relevance
+trajectory recurrence
+source availability
+resolution adequacy
+Re-Slice viability
+Runtime limits
 ```
 
-However, availability does not automatically trigger Re-Slice.
+Context availability does not select `RESLICE` automatically.
+
+Incorrect:
+
+```text
+Context exists → RESLICE
+high Context confidence → RESLICE
+```
+
+Correct:
+
+```text
+Context evidence
++ StabilityResult
++ Difference / Deviation
++ Boundary evidence
++ Boundary State records
++ Void evidence
++ Trajectory evidence
++ Runtime limits
+↓
+Loop Controller
+↓
+OperatorResponse
+```
 
 ---
 
-### 2. Select Operator Response
+## 6. Canonical Response Vocabulary
 
-The Loop Controller decides the next response.
-
-Possible responses include:
+The canonical Operator Response vocabulary is:
 
 ```text
 CONTINUE
-RESLICE_CONTEXT
-CHANGE_ORIENTATION
-DEFER_VOID
+ADJUST
+RESLICE
 JUMP
+DEFER
 STOP
 ```
 
-Context Loop begins only when Operator Response selects:
+Older names are compatibility aliases only:
 
 ```text
 RESLICE_CONTEXT
+→ RESLICE with Context source references
+
+CHANGE_ORIENTATION
+→ ADJUST
+
+DEFER_VOID
+→ DEFER with Void-related evidence
 ```
+
+`Context Loop Decision` is not a separate response type.
+
+It is an explanatory view of an ordinary `OperatorResponse` whose source references may include Context evidence.
 
 ---
 
-### 3. Create Re-Slice Request
+## 7. SliceRequest for Context-linked Re-Slice
 
-When `RESLICE_CONTEXT` is selected, the controller creates a Re-Slice request.
+A Context-linked Re-Slice request may be represented as:
 
 ```python
 class SliceRequest:
     request_id: str
-    source_type: str   # "context"
+    process_index: int
+
+    mode: str                    # "reslice"
+    source_type: str             # "context_evidence"
     source_ref: str
-    mode: str          # "reslice"
+
     orientation: OperatorOrientation
+    slice_policy_ref: str | None
+
     parent_process_id: str
     parent_slice_id: str
+    trajectory_ref: str | None
+
+    context_refs: list[str]
+    boundary_refs: list[str]
+    boundary_state_refs: list[str]
+    void_refs: list[str]
+
+    metadata: dict
 ```
+
+The request must preserve which evidence justified the source selection.
 
 ---
 
-### 4. Track Context Chain
+## 8. State and Traceability
 
-Context Loops may form chains.
-
-```text
-Context_1 → Context_2 → Context_3 → ...
-```
-
-The controller must track this chain.
-
-Recommended fields:
-
-```text
-context_chain
-source_context_id
-parent_process_id
-reslice_depth
-loop_depth
-```
-
----
-
-### 5. Prevent Uncontrolled Recursion
-
-Context Loop must not recurse without limit.
-
-The controller should enforce:
-
-```text
-max_reslice_depth
-max_context_chain_length
-cycle detection
-time budget
-cost budget
-```
-
-If recursion risk appears, the controller may select:
-
-```text
-STOP
-DEFER_VOID
-CHANGE_ORIENTATION
-JUMP
-```
-
----
-
-### 6. Handle Void and Defer
-
-Context Loop may encounter Void.
-
-Void is not an actor.
-
-The controller decides how to respond.
-
-Possible responses:
-
-```text
-DEFER_VOID
-JUMP
-CHANGE_ORIENTATION
-STOP
-```
-
----
-
-## Data Model
-
-### ContextLoopState
+A specialized implementation view may be retained for diagnostics, but it must not become a second controller.
 
 ```python
-class ContextLoopState:
+class ContextLoopTrace:
     loop_id: str
     process_index: int
 
-    active: bool
-    source_context_id: str | None
+    active_context_source_ref: str | None
     parent_process_id: str | None
     parent_slice_id: str | None
 
     context_chain: list[str]
+    source_chain: list[str]
     reslice_depth: int
     max_reslice_depth: int
 
     cycle_detected: bool
-    deferred_voids: list[str]
+    limit_evidence_refs: list[str]
     metadata: dict
 ```
 
----
+This object records execution lineage.
 
-### ContextLoopDecision
-
-```python
-class ContextLoopDecision:
-    process_index: int
-    decision: str  # CONTINUE | RESLICE_CONTEXT | DEFER_VOID | JUMP | STOP
-    reason: str
-    next_request: SliceRequest | None
-    updated_context_loop_state: ContextLoopState
-```
+It does not select the next response.
 
 ---
 
-## Decision Inputs
+## 9. Loop Controller Inputs
 
-The controller may consider:
+The Loop Controller may consider:
 
 ```text
+SliceDone readability
 StabilityResult
-Deviation
-Context confidence
-Context inferability
-VoidState
-Re-Slice depth
-Context chain length
-History
-Cost
-Purpose
+Difference / Deviation
+Context evidence and references
+context_readability
+context_confidence
+inferability_score
+Boundary evidence
+Boundary State records
+Void evidence
+Trajectory history
+source recoverability
+Re-Slice viability
+reslice_depth
+source_chain length
+cycle evidence
+memory pressure
+time / cost / policy limits
+current control scope
 ```
 
-Example input structure:
+No one field controls the result.
 
-```python
-class ContextResponseInput:
-    stability: StabilityResult
-    deviation: dict
-    context: ContextState | None
-    void: VoidState | None
-    reslice_depth: int
-    context_chain: list[str]
-    history: dict
-    cost_budget: float | None
-    purpose: str | None
-```
-
----
-
-## Decision Rules
-
-### Continue
-
-Use when current process is stable and Context does not need further exploration.
+In particular:
 
 ```text
-high Stability
-low Δ
-Context not required
+high Context confidence ≠ automatic RESLICE
+low Context confidence ≠ automatic DEFER
+cycle detected ≠ automatic STOP
+Void evidence ≠ automatic JUMP
 ```
+
+These conditions orient the response space and remain inputs to the Loop Controller.
 
 ---
 
-### RESLICE_CONTEXT
+## 10. Response Semantics in Context-linked Cases
 
-Use when Context is sufficiently inferable and may explain unresolved deviation or improve stability.
+### CONTINUE
 
-```text
-Context confidence is high
-Δ remains meaningful
-Void is not dominant
-reslice_depth < max_reslice_depth
-```
+Preserve direct connection through the current established Path without opening another Slice over Context evidence.
 
----
+### ADJUST
 
-### DEFER_VOID
+Preserve continuity through bounded modification of Orientation or Slice Policy.
 
-Use when Void exists but is not currently inferable.
+Context evidence may be retained for a later Slice.
 
-```text
-Void detected
-low inferability
-Re-Slice not useful yet
-```
+### RESLICE
 
----
-
-### CHANGE_ORIENTATION
-
-Use when the current orientation is not adequate.
-
-```text
-Context exists but current orientation cannot read it well
-```
-
----
+Request another Slice using Context evidence or another retained relation as source.
 
 ### JUMP
 
-Use when continuous Re-Slice or orientation change cannot restore stable trajectory.
+Request non-continuous reconnection when bounded continuation or Re-Slice is not the selected connection form.
 
-```text
-cycle detected
-repeated low stability
-context chain collapse
-void expansion
-```
+### DEFER
 
----
+Keep the Context-related source relation pending while preserving future connectability.
 
 ### STOP
 
-Use when external or runtime constraints require stopping.
+End the execution connection in the current control scope while preserving evidence and lineage.
 
-```text
-cost limit reached
-max depth reached
-explicit stop requested
-```
+STOP is not pending preservation.
 
 ---
 
-## Runtime Flow
+## 11. Recursion and Runtime Limits
+
+Context-linked Re-Slice must remain bounded.
+
+Candidate limits include:
 
 ```text
-Process_n
-   ↓
-SliceDone_n {
-  representation: X,
-  deviation: Δ,
-  context: C,
-  void: V
-}
-   ↓
-StabilityResult_n
-   ↓
+max_reslice_depth
+max_context_chain_length
+max_source_chain_length
+cycle detection
+time budget
+cost budget
+memory pressure
+trajectory branch limit
+```
+
+Limit detection produces evidence.
+
+It does not directly select a response.
+
+Correct:
+
+```text
+limit evidence
+↓
 Loop Controller
-   ↓
-Context Loop Decision
-   ├─ CONTINUE
-   ├─ RESLICE_CONTEXT
-   ├─ DEFER_VOID
-   ├─ CHANGE_ORIENTATION
-   ├─ JUMP
-   └─ STOP
-   ↓
-Next Process
+↓
+ADJUST | RESLICE | JUMP | DEFER | STOP
 ```
 
-If `RESLICE_CONTEXT`:
+Incorrect:
 
 ```text
-Context_n
-→ SliceRequest(mode="reslice", source_type="context")
-→ Re-Slice Engine
-→ SliceDone_{n+1}
+max depth reached → automatic STOP
+cycle detected → automatic JUMP
 ```
 
 ---
 
-## API Implications
+## 12. Boundary-aware Context Loop
 
-`POST /loop/step` remains the main runtime endpoint.
+Context evidence may alter which Boundary becomes readable in a later Slice.
 
-It may return a context loop state.
+```text
+ContextEvidence_A
+↓ RESLICE selected
+Slice_B
+↓
+Boundary_B becomes readable
+```
+
+However:
+
+```text
+Context ≠ Boundary
+Context confidence ≠ Boundary readability
+Boundary State ≠ Operator Response
+```
+
+A later Slice may reclassify a prior Boundary State.
+
+The earlier record must remain traceable.
+
+---
+
+## 13. Void Relation
+
+Context-linked execution may encounter Void-related evidence.
+
+GyroOS must distinguish:
+
+```text
+Void as Boundary State
+VoidEvidence
+Void reference
+DEFER response
+RESLICE response
+JUMP response
+STOP response
+```
+
+Context absence or low Context confidence does not automatically create `VOID`.
+
+A `VOID` Boundary State requires that the relevant Boundary is identifiable while the target relation remains insufficiently readable or connectable relative to it.
+
+---
+
+## 14. API Mapping
+
+`POST /loop/step` remains the primary Runtime endpoint.
 
 Example:
 
@@ -409,132 +437,157 @@ Example:
   "loop_id": "gyro_loop_001",
   "process_index": 9,
   "operator_response": {
-    "response_type": "RESLICE_CONTEXT",
-    "reason": "context may explain unresolved deviation"
+    "response_type": "RESLICE",
+    "reason": "retained context evidence may open a more readable path",
+    "decisive_evidence_refs": ["context_009", "deviation_009"],
+    "next_request": {
+      "mode": "reslice",
+      "source_type": "context_evidence",
+      "source_ref": "context_009",
+      "parent_process_id": "process_009",
+      "parent_slice_id": "slice_009"
+    }
   },
-  "context_loop": {
-    "active": true,
-    "source_context_id": "ctx_009",
+  "context_loop_trace": {
+    "active_context_source_ref": "context_009",
     "reslice_depth": 1,
-    "context_chain": ["ctx_007", "ctx_009"],
+    "context_chain": ["context_007", "context_009"],
     "cycle_detected": false
-  },
-  "next_request": {
-    "mode": "reslice",
-    "source_type": "context",
-    "source_ref": "ctx_009"
   }
 }
 ```
 
+The trace object is diagnostic.
+
+The `operator_response` remains the decision owner.
+
 ---
 
-## Relation to Re-Slice Engine
+## 15. Relation to Re-Slice Engine
 
-Context Loop Controller decides.
-
-Re-Slice Engine executes.
-
-Correct relation:
+Correct:
 
 ```text
-Loop Controller / Operator Response
-→ RESLICE_CONTEXT
-→ Re-Slice Engine
-```
-
-Incorrect relation:
-
-```text
+Loop Controller
+↓ selects RESLICE
+SliceRequest with Context source refs
+↓
 Re-Slice Engine
-→ decides to continue Context Loop
+↓ executes Slice
+new SliceDone
 ```
+
+Incorrect:
+
+```text
+Re-Slice Engine decides to continue the Context Loop
+Context evidence starts Re-Slice directly
+```
+
+The Re-Slice Engine executes; it does not decide.
 
 ---
 
-## Relation to Stability
+## 16. Relation to Stability
 
-Stability is an input to Operator Response.
-
-Stability does not decide Context Loop.
-
-Correct relation:
+Stability is one input to Operator Response.
 
 ```text
 StabilityResult
-→ Loop Controller
-→ Context Loop Decision
++ other Runtime evidence
+↓
+Loop Controller
+↓
+OperatorResponse
 ```
 
-Incorrect relation:
+Stability does not start or stop a Context-linked Loop directly.
+
+Also:
 
 ```text
-StabilityResult
-→ Context Loop automatically starts
+continuability
+≠ CONTINUE response
 ```
+
+A continuable establishment may still lead to `RESLICE`, `ADJUST`, `DEFER`, `JUMP`, or `STOP` under the current control conditions.
 
 ---
 
-## Design Constraints
+## 17. Design Constraints
 
-The Context Loop Controller MUST NOT:
+The Context-linked Loop design MUST NOT:
 
 ```text
 redefine Structure → Slice → Stability
-treat Context Loop as a new theory core
+create a second Loop Controller
+create Context as an independent Runtime Stage
 auto-trigger from Context existence
+auto-trigger from Context confidence
 auto-trigger from Stability alone
-allow unlimited Re-Slice recursion
+allow unbounded Re-Slice recursion
 treat Void as an actor
-mix GyroAuth authentication logic into GyroOS
+collapse Context, Boundary, Void, Stability, and Response
+mix GyroAuth application decisions into GyroOS
 ```
 
-The Context Loop Controller MUST:
+It MUST:
 
 ```text
-remain part of Loop Controller responsibility
-select RESLICE_CONTEXT only through Operator Response
-track context_chain
-track reslice_depth
-prevent cycles
-support DEFER_VOID
-support JUMP and STOP
-preserve parent process linkage
+remain an ordinary Gyro Loop pattern
+use the canonical Operator Response vocabulary
+preserve source and parent linkage
+retain Context evidence and lineage
+keep Re-Slice bounded
+preserve prior SliceDone and Boundary State records
+let Loop Controller select the response
+let Re-Slice Engine execute only a selected request
 ```
 
 ---
 
-## Key Insight
+## 18. Key Insight
 
-Context Loop is not a different loop.
-
-It is a Gyro Loop whose next Slice target is Context.
+```text
+Context Loop is not another loop.
+It is a Gyro Loop whose selected next Slice source is Context evidence.
+```
 
 In short:
 
 ```text
-Gyro Loop repeats Process.
-Context Loop repeats Process through Context.
+Context provides a possible source.
+Loop Controller selects the connection.
+Re-Slice Engine executes the next Slice.
+Trajectory preserves how the source changed.
 ```
 
 ---
 
-## Summary
+## 19. Summary
 
-The Context Loop Controller allows GyroOS to follow inferred Context across Processes without changing the invariant core.
-
-It is controlled by Operator Response, not Stability.
-
-It enables Context-aware runtime behavior while preserving:
+A Context-linked Loop is represented by:
 
 ```text
-Structure → Slice → Stability
+Gyro Processₙ
+→ OperatorResponseₙ: RESLICE
+→ SliceRequest(source=context_evidence)
+→ Re-Slice Engine
+→ Gyro Processₙ₊₁
 ```
 
----
-
-## Next
+It preserves the invariant Core:
 
 ```text
-docs/18_void_defer_jump.md
+Structure
+↓
+Slice
+↓
+Stability
+```
+
+The next Priority D target is:
+
+```text
+docs/21_memory_runtime.md
 ```
