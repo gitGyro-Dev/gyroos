@@ -2,293 +2,542 @@
 
 ---
 
-## Overview
+## 1. Overview
 
-This document defines **Local Inertia** in GyroOS.
+This document defines **Local Inertia** after the Priority A–D Runtime alignment.
 
-Local Inertia explains why some Trajectories, Contexts, and runtime references remain locally available instead of being aggressively compressed, archived, or externalized.
+Local Inertia explains why some Runtime records, trajectory segments, and evidence remain locally available instead of being aggressively compressed, archived, or externalized.
 
-It is not a replacement for Memory Runtime.
-
-It is not a cache implementation by itself.
-
-It is a runtime persistence principle used by Memory Runtime, Trajectory Cache, and Fluid API patterns.
-
-The invariant theoretical core remains:
+It is not:
 
 ```text
-Structure → Slice → Stability
+a new Gyro Logic element
+a cache implementation
+a Loop Controller
+a Stability measure
+an Operator Response
+a permanent pin
+```
+
+The invariant Core remains:
+
+```text
+Structure
+↓
+Slice
+↓
+Stability
 ```
 
 ---
 
-## Core Definition
+## 2. Canonical Definition
 
 ```text
-Local Inertia = tendency of runtime objects to remain locally available when they are repeatedly relevant to ongoing Gyro Processes.
+Local Inertia
+= a provisional Runtime retention-priority relation indicating
+  how strongly a record or evidence set should remain locally available
+  for current or likely near-term Runtime continuity.
 ```
 
-Local Inertia is created by repeated use, stability relevance, trajectory continuity, context relevance, and unresolved runtime dependency.
+Local Inertia is an implementation-level support value.
+
+It does not determine theoretical identity, Stability, or the next Operator Response.
 
 ---
 
-## What Local Inertia Is Not
-
-Local Inertia is not:
+## 3. Runtime Position
 
 ```text
-static cache pinning
-manual favorite marking
-permanent storage
-authentication decision
-Stability controller
+SliceDone / StabilityResult / OperatorResponse / Continuity records
+↓
+Memory Runtime and Trajectory Cache preserve evidence and lineage
+↓
+Local Inertia evaluator produces retention-priority evidence
+↓
+Memory tiering / retrieval / compression policy
+↓
+optional Gyro-OOM Damper operation
 ```
 
-It should be understood as runtime persistence pressure.
+Local Inertia may inform storage policy.
+
+It must not control:
+
+```text
+CONTINUE
+ADJUST
+RESLICE
+JUMP
+DEFER
+STOP
+```
 
 ---
 
-## Runtime Position
+## 4. Objects That May Carry Local Inertia
+
+Local Inertia may be evaluated for:
 
 ```text
-Gyro Process
-→ SliceDone
-→ Stability
-→ Operator Response
-→ Memory Runtime
-→ Trajectory Cache
-→ Local Inertia update
-```
-
-Local Inertia does not control the loop.
-
-It influences memory tiering, retrieval priority, compression resistance, and offline availability.
-
----
-
-## Objects Affected
-
-Local Inertia may apply to:
-
-```text
-TrajectoryRecord
-ContextRecord
+RuntimeStructureRecord
 SliceDoneRecord
-VoidRecord
-DynamicEquivalence evidence
-OperatorResponse history
-FluidSession state
+DeviationRecord
+BoundaryEvidence
+BoundaryStateRecord
+ContextEvidence
+VoidEvidence
+StabilityRecord
+OperatorResponseRecord
+ContinuityRecord
+DeferredRelationRecord
+TrajectoryRecord
+TrajectoryEdge
+Dynamic Equivalence evidence
+ExternalStorageReference
+```
+
+The use of `VoidRecord` and `ContextRecord` as generic collapsed objects is deprecated in this document.
+
+Preferred terms are:
+
+```text
+ContextEvidence
+VoidEvidence
+BoundaryStateRecord
+DeferredRelationRecord
 ```
 
 ---
 
-## Inertia Factors
+## 5. Local Inertia Is Evidence, Not Authority
 
-Recommended factors:
+A high Local Inertia value may indicate:
+
+```text
+keep locally available
+reduce compression priority
+increase retrieval priority
+preserve offline availability
+protect lineage-bearing records
+```
+
+It does not mean:
+
+```text
+record is Stable
+record is correct
+record is final
+record must be selected for RESLICE
+record must remain forever
+current trajectory must CONTINUE
+```
+
+A low Local Inertia value does not authorize deletion.
+
+---
+
+## 6. Candidate Factors
+
+Candidate factors include:
 
 ```text
 access_frequency
 recency
-stability_relevance
-trajectory_continuity
-context_relevance
-void_severity
-equivalence_importance
-application_demand
+active_scope_relevance
+trajectory_connectivity
+lineage_importance
+boundary_reclassification_relevance
+context_source_viability
+void_traceability_need
+deferred_relation_revisit_need
+dynamic_equivalence_relevance
+retrieval_cost
 offline_requirement
+application_demand
+storage_pressure
+reconstructability
+```
+
+These factors are implementation policy inputs.
+
+They are not Gyro Logic definitions.
+
+---
+
+## 7. Canonical Factor Separation
+
+The following values must remain distinct:
+
+```text
+local_inertia_score
+boundary_readability
+boundary_state_confidence
+context_confidence
+inferability_score
+stability
+response_confidence
+pressure_severity
+```
+
+Incorrect:
+
+```text
+high Stability = high Local Inertia
+high Boundary confidence = keep forever
+low Local Inertia = STOP
+```
+
+Correct:
+
+```text
+multiple retention factors
+↓
+Local Inertia evaluation
+↓
+storage-policy evidence
 ```
 
 ---
 
-## Local Inertia Score
-
-Example model:
+## 8. LocalInertiaEvidence Model
 
 ```python
-local_inertia_score = (
-    w_access * access_frequency
-    + w_recency * recency
-    + w_stability * stability_relevance
-    + w_trajectory * trajectory_continuity
-    + w_context * context_relevance
-    + w_void * void_severity
-    + w_equivalence * equivalence_importance
-    + w_application * application_demand
-)
+class LocalInertiaEvidence:
+    evidence_id: str
+    target_ref: str
+    target_type: str
+    score: float
+    factor_values: dict[str, float]
+    decisive_factor_refs: list[str]
+    active_scope_ref: str | None
+    policy_ref: str
+    calculated_at_process_ref: str
+    provisional: bool
+    metadata: dict
 ```
 
-This score is implementation-dependent.
+The evidence should preserve how the score was produced.
 
-It should not be treated as a Gyro Logic definition.
+A score without factor traceability should not be treated as authoritative.
 
 ---
 
-## Storage Tier Impact
+## 9. Current Scope and Historical Scope
 
-Local Inertia influences storage tier decisions.
-
-High inertia:
+Local Inertia is scope-relative.
 
 ```text
-hot or warm storage
-reduced compression
+high inertia in current scope
+≠ permanent global importance
+```
+
+Recommended distinction:
+
+```text
+current_scope_inertia
+historical_relevance
+retrieval_priority
+archive_resistance
+```
+
+A record may lose current-scope inertia while remaining historically important.
+
+Historical records and lineage must not be deleted merely because their current-scope score decays.
+
+---
+
+## 10. Storage Tier Impact
+
+Local Inertia may influence storage tier policy.
+
+Possible high-inertia effects:
+
+```text
+hot or warm placement
+reduced compression rate
+local materialization
 faster retrieval
-offline availability candidate
+preserved offline copy
 ```
 
-Low inertia:
+Possible low-inertia effects:
 
 ```text
-summary
-vector
-pointer
-cold archive
-external reference
+summary representation
+vector representation
+pointer-only local representation
+cold archive candidacy
+external materialization on demand
+```
+
+These are policy possibilities, not direct universal mappings.
+
+Incorrect:
+
+```text
+score < threshold → archive automatically
+```
+
+Safer:
+
+```text
+Local Inertia evidence
++
+active-scope requirements
++
+lineage requirements
++
+reconstructability
++
+Gyro-OOM pressure
++
+storage policy
+↓
+selected storage operation
 ```
 
 ---
 
-## Relation to Resolution Decay
+## 11. Relation to Boundary Evidence
 
-Local Inertia resists resolution decay.
+Boundary evidence may gain Local Inertia when it is important for:
 
 ```text
-high local inertia → slower decay
-low local inertia → faster decay
+current Slice interpretation
+Boundary State reclassification lineage
+conflicting Boundary comparison
+current-scope selection
+future Re-Slice source reconstruction
+Dynamic Equivalence evaluation
 ```
 
-However, it must not prevent all compression.
+A prior Boundary State record may retain high historical relevance even after another record:
 
-Gyro-OOM Damper may still request compression under pressure.
+```text
+supersedes_for_current_scope
+```
+
+This relation does not erase the earlier record.
 
 ---
 
-## Relation to Trajectory Cache
+## 12. Relation to ContextEvidence
 
-Trajectory Cache may compute and store Local Inertia.
+`ContextEvidence` may gain Local Inertia when it is:
 
 ```text
-TrajectoryCacheEntry.local_inertia_score
+repeatedly referenced
+selected as a RESLICE source
+important to Boundary readability
+needed to reconstruct a prior Slice
+part of an active context-linked lineage
+required for offline continuity
 ```
 
-High local inertia indicates that a trajectory remains important for runtime continuity.
-
-This may be because it is:
+However:
 
 ```text
-frequently accessed
-stability-relevant
-needed for Dynamic Equivalence
-connected to unresolved Void
-part of active Context Loop
+high Context inertia
+≠ automatic RESLICE
+```
+
+The Loop Controller still owns Operator Response selection.
+
+---
+
+## 13. Relation to VoidEvidence and Deferred Relations
+
+The following must remain separate:
+
+```text
+Void as Boundary State
+VoidEvidence
+Void reference
+DeferredRelationRecord
+DEFER response
+```
+
+`VoidEvidence` may gain Local Inertia when its traceability is needed for:
+
+```text
+future classification
+Boundary-relative reconstruction
+pending relation revisit
+trajectory explanation
+safety or audit requirements
+```
+
+A `DeferredRelationRecord` may independently gain Local Inertia when its revisit condition is near or its source evidence remains active.
+
+`VoidEvidence` must not contain:
+
+```python
+deferred: bool
+resolved: bool
 ```
 
 ---
 
-## Relation to Context
+## 14. Relation to Trajectory Cache
 
-Context may gain Local Inertia when it is repeatedly selected or referenced.
+Trajectory Cache may store Local Inertia evidence and indexes.
 
-Examples:
+Recommended relation:
 
 ```text
-Context repeatedly selected for Re-Slice
-Context explains persistent deviation
-Context stabilizes future trajectory
-Context is used by Fluid API session
+TrajectoryRecord / TrajectoryEdge
+↓
+LocalInertiaEvidence
+↓
+current-scope cache and retrieval policy
 ```
 
-Context with high Local Inertia should remain retrievable.
+High trajectory inertia may arise from:
+
+```text
+active continuity
+important branch point
+RESLICE lineage
+JUMP reconnection
+DEFER pending relation
+STOP boundary auditability
+Boundary State transition history
+```
+
+Trajectory similarity alone must not determine inertia or Dynamic Equivalence.
 
 ---
 
-## Relation to Void
+## 15. Relation to Runtime Continuity
 
-Void may also create Local Inertia.
-
-An unresolved Void with high severity should not disappear simply because it is unresolved.
+Local Inertia may preserve records needed to explain the continuity effect of:
 
 ```text
-high-severity Void → local persistence pressure
+CONTINUE = direct connection
+ADJUST   = bounded continuous modification
+RESLICE  = new Slice from retained source
+JUMP     = non-continuous reconnection
+DEFER    = pending relation
+STOP     = current-scope execution boundary
 ```
 
-However, unresolved Void may be compressed or deferred.
-
-It must remain traceable.
+It does not select any of these responses.
 
 ---
 
-## Relation to Fluid API
+## 16. Relation to Gyro-OOM Damper
 
-Fluid API sessions may increase Local Inertia for objects used in active application continuity.
-
-Example:
+Gyro-OOM pressure may reduce the practical effect of Local Inertia.
 
 ```text
-active FluidSession
-→ trajectory subscription
-→ increased local inertia
+Local Inertia evidence
++
+DamperPressureEvidence
++
+lineage and reconstructability requirements
+↓
+storage-operation policy
 ```
 
-This supports continuous interaction without requiring constant full retrieval from external storage.
+The Gyro-OOM Damper may apply:
+
+```text
+REDUCE_RESOLUTION
+COMPRESS_CONTEXT_EVIDENCE
+COMPRESS_TRAJECTORY
+ARCHIVE_COLD
+FREEZE_BRANCH_FOR_CURRENT_SCOPE
+```
+
+High Local Inertia resists aggressive reduction but does not absolutely prevent it.
+
+The Damper and Local Inertia evaluator do not choose Operator Responses.
 
 ---
 
-## Offline Continuity
+## 17. Offline and Degraded-network Continuity
 
-Local Inertia can support offline or degraded-network continuity.
-
-When network access is unavailable, high-inertia objects may remain locally available.
-
-Candidates:
+Local Inertia may support bounded offline continuity by prioritizing local availability of:
 
 ```text
-active trajectories
-recent contexts
-high-confidence SliceDone summaries
-required Dynamic Equivalence evidence
-unresolved high-severity Void references
+active Runtime Structure records
+current Slice lineage
+active Boundary and Boundary State records
+recent ContextEvidence
+required VoidEvidence and DeferredRelation records
+active trajectory segments
+retrieval indexes
 ```
 
-Offline continuity does not mean full system replication.
+Offline continuity does not mean complete replication.
 
-It means preserving enough trajectory substrate to continue limited runtime operation.
+It means preserving a bounded set of records sufficient for limited Runtime continuity or safe deferral.
 
 ---
 
-## Inertia Decay
+## 18. Inertia Decay
 
-Local Inertia should decay over time.
+Local Inertia is provisional and should be recalculated.
 
 Possible decay factors:
 
 ```text
 time since last access
-reduced relevance
-resolved Void
-trajectory branch freeze
-application session closed
-external archive confirmed
+current-scope transition
+reduced source viability
+completed retrieval or reconstruction
+archived but reconstructable copy
+closed application session
+resolved pending relation
+reduced Dynamic Equivalence relevance
 ```
 
-Decay should be gradual unless Gyro-OOM pressure is severe.
+A Boundary State reclassification or pending-relation resolution does not justify deleting prior evidence.
+
+Decay changes retention priority, not historical truth.
 
 ---
 
-## API Implications
+## 19. Local Inertia Policy
 
-Possible future endpoints:
+```python
+class LocalInertiaPolicy:
+    factor_weights: dict[str, float]
+    hot_threshold: float
+    warm_threshold: float
+    pointer_threshold: float
+    offline_threshold: float
+    lineage_floor: float
+    unresolved_relation_floor: float
+    active_scope_floor: float
+    decay_rate: float
+    metadata: dict
+```
+
+Thresholds guide storage policy.
+
+They do not directly execute archive, compression, RESLICE, DEFER, JUMP, or STOP.
+
+---
+
+## 20. API Implications
+
+Possible support endpoints:
 
 ```text
 GET  /inertia/state
+GET  /inertia/evidence/{evidence_id}
 GET  /inertia/object/{object_id}
-POST /inertia/update
+POST /inertia/evaluate
 POST /inertia/policy
 ```
 
-These are support endpoints.
+`POST /inertia/evaluate` returns retention-priority evidence.
 
-The main runtime endpoint remains:
+It must not mutate Runtime Continuity or choose Operator Response.
+
+The main Runtime endpoint remains:
 
 ```text
 POST /loop/step
@@ -296,64 +545,75 @@ POST /loop/step
 
 ---
 
-## Design Constraints
+## 21. Design Constraints
 
 Local Inertia MUST NOT:
 
 ```text
 redefine Structure → Slice → Stability
-control the Loop directly
-prevent Gyro-OOM damping absolutely
+control the Loop
+select OperatorResponse
+substitute for Stability
+substitute for Boundary readability or confidence
 be treated as permanent memory
-make authentication decisions
-expose raw memory to applications by default
+encode DEFER state inside VoidEvidence
+automatically trigger RESLICE
+silently authorize deletion
+make application or authentication decisions
 ```
 
 Local Inertia MUST:
 
 ```text
-support runtime continuity
-influence memory tiering
-resist inappropriate resolution decay
-preserve traceability of relevant Void and Context
-support offline continuity when possible
-remain subordinate to Memory Runtime and Operator Response
+produce traceable retention-priority evidence
+remain scope-relative and provisional
+preserve historical and current-scope views separately
+support Memory Runtime and Trajectory Cache
+protect identity and lineage-bearing records
+cooperate with Gyro-OOM pressure policy
+support bounded offline continuity when applicable
 ```
 
 ---
 
-## Key Insight
-
-Local Inertia is not memory hoarding.
-
-It is runtime relevance becoming local persistence.
-
-In short:
+## 22. Key Insight
 
 ```text
-Repeated relevance creates local persistence.
+Local Inertia is not persistence authority.
+It is evidence for bounded local retention.
 ```
+
+Repeated or current relevance may create local persistence pressure, but Runtime responsibility boundaries remain unchanged.
 
 ---
 
-## Summary
+## 23. Summary
 
-Local Inertia gives GyroOS a principled way to decide what remains locally available.
+Local Inertia provides a traceable, provisional indication of which Runtime records should remain locally available.
 
-It supports Memory Runtime, Trajectory Cache, Fluid API, Dynamic Equivalence, and offline continuity.
-
-It preserves the invariant core:
+It supports:
 
 ```text
-Structure → Slice → Stability
+Memory Runtime
+Trajectory Cache
+Boundary and Context lineage
+Void and deferred-relation traceability
+Gyro-OOM damping
+bounded offline continuity
 ```
 
-and remains a runtime support mechanism.
-
----
-
-## Next
+It does not choose:
 
 ```text
-PoC runtime implementation planning
+CONTINUE | ADJUST | RESLICE | JUMP | DEFER | STOP
+```
+
+The invariant Core remains:
+
+```text
+Structure
+↓
+Slice
+↓
+Stability
 ```
