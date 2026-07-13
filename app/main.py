@@ -3,8 +3,8 @@ from __future__ import annotations
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
 
 from .models import ApiError, LoopStepRequest, LoopStepResult
 from .repositories import store
@@ -42,8 +42,8 @@ def api_error(
     return JSONResponse(status_code=status_code, content=payload.model_dump(mode="json"))
 
 
-@app.exception_handler(ValidationError)
-def validation_error_handler(_, exc: ValidationError) -> JSONResponse:
+@app.exception_handler(RequestValidationError)
+def request_validation_error_handler(_, exc: RequestValidationError) -> JSONResponse:
     return api_error(
         422,
         code="GYRO_API_VALIDATION_SCHEMA",
@@ -103,7 +103,7 @@ def loop_step(request: LoopStepRequest):
             request_id=request.request_id,
             loop_id=request.loop_id,
         )
-    except Exception as exc:  # pragma: no cover - defensive boundary
+    except Exception:  # pragma: no cover - defensive boundary
         return api_error(
             500,
             code="GYRO_API_INTERNAL_UNEXPECTED",
