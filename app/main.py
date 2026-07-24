@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from fastapi import FastAPI, Query
+from fastapi import APIRouter, Depends, FastAPI, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -22,6 +22,7 @@ from .repository_errors import (
     RepositorySerializationError,
 )
 from .runtime import ProcessExecutor, ReferenceError
+from .security import require_runtime_bearer
 from .settings import settings
 
 app = FastAPI(
@@ -30,6 +31,7 @@ app = FastAPI(
     description="One HTTP request executes one bounded Gyro Process.",
     debug=settings.debug,
 )
+protected = APIRouter(dependencies=[Depends(require_runtime_bearer)])
 executor = ProcessExecutor(store)
 
 
@@ -78,7 +80,7 @@ def health() -> dict[str, str]:
     }
 
 
-@app.post("/loop/step", response_model=LoopStepResult)
+@protected.post("/loop/step", response_model=LoopStepResult)
 def loop_step(request: LoopStepRequest):
     try:
         return executor.execute(request)
@@ -136,7 +138,7 @@ def loop_step(request: LoopStepRequest):
         )
 
 
-@app.get("/loop/state/{loop_id}", response_model=CurrentScopeState)
+@protected.get("/loop/state/{loop_id}", response_model=CurrentScopeState)
 def get_loop_state(loop_id: str):
     process_id = store.get_current_scope(loop_id)
     if process_id is None:
@@ -170,7 +172,7 @@ def get_loop_state(loop_id: str):
     )
 
 
-@app.get("/loop/history/{loop_id}", response_model=ProcessHistoryPage)
+@protected.get("/loop/history/{loop_id}", response_model=ProcessHistoryPage)
 def get_loop_history(
     loop_id: str,
     limit: int = Query(default=20, ge=1, le=100),
@@ -198,7 +200,7 @@ def get_loop_history(
         )
 
 
-@app.get("/trajectory/{trajectory_ref}", response_model=TrajectoryEdgePage)
+@protected.get("/trajectory/{trajectory_ref}", response_model=TrajectoryEdgePage)
 def get_trajectory(
     trajectory_ref: str,
     limit: int = Query(default=20, ge=1, le=100),
@@ -228,7 +230,7 @@ def get_trajectory(
         )
 
 
-@app.get("/process/{process_id}", response_model=LoopStepResult)
+@protected.get("/process/{process_id}", response_model=LoopStepResult)
 def get_process(process_id: str):
     try:
         result = store.get_process(process_id)
@@ -251,7 +253,7 @@ def get_process(process_id: str):
     return result
 
 
-@app.get("/memory/record/{record_id}", response_model=MemoryRecordEnvelope)
+@protected.get("/memory/record/{record_id}", response_model=MemoryRecordEnvelope)
 def get_memory_record(record_id: str):
     try:
         record = store.get_record(record_id)
@@ -294,3 +296,6 @@ def get_memory_record(record_id: str):
         record_type=type(record).__name__,
         record=record,
     )
+
+
+app.include_router(protected)
