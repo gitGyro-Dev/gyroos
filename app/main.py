@@ -22,11 +22,13 @@ from .repository_errors import (
     RepositorySerializationError,
 )
 from .runtime import ProcessExecutor, ReferenceError
+from .settings import settings
 
 app = FastAPI(
     title="GyroOS Bounded Runtime API",
     version="0.1.0",
     description="One HTTP request executes one bounded Gyro Process.",
+    debug=settings.debug,
 )
 executor = ProcessExecutor(store)
 
@@ -68,7 +70,12 @@ def request_validation_error_handler(_, exc: RequestValidationError) -> JSONResp
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "runtime": "bounded", "version": app.version}
+    return {
+        "status": "ok",
+        "runtime": "bounded",
+        "version": app.version,
+        "environment": settings.environment.value,
+    }
 
 
 @app.post("/loop/step", response_model=LoopStepResult)
@@ -223,7 +230,16 @@ def get_trajectory(
 
 @app.get("/process/{process_id}", response_model=LoopStepResult)
 def get_process(process_id: str):
-    result = store.get_process(process_id)
+    try:
+        result = store.get_process(process_id)
+    except RepositoryIntegrityError as exc:
+        return api_error(
+            500,
+            code="GYRO_API_REPOSITORY_INTEGRITY",
+            message=str(exc),
+            category="REPOSITORY",
+            phase="PROCESS_RETRIEVAL",
+        )
     if result is None:
         return api_error(
             404,
