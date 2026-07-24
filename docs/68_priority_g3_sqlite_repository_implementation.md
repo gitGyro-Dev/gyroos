@@ -203,7 +203,6 @@ one write fails
 ```
 
 SQLite primary-key and transaction constraints provide the initial identity-collision boundary.
-
 Detailed rollback fault-injection tests remain part of G-4.
 
 ---
@@ -252,7 +251,7 @@ current-scope pointer
 idempotency entry
 ```
 
-The first restart tests demonstrate:
+The restart tests demonstrate:
 
 ```text
 execute and publish Process
@@ -269,9 +268,9 @@ Expanded recovery cases remain part of G-9.
 
 ---
 
-## 9. Tests
+## 9. Tests and Execution Evidence
 
-The following file was added:
+The following test file was added:
 
 ```text
 tests/test_sqlite_repository.py
@@ -288,7 +287,7 @@ idempotent replay after restart
 missing record returns None
 ```
 
-The existing GitHub Actions workflow was updated to run:
+The GitHub Actions workflow executes:
 
 ```text
 tests/test_bounded_api.py
@@ -296,7 +295,23 @@ tests/test_priority_f_poc.py
 tests/test_sqlite_repository.py
 ```
 
-The CI execution result must still be confirmed from the corresponding workflow run.
+Execution evidence:
+
+```text
+Workflow run ID
+= 30071178485
+
+Job ID
+= 89412200920
+
+Job conclusion
+= success
+
+SQLite repository test step
+= completed / success
+```
+
+The run verifies that the bounded API, PoC, and SQLite repository tests pass together.
 
 ---
 
@@ -360,26 +375,19 @@ No persistence component selects or changes Runtime meaning.
 
 ```text
 G-3 SQLite Repository Implementation
-= IMPLEMENTED
+= COMPLETE
 
 Repository contract compatibility
 = ACCEPTED
 
 Canonical typed reconstruction
-= IMPLEMENTED
+= VERIFIED
 
 Restart-safe base retrieval
-= IMPLEMENTED
+= VERIFIED
 
 GitHub Actions execution verification
-= PENDING RUN CONFIRMATION
-```
-
-After the updated workflow passes, G-3 may be marked:
-
-```text
-G-3
-= COMPLETE
+= PASS
 ```
 
 The next design and implementation step is:
