@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -92,18 +91,20 @@ def test_health_is_excluded_from_resource_limits() -> None:
     assert second.status_code == 200
 
 
-@pytest.mark.asyncio
-async def test_fixed_window_limiter_expires_old_entries() -> None:
-    limiter = FixedWindowRateLimiter(max_requests=1, window_seconds=10)
+def test_fixed_window_limiter_expires_old_entries() -> None:
+    async def scenario() -> None:
+        limiter = FixedWindowRateLimiter(max_requests=1, window_seconds=10)
 
-    allowed, retry_after = await limiter.allow("client", now=100.0)
-    assert allowed is True
-    assert retry_after == 0
+        allowed, retry_after = await limiter.allow("client", now=100.0)
+        assert allowed is True
+        assert retry_after == 0
 
-    allowed, retry_after = await limiter.allow("client", now=101.0)
-    assert allowed is False
-    assert retry_after >= 1
+        allowed, retry_after = await limiter.allow("client", now=101.0)
+        assert allowed is False
+        assert retry_after >= 1
 
-    allowed, retry_after = await limiter.allow("client", now=111.0)
-    assert allowed is True
-    assert retry_after == 0
+        allowed, retry_after = await limiter.allow("client", now=111.0)
+        assert allowed is True
+        assert retry_after == 0
+
+    asyncio.run(scenario())
