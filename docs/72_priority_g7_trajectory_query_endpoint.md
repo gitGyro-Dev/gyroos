@@ -42,9 +42,9 @@ It does not infer a global trajectory or select a latest relation.
 
 ---
 
-## 3. Initial Query Identity
+## 3. Query Identity
 
-The current canonical `TrajectoryEdge` model contains:
+The canonical `TrajectoryEdge` model contains:
 
 ```text
 trajectory_edge_id
@@ -52,6 +52,7 @@ process_id
 operator_response_ref
 continuity_result_ref
 edge_type
+relation_ref
 source_ref
 target_ref
 parent_process_ref
@@ -59,10 +60,10 @@ created_at
 metadata
 ```
 
-Priority G-7 does not add a new synthetic trajectory identifier.
-The initial query key is an explicit relation reference matching one of:
+The query key matches one explicit edge relation field:
 
 ```text
+relation_ref
 source_ref
 target_ref
 parent_process_ref
@@ -75,13 +76,14 @@ trajectory_ref equals one explicit edge relation field
 → edge belongs to the bounded query result
 ```
 
+`relation_ref` preserves the observed Runtime relation from `Structure.current_mode.relation_ref`.
+`source_ref` remains the Slice input source and is not overwritten by the relation query key.
+
 The repository does not derive semantic similarity, infer hidden branches, or merge unrelated references.
 
 ---
 
 ## 4. Response Model
-
-Added:
 
 ```text
 TrajectoryEdgePage
@@ -97,49 +99,14 @@ next_cursor
 ```
 
 `items` contains complete typed `TrajectoryEdge` records.
-
-The endpoint preserves the canonical edge payload including:
-
-```text
-RESLICE_CONNECTION
-JUMP_RECONNECTION
-DEFERRED_PENDING_RELATION
-STOPPED_FOR_CURRENT_SCOPE
-DIRECT_CONNECTION
-ADJUSTED_CONNECTION
-```
-
-It does not convert these edge types into new Runtime outcomes.
+The endpoint preserves canonical edge payload and does not convert continuity types into new Runtime outcomes.
 
 ---
 
-## 5. Ordering Contract
+## 5. Ordering and Pagination
 
-Canonical initial ordering is:
-
-```text
-publication order ascending
-```
-
-For `InMemoryStore`, successful publication appends each `trajectory_edge_id` to an immutable in-memory order list.
-
-For `SQLiteStore`, committed `TrajectoryEdge` rows are reconstructed in insertion order.
-
-Ordering is not based on:
-
-```text
-edge type
-Stability value
-current-scope pointer
-lexical record identity
-query relation field priority
-```
-
----
-
-## 6. Pagination Contract
-
-G-7 uses the same bounded cursor form as G-6:
+Canonical ordering is successful publication order ascending.
+The bounded cursor contract is:
 
 ```text
 cursor absent
@@ -158,44 +125,17 @@ The query is bounded by:
 1 <= limit <= 100
 ```
 
-Example:
-
-```text
-GET /trajectory/relation_001?limit=2
-→ next_cursor="2"
-
-GET /trajectory/relation_001?limit=2&cursor=2
-→ next matching page
-```
-
 ---
 
-## 7. Empty Result Behavior
+## 6. Empty and Error Behavior
 
-When no `TrajectoryEdge` matches the explicit reference:
+No matching edge:
 
 ```text
 HTTP 200
 items = []
 next_cursor = null
 ```
-
-An empty trajectory query is not:
-
-```text
-BoundaryState.VOID
-VoidEvidence
-OperatorResponse.DEFER
-OperatorResponse.STOP
-StabilityStatus.NOT_EVALUABLE
-API not-found error
-```
-
-It is a valid query with an empty bounded result set.
-
----
-
-## 8. Invalid Query and Integrity Behavior
 
 Invalid cursor:
 
@@ -206,7 +146,7 @@ category = VALIDATION
 phase = TRAJECTORY_QUERY
 ```
 
-Repository reconstruction or digest integrity failure:
+Repository reconstruction or digest failure:
 
 ```text
 HTTP 500
@@ -215,15 +155,13 @@ category = REPOSITORY
 phase = TRAJECTORY_QUERY
 ```
 
-Repository failure remains separate from Runtime continuity meaning.
+These conditions are not Runtime responses such as VOID, DEFER, or STOP.
 
 ---
 
-## 9. Repository Implementations
+## 7. Repository Implementations
 
-### 9.1 InMemoryStore
-
-Added:
+### 7.1 InMemoryStore
 
 ```text
 trajectory_history: list[trajectory_edge_id]
@@ -231,11 +169,9 @@ list_trajectory_edges(...)
 ```
 
 Successful publication appends generated trajectory edges once.
-Idempotent replay does not append duplicate edges because no new publication occurs.
+Idempotent replay does not append duplicate edges.
 
-### 9.2 SQLiteStore
-
-Added:
+### 7.2 SQLiteStore
 
 ```text
 list_trajectory_edges(...)
@@ -251,17 +187,13 @@ selects committed TrajectoryEdge rows
 → returns bounded publication-order page
 ```
 
-The first SQLite implementation reconstructs the bounded edge set before matching.
-Later optimization may add indexed relation columns without changing canonical payload authority.
-
 ---
 
-## 10. Implemented Files
-
-Updated:
+## 8. Implemented Files
 
 ```text
 app/models.py
+app/runtime.py
 app/repositories.py
 app/sqlite_repository.py
 app/main.py
@@ -269,7 +201,7 @@ tests/test_bounded_api.py
 tests/test_sqlite_repository.py
 ```
 
-Added endpoint:
+Endpoint:
 
 ```text
 GET /trajectory/{trajectory_ref}
@@ -277,47 +209,37 @@ GET /trajectory/{trajectory_ref}
 
 ---
 
-## 11. Tests
+## 9. Verification
 
-API tests verify:
-
-```text
-matching source_ref edges are returned
-publication order is preserved
-complete TrajectoryEdge payload is returned
-bounded pagination and next_cursor
-empty query returns HTTP 200 with empty items
-invalid cursor returns structured HTTP 422
-idempotent replay does not duplicate trajectory history
-```
-
-SQLite tests verify:
+GitHub Actions run:
 
 ```text
-trajectory edges survive repository restart
-publication order survives restart
-pagination survives restart
-unknown relation returns empty page
-invalid cursor is rejected
+run_id = 30075166381
+job_id = 89424208222
+conclusion = success
 ```
 
-The existing GitHub Actions workflow runs both affected test files.
+Verified:
+
+```text
+explicit relation_ref matching
+source_ref semantic preservation
+publication ordering
+bounded pagination
+empty result behavior
+invalid cursor behavior
+idempotent replay non-duplication
+SQLite restart-safe retrieval
+all bounded API, PoC, and SQLite tests pass
+```
 
 ---
 
-## 12. Responsibility Review
-
-Accepted chain:
+## 10. Responsibility Review
 
 ```text
 ProcessExecutor
-→ creates one complete bounded result group
-
-ContinuityBuilder
-→ creates RuntimeContinuityResult
-
-ProcessExecutor publication assembly
-→ creates canonical TrajectoryEdge
+→ creates one complete bounded result group and canonical TrajectoryEdge
 
 RuntimeRepository
 → preserves and returns committed typed edges
@@ -326,48 +248,30 @@ GET /trajectory/{trajectory_ref}
 → returns a bounded explicit-reference edge page
 ```
 
-The endpoint must not:
-
-```text
-select OperatorResponse
-change edge_type
-create inferred edges
-resolve pending DeferredRelationRecord
-execute RESLICE
-perform JUMP
-terminate current scope
-collapse trajectory into current state
-```
+The endpoint does not select OperatorResponse, change edge type, create inferred edges, resolve pending relations, execute RESLICE, perform JUMP, or change current scope.
 
 ---
 
-## 13. G-7 Decision
+## 11. G-7 Decision
 
 ```text
 G-7 Trajectory Query Endpoint
-= IMPLEMENTED
+= COMPLETE
 
 Explicit relation-reference matching
-= IMPLEMENTED
+= VERIFIED
 
 InMemoryStore trajectory query
-= IMPLEMENTED
+= VERIFIED
 
 SQLiteStore persistent trajectory query
-= IMPLEMENTED
+= VERIFIED
 
 Bounded pagination
-= IMPLEMENTED
+= VERIFIED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, G-7 may be marked:
-
-```text
-G-7
-= COMPLETE
+= PASS
 ```
 
 The next Priority G step is:
