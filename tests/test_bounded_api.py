@@ -48,6 +48,7 @@ def setup_function() -> None:
     store.records.clear()
     store.idempotency.clear()
     store.current_scope.clear()
+    store.process_history.clear()
 
 
 def test_health() -> None:
@@ -92,6 +93,7 @@ def test_idempotent_replay_does_not_create_second_process() -> None:
     assert first.json()["process_id"] == second.json()["process_id"]
     assert second.json()["replayed"] is True
     assert len(store.processes) == 1
+    assert len(store.process_history["loop_001"]) == 1
 
 
 def test_void_is_runtime_result_and_defer_is_separate() -> None:
@@ -185,6 +187,70 @@ def test_current_scope_endpoint_reports_broken_pointer_as_repository_error() -> 
     body = response.json()
     assert body["error_code"] == "GYRO_API_REPOSITORY_INTEGRITY"
     assert body["category"] == "REPOSITORY"
+
+
+def test_process_history_returns_publication_order_and_summary() -> None:
+    first = client.post(
+        "/loop/step",
+        json=base_request(request_id="history_one", loop_id="history_loop"),
+    )
+    second = client.post(
+        "/loop/step",
+        json=base_request(request_id="history_two", loop_id="history_loop"),
+    )
+    assert first.status_code == 200
+    assert second.status_code == 200
+
+    response = client.get("/loop/history/history_loop")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["loop_id"] == "history_loop"
+    assert [item["request_id"] for item in body["items"]] == [
+        "history_one",
+        "history_two",
+    ]
+    assert body["items"][0]["operator_response"] == "CONTINUE"
+    assert body["items"][0]["continuity_type"] == "DIRECT_CONNECTION"
+    assert body["next_cursor"] is None
+
+
+def test_process_history_supports_bounded_cursor_pagination() -> None:
+    for index in range(3):
+        response = client.post(
+            "/loop/step",
+            json=base_request(request_id=f"page_{index}", loop_id="page_loop"),
+        )
+        assert response.status_code == 200
+
+    first_page = client.get("/loop/history/page_loop?limit=2")
+    assert first_page.status_code == 200
+    first_body = first_page.json()
+    assert [item["request_id"] for item in first_body["items"]] == ["page_0", "page_1"]
+    assert first_body["next_cursor"] == "2"
+
+    second_page = client.get(
+        f"/loop/history/page_loop?limit=2&cursor={first_body['next_cursor']}"
+    )
+    assert second_page.status_code == 200
+    second_body = second_page.json()
+    assert [item["request_id"] for item in second_body["items"]] == ["page_2"]
+    assert second_body["next_cursor"] is None
+
+
+def test_process_history_empty_loop_returns_empty_page() -> None:
+    response = client.get("/loop/history/missing_history")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["items"] == []
+    assert body["next_cursor"] is None
+
+
+def test_process_history_rejects_invalid_cursor() -> None:
+    response = client.get("/loop/history/history_loop?cursor=invalid")
+    assert response.status_code == 422
+    body = response.json()
+    assert body["error_code"] == "GYRO_API_VALIDATION_HISTORY_CURSOR"
+    assert body["phase"] == "PROCESS_HISTORY_QUERY"
 
 
 def test_published_process_and_record_can_be_retrieved() -> None:
