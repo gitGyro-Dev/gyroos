@@ -246,7 +246,29 @@ The existing API test verifies the health endpoint remains available. The workfl
 
 ---
 
-## 10. Deferred Configuration Work
+## 10. Verification
+
+GitHub Actions run:
+
+```text
+run_id = 30084358480
+job_id = 89452952024
+conclusion = success
+```
+
+Verified:
+
+```text
+typed environment profile parsing
+production fail-fast validation
+SQLite timeout propagation
+health endpoint environment reporting
+all bounded Runtime and production-hardening tests pass
+```
+
+---
+
+## 11. Deferred Configuration Work
 
 H-1 does not yet implement:
 
@@ -265,7 +287,7 @@ These belong to later Priority H steps.
 
 ---
 
-## 11. Responsibility Review
+## 12. Responsibility Review
 
 ```text
 RuntimeSettings
@@ -285,33 +307,26 @@ No configuration value becomes part of the invariant Core.
 
 ---
 
-## 12. H-1 Decision
+## 13. H-1 Decision
 
 ```text
 H-1 Configuration and Environment Separation
-= IMPLEMENTED
+= COMPLETE
 
 Typed environment profiles
-= IMPLEMENTED
+= VERIFIED
 
 Production startup validation
-= IMPLEMENTED
+= VERIFIED
 
 SQLite timeout configuration
-= IMPLEMENTED
+= VERIFIED
 
 Non-secret health environment reporting
-= IMPLEMENTED
+= VERIFIED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-1 may be marked:
-
-```text
-H-1
-= COMPLETE
+= PASS
 ```
 
 The next Priority H step is:
