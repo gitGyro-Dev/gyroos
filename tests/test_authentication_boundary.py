@@ -23,6 +23,10 @@ def auth_settings(*, required: bool, token: str | None) -> RuntimeSettings:
         sqlite_timeout_seconds=5.0,
         authentication_required=required,
         api_bearer_token=token,
+        max_request_body_bytes=1_048_576,
+        rate_limit_requests=120,
+        rate_limit_window_seconds=60,
+        max_concurrent_requests=32,
     )
 
 
