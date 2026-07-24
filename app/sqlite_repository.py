@@ -27,6 +27,7 @@ from .models import (
 from .repository_errors import (
     IdempotencyConflict,
     RecordIdentityCollision,
+    RepositoryBusyError,
     RepositoryIntegrityError,
     RepositorySchemaMismatch,
     RepositorySerializationError,
@@ -47,7 +48,7 @@ CanonicalRecord: TypeAlias = (
 )
 
 SCHEMA_VERSION = "1"
-RUNTIME_VERSION = "priority-h1"
+RUNTIME_VERSION = "priority-h4"
 MAX_HISTORY_LIMIT = 100
 DEFAULT_HISTORY_LIMIT = 20
 DEFAULT_SQLITE_TIMEOUT_SECONDS = 5.0
@@ -177,6 +178,11 @@ def _matches_trajectory_ref(edge: TrajectoryEdge, trajectory_ref: str) -> bool:
     }
 
 
+def _is_busy_error(exc: sqlite3.DatabaseError) -> bool:
+    message = str(exc).lower()
+    return "database is locked" in message or "database is busy" in message
+
+
 class SQLiteStore:
     """SQLite-backed Runtime repository for the bounded Priority H prototype."""
 
@@ -201,6 +207,10 @@ class SQLiteStore:
         )
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute(f"PRAGMA busy_timeout = {int(self.timeout_seconds * 1000)}")
+        if self.database_path != ":memory:":
+            connection.execute("PRAGMA journal_mode = WAL")
+            connection.execute("PRAGMA synchronous = NORMAL")
         return connection
 
     def _initialize_schema(self) -> None:
@@ -511,5 +521,9 @@ class SQLiteStore:
             if "idempotency_entries" in message:
                 raise IdempotencyConflict(message) from exc
             raise RecordIdentityCollision(message) from exc
+        except sqlite3.OperationalError as exc:
+            if _is_busy_error(exc):
+                raise RepositoryBusyError(str(exc)) from exc
+            raise RepositoryIntegrityError(str(exc)) from exc
         except sqlite3.DatabaseError as exc:
             raise RepositoryIntegrityError(str(exc)) from exc
