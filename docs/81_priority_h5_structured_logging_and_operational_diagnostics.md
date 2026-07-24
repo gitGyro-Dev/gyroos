@@ -266,7 +266,7 @@ Transport request IDs and operational logs do not become part of canonical Proce
 
 ```text
 H-5 Structured Logging and Operational Diagnostics
-= IMPLEMENTED
+= COMPLETE
 
 JSON structured logging
 = IMPLEMENTED
@@ -281,14 +281,13 @@ Sensitive-field exclusion
 = IMPLEMENTED
 
 GitHub Actions execution verification
-= PENDING
+= PASSED
 ```
 
-After the updated workflow passes, H-5 may be marked:
+Verified by GitHub Actions run:
 
 ```text
-H-5
-= COMPLETE
+30091681637
 ```
 
 The next Priority H step is:
