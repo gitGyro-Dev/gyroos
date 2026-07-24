@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from app.settings import RuntimeEnvironment, RuntimeSettings
+from app.settings import LogLevel, RuntimeEnvironment, RuntimeSettings
 from app.sqlite_repository import SQLiteStore
 
 
@@ -22,6 +22,8 @@ def clear_runtime_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "GYROOS_RATE_LIMIT_REQUESTS",
         "GYROOS_RATE_LIMIT_WINDOW_SECONDS",
         "GYROOS_MAX_CONCURRENT_REQUESTS",
+        "GYROOS_LOG_LEVEL",
+        "GYROOS_JSON_LOGGING",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -45,6 +47,8 @@ def test_development_profile_uses_safe_local_defaults(
     assert settings.rate_limit_requests == 120
     assert settings.rate_limit_window_seconds == 60
     assert settings.max_concurrent_requests == 32
+    assert settings.log_level == LogLevel.DEBUG
+    assert settings.json_logging is True
 
 
 def test_test_profile_has_isolated_default_database(
@@ -59,6 +63,8 @@ def test_test_profile_has_isolated_default_database(
     assert settings.database_path == Path(".runtime-test.db")
     assert settings.debug is False
     assert settings.authentication_required is False
+    assert settings.log_level == LogLevel.INFO
+    assert settings.json_logging is True
 
 
 def test_production_requires_explicit_persistent_database(
@@ -107,6 +113,20 @@ def test_production_rejects_disabled_authentication(
         RuntimeSettings.from_env()
 
 
+def test_production_rejects_non_json_logging(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    clear_runtime_env(monkeypatch)
+    monkeypatch.setenv("GYROOS_ENV", "production")
+    monkeypatch.setenv("GYROOS_DATABASE_PATH", "/var/lib/gyroos/runtime.db")
+    monkeypatch.setenv("GYROOS_DEBUG", "false")
+    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", "production-secret")
+    monkeypatch.setenv("GYROOS_JSON_LOGGING", "false")
+
+    with pytest.raises(ValueError, match="GYROOS_JSON_LOGGING must be enabled"):
+        RuntimeSettings.from_env()
+
+
 def test_production_accepts_explicit_safe_configuration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -122,6 +142,8 @@ def test_production_accepts_explicit_safe_configuration(
     monkeypatch.setenv("GYROOS_RATE_LIMIT_REQUESTS", "60")
     monkeypatch.setenv("GYROOS_RATE_LIMIT_WINDOW_SECONDS", "30")
     monkeypatch.setenv("GYROOS_MAX_CONCURRENT_REQUESTS", "16")
+    monkeypatch.setenv("GYROOS_LOG_LEVEL", "warning")
+    monkeypatch.setenv("GYROOS_JSON_LOGGING", "true")
 
     settings = RuntimeSettings.from_env()
 
@@ -137,6 +159,8 @@ def test_production_accepts_explicit_safe_configuration(
     assert settings.rate_limit_requests == 60
     assert settings.rate_limit_window_seconds == 30
     assert settings.max_concurrent_requests == 16
+    assert settings.log_level == LogLevel.WARNING
+    assert settings.json_logging is True
 
 
 @pytest.mark.parametrize(
@@ -147,6 +171,8 @@ def test_production_accepts_explicit_safe_configuration(
         ("GYROOS_PORT", "70000", "GYROOS_PORT must be between"),
         ("GYROOS_DEBUG", "sometimes", "GYROOS_DEBUG must be a boolean"),
         ("GYROOS_AUTH_REQUIRED", "sometimes", "GYROOS_AUTH_REQUIRED must be a boolean"),
+        ("GYROOS_LOG_LEVEL", "trace", "GYROOS_LOG_LEVEL must be one of"),
+        ("GYROOS_JSON_LOGGING", "sometimes", "GYROOS_JSON_LOGGING must be a boolean"),
         (
             "GYROOS_SQLITE_TIMEOUT_SECONDS",
             "0",
