@@ -188,6 +188,7 @@ class SliceEngine:
             parent_slice_ref=request.slice_request.parent_slice_ref,
             source_type=request.slice_request.source_type,
             source_ref=request.slice_request.source_ref,
+            metadata={"relation_ref": relation_ref},
         )
 
 
@@ -344,12 +345,14 @@ class ProcessExecutor:
                 evidence_refs=list(response.considered_evidence_refs),
             )
 
+        relation_ref = str(slice_done.metadata.get("relation_ref", slice_done.source_ref))
         trajectory_edge = TrajectoryEdge(
             trajectory_edge_id=new_id("trajectory_edge"),
             process_id=process_id,
             operator_response_ref=response.operator_response_id,
             continuity_result_ref=continuity.continuity_result_id,
             edge_type=continuity.continuity_type,
+            relation_ref=relation_ref,
             source_ref=continuity.source_ref,
             target_ref=continuity.target_ref,
             parent_process_ref=slice_done.parent_process_ref,
