@@ -198,7 +198,7 @@ health remains excluded
 fixed-window entries expire
 ```
 
-The workflow now executes the H-3 test file.
+GitHub Actions run `30091152703` completed successfully. The workflow executed the bounded Runtime, production-hardening, and PoC artifact steps without failure.
 
 ---
 
@@ -247,28 +247,21 @@ Resource controls do not become Gyro Logic definitions or OperatorResponse polic
 
 ```text
 H-3 Request Size, Rate, and Resource Limits
-= IMPLEMENTED
+= COMPLETE
 
 Request body limit
-= IMPLEMENTED
+= COMPLETE
 
 Fixed-window rate limit
-= IMPLEMENTED
+= COMPLETE
 
 Concurrent request limit
-= IMPLEMENTED
+= COMPLETE
 
 Public health exclusion
-= IMPLEMENTED
+= COMPLETE
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-3 may be marked:
-
-```text
-H-3
 = COMPLETE
 ```
 
