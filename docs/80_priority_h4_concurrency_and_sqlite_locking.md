@@ -165,7 +165,14 @@ failed locked publication leaves no idempotency entry
 publication succeeds after the external lock is released
 ```
 
-The workflow now executes the H-4 locking test file.
+The workflow executes the H-4 locking test file.
+
+Verified successful GitHub Actions execution:
+
+```text
+run_id = 30091398327
+conclusion = success
+```
 
 ---
 
@@ -217,7 +224,7 @@ No lock state becomes part of canonical Process identity, trajectory, Stability,
 
 ```text
 H-4 Concurrency and SQLite Locking
-= IMPLEMENTED
+= COMPLETE
 
 WAL mode
 = IMPLEMENTED
@@ -235,13 +242,6 @@ Retryable API response
 = IMPLEMENTED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-4 may be marked:
-
-```text
-H-4
 = COMPLETE
 ```
 
