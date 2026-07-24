@@ -362,6 +362,13 @@ class ProcessHistoryPage(CanonicalModel):
     next_cursor: str | None = None
 
 
+class TrajectoryEdgePage(CanonicalModel):
+    trajectory_ref: str
+    items: list[TrajectoryEdge] = Field(default_factory=list)
+    limit: int = Field(ge=1, le=100)
+    next_cursor: str | None = None
+
+
 class ApiError(CanonicalModel):
     error_id: str
     error_code: str
