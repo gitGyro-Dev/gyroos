@@ -237,7 +237,7 @@ This verifies that inserted records are not visible after a later transaction fa
 
 ## 8. Implemented Tests
 
-`tests/test_sqlite_repository.py` now verifies:
+`tests/test_sqlite_repository.py` verifies:
 
 ```text
 complete Process persistence and typed reconstruction
@@ -267,7 +267,38 @@ idempotency conflict
 
 ---
 
-## 9. Responsibility Review
+## 9. GitHub Actions Verification
+
+The implementation was verified by GitHub Actions:
+
+```text
+Workflow run ID
+30072362207
+
+Job ID
+89415719147
+
+Job
+ test-and-run-poc
+
+Status
+completed
+
+Conclusion
+success
+```
+
+The following step completed successfully:
+
+```text
+Run bounded API, PoC, and SQLite repository tests
+```
+
+This verifies the G-4 rollback, conflict, and persistence tests together with the existing bounded API and Priority F PoC tests.
+
+---
+
+## 10. Responsibility Review
 
 The responsibility chain remains:
 
@@ -295,7 +326,7 @@ The repository does not repair, reinterpret, or partially publish Runtime object
 
 ---
 
-## 10. Deferred Work
+## 11. Deferred Work
 
 G-4 does not yet implement:
 
@@ -313,30 +344,23 @@ These remain later Priority G work.
 
 ---
 
-## 11. G-4 Decision
+## 12. G-4 Decision
 
 ```text
 G-4 Atomic Publication and Idempotency Persistence
-= IMPLEMENTED
+= COMPLETE
 
 Repository-level error boundary
-= IMPLEMENTED
+= VERIFIED
 
 Atomic rollback fault injection
-= IMPLEMENTED
+= VERIFIED
 
 Persistent idempotency conflict protection
-= IMPLEMENTED
+= VERIFIED
 
 GitHub Actions execution verification
-= PENDING RUN CONFIRMATION
-```
-
-After the updated workflow passes, G-4 may be marked:
-
-```text
-G-4
-= COMPLETE
+= PASS
 ```
 
 The next Priority G step is:
