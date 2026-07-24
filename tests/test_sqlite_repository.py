@@ -134,6 +134,55 @@ def test_sqlite_store_process_history_rejects_invalid_cursor(tmp_path: Path) -> 
         store.list_process_history(loop_id="loop", cursor="invalid")
 
 
+def test_sqlite_store_trajectory_query_survives_restart_and_paginates(
+    tmp_path: Path,
+) -> None:
+    database = tmp_path / "runtime.db"
+    first_store = SQLiteStore(database)
+    executor = ProcessExecutor(first_store)
+    results = []
+
+    for index in range(3):
+        request = LoopStepRequest.model_validate(
+            base_request(request_id=f"trajectory_{index}", loop_id="sqlite_trajectory_loop")
+        )
+        results.append(executor.execute(request))
+
+    second_store = SQLiteStore(database)
+    first_page = second_store.list_trajectory_edges(
+        trajectory_ref="sqlite_relation_001",
+        limit=2,
+    )
+    assert [edge.process_id for edge in first_page.items] == [
+        results[0].process_id,
+        results[1].process_id,
+    ]
+    assert first_page.next_cursor == "2"
+
+    second_page = second_store.list_trajectory_edges(
+        trajectory_ref="sqlite_relation_001",
+        limit=2,
+        cursor=first_page.next_cursor,
+    )
+    assert [edge.process_id for edge in second_page.items] == [results[2].process_id]
+    assert second_page.next_cursor is None
+
+
+def test_sqlite_store_trajectory_query_returns_empty_page_for_unknown_ref(
+    tmp_path: Path,
+) -> None:
+    store = SQLiteStore(tmp_path / "runtime.db")
+    page = store.list_trajectory_edges(trajectory_ref="missing_relation", limit=20)
+    assert page.items == []
+    assert page.next_cursor is None
+
+
+def test_sqlite_store_trajectory_query_rejects_invalid_cursor(tmp_path: Path) -> None:
+    store = SQLiteStore(tmp_path / "runtime.db")
+    with pytest.raises(ValueError, match="trajectory cursor"):
+        store.list_trajectory_edges(trajectory_ref="relation", cursor="invalid")
+
+
 def test_sqlite_store_missing_record_remains_none(tmp_path: Path) -> None:
     store = SQLiteStore(tmp_path / "runtime.db")
     assert store.get_record("missing_record") is None
