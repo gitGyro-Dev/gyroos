@@ -68,6 +68,21 @@ def test_one_request_creates_one_complete_process() -> None:
     assert body["continuity"]["continuity_type"] == "DIRECT_CONNECTION"
 
 
+def test_explicit_representation_preserves_stability_for_evaluation() -> None:
+    payload = base_request(request_id="representation_stability")
+    payload["structure"]["current_mode"]["representation"] = {
+        "state": "readable",
+        "path": "direct",
+    }
+    response = client.post("/loop/step", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["slice_done"]["representation"]["state"] == "readable"
+    assert body["slice_done"]["representation"]["stability"] == 0.92
+    assert body["stability"]["status"] == "STABLE"
+    assert body["stability"]["value"] == 0.92
+
+
 def test_idempotent_replay_does_not_create_second_process() -> None:
     payload = base_request()
     first = client.post("/loop/step", json=payload)
