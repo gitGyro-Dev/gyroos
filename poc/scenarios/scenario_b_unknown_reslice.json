@@ -1,0 +1,80 @@
+{
+  "scenario_id": "scenario_b_unknown_reslice",
+  "seed_request": {
+    "request_id": "poc_b_seed_request",
+    "loop_id": "poc_loop_b_seed",
+    "idempotency_key": "poc_loop_b_seed:step_001",
+    "structure": {
+      "structure_id": "poc_structure_b_seed",
+      "current_mode": {
+        "relation_ref": "poc_relation_b",
+        "representation": {"state": "partially_readable"},
+        "deviation": {"value": 0.25},
+        "stability": 0.68,
+        "boundary_readability": 0.82,
+        "target_relation_readability": 0.45,
+        "boundary_state": "UNKNOWN",
+        "boundary_state_confidence": 0.62,
+        "boundary_state_reason": "The Boundary is identifiable but the target relation remains insufficiently classified.",
+        "context": {"candidate_path": "contextual_alternative", "retained": true},
+        "context_confidence": 0.88
+      }
+    },
+    "slice_request": {
+      "mode": "SLICE",
+      "source_type": "RUNTIME_STRUCTURE",
+      "source_ref": "poc_structure_b_seed",
+      "orientation": {"orientation_id": "poc_orientation_b_seed"},
+      "slice_policy": {
+        "policy_id": "poc_policy_b_seed",
+        "policy_type": "BOUNDED_POC",
+        "parameters": {"response_type": "CONTINUE", "response_reason": "Retain the seed result before explicit Re-Slice preparation."}
+      }
+    },
+    "runtime_limits": {"max_slice_operations": 1}
+  },
+  "prepare_request": {
+    "request_id": "poc_b_prepare_request",
+    "loop_id": "poc_loop_b_prepare",
+    "idempotency_key": "poc_loop_b_prepare:step_001",
+    "structure": {
+      "structure_id": "poc_structure_b_prepare",
+      "current_mode": {
+        "relation_ref": "poc_relation_b_prepare",
+        "representation": {"state": "unknown_with_context"},
+        "deviation": {"value": 0.32},
+        "stability": 0.66,
+        "boundary_readability": 0.8,
+        "target_relation_readability": 0.4,
+        "boundary_state": "UNKNOWN",
+        "boundary_state_confidence": 0.6,
+        "boundary_state_reason": "Current reading remains provisional while retained Context is available."
+      }
+    },
+    "slice_request": {
+      "mode": "SLICE",
+      "source_type": "RUNTIME_STRUCTURE",
+      "source_ref": "poc_structure_b_prepare",
+      "orientation": {"orientation_id": "poc_orientation_b_prepare"},
+      "slice_policy": {
+        "policy_id": "poc_policy_reslice",
+        "policy_type": "BOUNDED_POC",
+        "parameters": {
+          "response_type": "RESLICE",
+          "response_reason": "Prepare another Slice from explicitly retained Context evidence.",
+          "response_confidence": 0.9,
+          "reslice_source_type": "CONTEXT_EVIDENCE",
+          "reslice_source_ref": "${seed.context_evidence_id}"
+        }
+      }
+    },
+    "runtime_limits": {"max_slice_operations": 1}
+  },
+  "expected": {
+    "boundary_state": "UNKNOWN",
+    "operator_response": "RESLICE",
+    "continuity_type": "RESLICE_CONNECTION",
+    "next_request_mode": "RESLICE",
+    "process_count_delta": 1
+  }
+}

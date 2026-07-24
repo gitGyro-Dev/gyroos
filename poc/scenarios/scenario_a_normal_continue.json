@@ -1,0 +1,44 @@
+{
+  "scenario_id": "scenario_a_normal_continue",
+  "request": {
+    "request_id": "poc_a_request",
+    "loop_id": "poc_loop_a",
+    "idempotency_key": "poc_loop_a:step_001",
+    "structure": {
+      "structure_id": "poc_structure_a",
+      "current_mode": {
+        "relation_ref": "poc_relation_a",
+        "representation": {"state": "readable", "path": "direct"},
+        "deviation": {"value": 0.08},
+        "stability": 0.92,
+        "boundary_readability": 0.96,
+        "target_relation_readability": 0.91,
+        "boundary_state": "NORMAL",
+        "boundary_state_confidence": 0.94,
+        "boundary_state_reason": "The target relation remains readable relative to the identified Boundary."
+      }
+    },
+    "slice_request": {
+      "mode": "SLICE",
+      "source_type": "RUNTIME_STRUCTURE",
+      "source_ref": "poc_structure_a",
+      "orientation": {"orientation_id": "poc_orientation_a"},
+      "slice_policy": {
+        "policy_id": "poc_policy_continue",
+        "policy_type": "BOUNDED_POC",
+        "parameters": {
+          "response_type": "CONTINUE",
+          "response_reason": "Preserve the direct readable connection.",
+          "response_confidence": 0.95
+        }
+      }
+    },
+    "runtime_limits": {"max_slice_operations": 1}
+  },
+  "expected": {
+    "boundary_state": "NORMAL",
+    "stability_status": "STABLE",
+    "operator_response": "CONTINUE",
+    "continuity_type": "DIRECT_CONNECTION"
+  }
+}

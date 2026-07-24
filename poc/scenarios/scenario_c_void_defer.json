@@ -1,0 +1,46 @@
+{
+  "scenario_id": "scenario_c_void_defer",
+  "request": {
+    "request_id": "poc_c_request",
+    "loop_id": "poc_loop_c",
+    "idempotency_key": "poc_loop_c:step_001",
+    "structure": {
+      "structure_id": "poc_structure_c",
+      "current_mode": {
+        "relation_ref": "poc_relation_c",
+        "representation": {"state": "void_related"},
+        "deviation": {"value": 0.74},
+        "boundary_readability": 0.9,
+        "target_relation_readability": 0.08,
+        "connectability": 0.0,
+        "boundary_state": "VOID",
+        "boundary_state_confidence": 0.91,
+        "boundary_state_reason": "The Boundary is identifiable while the target relation is unreadable relative to it.",
+        "void_reason": "The target relation cannot currently be connected under the identified Boundary."
+      }
+    },
+    "slice_request": {
+      "mode": "SLICE",
+      "source_type": "RUNTIME_STRUCTURE",
+      "source_ref": "poc_structure_c",
+      "orientation": {"orientation_id": "poc_orientation_c"},
+      "slice_policy": {
+        "policy_id": "poc_policy_defer",
+        "policy_type": "BOUNDED_POC",
+        "parameters": {
+          "response_type": "DEFER",
+          "response_reason": "Preserve the relation as pending without collapsing Void evidence into control state.",
+          "response_confidence": 0.89
+        }
+      }
+    },
+    "runtime_limits": {"max_slice_operations": 1}
+  },
+  "expected": {
+    "boundary_state": "VOID",
+    "stability_status": "VOID_RELATED",
+    "operator_response": "DEFER",
+    "continuity_type": "DEFERRED_PENDING_RELATION",
+    "pending": true
+  }
+}

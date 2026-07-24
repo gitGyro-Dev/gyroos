@@ -1,0 +1,44 @@
+{
+  "scenario_id": "scenario_d_adjust",
+  "request": {
+    "request_id": "poc_d_adjust_request",
+    "loop_id": "poc_loop_d_adjust",
+    "idempotency_key": "poc_loop_d_adjust:step_001",
+    "structure": {
+      "structure_id": "poc_structure_d_adjust",
+      "current_mode": {
+        "relation_ref": "poc_relation_d",
+        "representation": {"state": "conflicting_but_adjustable"},
+        "deviation": {"value": 0.42},
+        "stability": 0.61,
+        "boundary_readability": 0.83,
+        "target_relation_readability": 0.58,
+        "boundary_state": "UNKNOWN",
+        "boundary_state_confidence": 0.57,
+        "boundary_state_reason": "Conflicting readings remain within a bounded adjustment range."
+      }
+    },
+    "slice_request": {
+      "mode": "SLICE",
+      "source_type": "RUNTIME_STRUCTURE",
+      "source_ref": "poc_structure_d_adjust",
+      "orientation": {"orientation_id": "poc_orientation_d_adjust"},
+      "slice_policy": {
+        "policy_id": "poc_policy_adjust",
+        "policy_type": "BOUNDED_POC",
+        "parameters": {
+          "response_type": "ADJUST",
+          "response_reason": "Preserve continuity through bounded adjustment.",
+          "response_confidence": 0.78
+        }
+      }
+    },
+    "runtime_limits": {"max_slice_operations": 1}
+  },
+  "expected": {
+    "boundary_state": "UNKNOWN",
+    "stability_status": "ADAPTIVE",
+    "operator_response": "ADJUST",
+    "continuity_type": "ADJUSTED_CONNECTION"
+  }
+}
