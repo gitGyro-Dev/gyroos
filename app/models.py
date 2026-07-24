@@ -297,6 +297,31 @@ class RuntimeContinuityResult(CanonicalModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class DeferredRelationRecord(CanonicalModel):
+    deferred_relation_record_id: str
+    process_id: str
+    operator_response_ref: str
+    continuity_result_ref: str
+    relation_ref: str
+    pending: bool = True
+    evidence_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class TrajectoryEdge(CanonicalModel):
+    trajectory_edge_id: str
+    process_id: str
+    operator_response_ref: str
+    continuity_result_ref: str
+    edge_type: RuntimeContinuityType
+    source_ref: str
+    target_ref: str | None = None
+    parent_process_ref: str | None = None
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class LoopStepResult(CanonicalModel):
     process_id: str
     request_id: str
@@ -305,6 +330,8 @@ class LoopStepResult(CanonicalModel):
     stability: StabilityResult
     operator_response: OperatorResponse
     continuity: RuntimeContinuityResult
+    deferred_relation_record: DeferredRelationRecord | None = None
+    trajectory_edges: list[TrajectoryEdge] = Field(default_factory=list)
     created_record_refs: list[str] = Field(default_factory=list)
     replayed: bool = False
     completed_at: datetime = Field(default_factory=utc_now)
