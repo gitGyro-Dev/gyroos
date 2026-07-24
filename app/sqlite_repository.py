@@ -4,9 +4,9 @@ import hashlib
 import json
 import sqlite3
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any, Callable, TypeAlias
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from .models import (
     BoundaryEvidence,
@@ -20,6 +20,13 @@ from .models import (
     StabilityResult,
     TrajectoryEdge,
     VoidEvidence,
+)
+from .repository_errors import (
+    IdempotencyConflict,
+    RecordIdentityCollision,
+    RepositoryIntegrityError,
+    RepositorySchemaMismatch,
+    RepositorySerializationError,
 )
 
 CanonicalRecord: TypeAlias = (
@@ -37,7 +44,7 @@ CanonicalRecord: TypeAlias = (
 )
 
 SCHEMA_VERSION = "1"
-RUNTIME_VERSION = "priority-g3"
+RUNTIME_VERSION = "priority-g4"
 
 _RECORD_REGISTRY: dict[str, type[BaseModel]] = {
     "LoopStepResult": LoopStepResult,
@@ -69,8 +76,13 @@ _RECORD_ID_FIELDS: dict[type[BaseModel], str] = {
 
 
 def _canonical_json(record: BaseModel) -> str:
-    payload = record.model_dump(mode="json")
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    try:
+        payload = record.model_dump(mode="json")
+        return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    except (TypeError, ValueError) as exc:
+        raise RepositorySerializationError(
+            f"failed to serialize {type(record).__name__}"
+        ) from exc
 
 
 def _digest(payload_json: str) -> str:
@@ -80,10 +92,12 @@ def _digest(payload_json: str) -> str:
 def _record_id(record: CanonicalRecord) -> str:
     field_name = _RECORD_ID_FIELDS.get(type(record))
     if field_name is None:
-        raise ValueError(f"unsupported canonical record type: {type(record).__name__}")
+        raise RepositorySerializationError(
+            f"unsupported canonical record type: {type(record).__name__}"
+        )
     value = getattr(record, field_name, None)
     if not value:
-        raise ValueError(
+        raise RepositorySerializationError(
             f"canonical record {type(record).__name__} has no value for {field_name}"
         )
     return str(value)
@@ -92,7 +106,7 @@ def _record_id(record: CanonicalRecord) -> str:
 def _record_type(record: CanonicalRecord) -> str:
     name = type(record).__name__
     if name not in _RECORD_REGISTRY:
-        raise ValueError(f"unsupported canonical record type: {name}")
+        raise RepositorySerializationError(f"unsupported canonical record type: {name}")
     return name
 
 
@@ -117,15 +131,23 @@ def _collect_records(result: LoopStepResult) -> list[CanonicalRecord]:
         duplicates = sorted(
             record_id for record_id in set(record_ids) if record_ids.count(record_id) > 1
         )
-        raise ValueError(f"duplicate record identities in publication group: {duplicates}")
+        raise RecordIdentityCollision(
+            f"duplicate record identities in publication group: {duplicates}"
+        )
     return records
 
 
 class SQLiteStore:
     """SQLite-backed Runtime repository for the bounded Priority G prototype."""
 
-    def __init__(self, database_path: str | Path) -> None:
+    def __init__(
+        self,
+        database_path: str | Path,
+        *,
+        failure_injector: Callable[[str, int], None] | None = None,
+    ) -> None:
         self.database_path = str(database_path)
+        self._failure_injector = failure_injector
         self._initialize_schema()
 
     def _connect(self) -> sqlite3.Connection:
@@ -175,12 +197,16 @@ class SQLiteStore:
                 """
             )
 
+    def _inject_failure(self, phase: str, position: int) -> None:
+        if self._failure_injector is not None:
+            self._failure_injector(phase, position)
+
     def get_process(self, process_id: str) -> LoopStepResult | None:
         record = self.get_record(process_id)
         if record is None:
             return None
         if not isinstance(record, LoopStepResult):
-            raise ValueError(f"record {process_id} is not LoopStepResult")
+            raise RepositoryIntegrityError(f"record {process_id} is not LoopStepResult")
         return record
 
     def get_record(self, record_id: str) -> CanonicalRecord | None:
@@ -196,17 +222,26 @@ class SQLiteStore:
         if row is None:
             return None
         if row["schema_version"] != SCHEMA_VERSION:
-            raise ValueError(
+            raise RepositorySchemaMismatch(
                 f"unsupported schema_version={row['schema_version']} for record {record_id}"
             )
         payload_json = str(row["canonical_payload"])
         if _digest(payload_json) != row["canonical_digest"]:
-            raise ValueError(f"canonical digest mismatch for record {record_id}")
+            raise RepositoryIntegrityError(
+                f"canonical digest mismatch for record {record_id}"
+            )
         model = _RECORD_REGISTRY.get(str(row["record_type"]))
         if model is None:
-            raise ValueError(f"unsupported record type: {row['record_type']}")
-        payload: dict[str, Any] = json.loads(payload_json)
-        return model.model_validate(payload)  # type: ignore[return-value]
+            raise RepositorySerializationError(
+                f"unsupported record type: {row['record_type']}"
+            )
+        try:
+            payload: dict[str, Any] = json.loads(payload_json)
+            return model.model_validate(payload)  # type: ignore[return-value]
+        except (json.JSONDecodeError, ValidationError) as exc:
+            raise RepositorySerializationError(
+                f"failed to reconstruct record {record_id}"
+            ) from exc
 
     def get_current_scope(self, loop_id: str) -> str | None:
         with self._connect() as connection:
@@ -234,7 +269,9 @@ class SQLiteStore:
             return None
         result = self.get_process(str(row["process_id"]))
         if result is None:
-            raise ValueError("idempotency entry references a missing Process")
+            raise RepositoryIntegrityError(
+                "idempotency entry references a missing Process"
+            )
         return str(row["request_digest"]), result
 
     def publish(
@@ -247,68 +284,101 @@ class SQLiteStore:
         records = _collect_records(result)
         publication_id = result.process_id
 
-        with self._connect() as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            for publication_order, record in enumerate(records):
-                payload_json = _canonical_json(record)
-                record_id = _record_id(record)
-                record_type = _record_type(record)
-                process_id = result.process_id
-                loop_id = result.loop_id if isinstance(record, LoopStepResult) else None
+        try:
+            with self._connect() as connection:
+                connection.execute("BEGIN IMMEDIATE")
+
+                if idempotency_key:
+                    existing = connection.execute(
+                        """
+                        SELECT request_digest, process_id
+                        FROM idempotency_entries
+                        WHERE loop_id = ? AND idempotency_key = ?
+                        """,
+                        (result.loop_id, idempotency_key),
+                    ).fetchone()
+                    if existing is not None:
+                        if str(existing["request_digest"]) != request_digest:
+                            raise IdempotencyConflict(
+                                "idempotency scope already exists with a different request digest"
+                            )
+                        if str(existing["process_id"]) != result.process_id:
+                            raise RepositoryIntegrityError(
+                                "matching idempotency digest references a different Process"
+                            )
+                        return
+
+                for publication_order, record in enumerate(records):
+                    self._inject_failure("before_record_insert", publication_order)
+                    payload_json = _canonical_json(record)
+                    record_id = _record_id(record)
+                    record_type = _record_type(record)
+                    process_id = result.process_id
+                    loop_id = result.loop_id if isinstance(record, LoopStepResult) else None
+                    connection.execute(
+                        """
+                        INSERT INTO runtime_records (
+                            record_id,
+                            record_type,
+                            process_id,
+                            loop_id,
+                            canonical_payload,
+                            canonical_digest,
+                            schema_version,
+                            runtime_version,
+                            publication_id,
+                            publication_order
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            record_id,
+                            record_type,
+                            process_id,
+                            loop_id,
+                            payload_json,
+                            _digest(payload_json),
+                            SCHEMA_VERSION,
+                            RUNTIME_VERSION,
+                            publication_id,
+                            publication_order,
+                        ),
+                    )
+
+                self._inject_failure("before_current_scope", len(records))
                 connection.execute(
                     """
-                    INSERT INTO runtime_records (
-                        record_id,
-                        record_type,
-                        process_id,
-                        loop_id,
-                        canonical_payload,
-                        canonical_digest,
-                        schema_version,
-                        runtime_version,
-                        publication_id,
-                        publication_order
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO current_scope(loop_id, process_id)
+                    VALUES (?, ?)
+                    ON CONFLICT(loop_id) DO UPDATE SET
+                        process_id = excluded.process_id,
+                        updated_at = CURRENT_TIMESTAMP
                     """,
-                    (
-                        record_id,
-                        record_type,
-                        process_id,
-                        loop_id,
-                        payload_json,
-                        _digest(payload_json),
-                        SCHEMA_VERSION,
-                        RUNTIME_VERSION,
-                        publication_id,
-                        publication_order,
-                    ),
+                    (result.loop_id, result.process_id),
                 )
 
-            connection.execute(
-                """
-                INSERT INTO current_scope(loop_id, process_id)
-                VALUES (?, ?)
-                ON CONFLICT(loop_id) DO UPDATE SET
-                    process_id = excluded.process_id,
-                    updated_at = CURRENT_TIMESTAMP
-                """,
-                (result.loop_id, result.process_id),
-            )
-
-            if idempotency_key:
-                connection.execute(
-                    """
-                    INSERT INTO idempotency_entries(
-                        loop_id,
-                        idempotency_key,
-                        request_digest,
-                        process_id
-                    ) VALUES (?, ?, ?, ?)
-                    """,
-                    (
-                        result.loop_id,
-                        idempotency_key,
-                        request_digest,
-                        result.process_id,
-                    ),
-                )
+                if idempotency_key:
+                    self._inject_failure("before_idempotency", len(records) + 1)
+                    connection.execute(
+                        """
+                        INSERT INTO idempotency_entries(
+                            loop_id,
+                            idempotency_key,
+                            request_digest,
+                            process_id
+                        ) VALUES (?, ?, ?, ?)
+                        """,
+                        (
+                            result.loop_id,
+                            idempotency_key,
+                            request_digest,
+                            result.process_id,
+                        ),
+                    )
+        except (IdempotencyConflict, RepositoryIntegrityError):
+            raise
+        except sqlite3.IntegrityError as exc:
+            raise RecordIdentityCollision(
+                "record, current-scope, or idempotency identity collision"
+            ) from exc
+        except sqlite3.DatabaseError as exc:
+            raise RepositoryIntegrityError("SQLite publication failed") from exc
