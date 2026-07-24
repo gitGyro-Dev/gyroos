@@ -53,6 +53,20 @@ _RECORD_REGISTRY: dict[str, type[BaseModel]] = {
     "TrajectoryEdge": TrajectoryEdge,
 }
 
+_RECORD_ID_FIELDS: dict[type[BaseModel], str] = {
+    LoopStepResult: "process_id",
+    SliceDone: "slice_id",
+    StabilityResult: "stability_result_id",
+    OperatorResponse: "operator_response_id",
+    RuntimeContinuityResult: "continuity_result_id",
+    BoundaryEvidence: "boundary_evidence_id",
+    BoundaryStateRecord: "boundary_state_record_id",
+    ContextEvidence: "context_evidence_id",
+    VoidEvidence: "void_evidence_id",
+    DeferredRelationRecord: "deferred_relation_record_id",
+    TrajectoryEdge: "trajectory_edge_id",
+}
+
 
 def _canonical_json(record: BaseModel) -> str:
     payload = record.model_dump(mode="json")
@@ -64,24 +78,15 @@ def _digest(payload_json: str) -> str:
 
 
 def _record_id(record: CanonicalRecord) -> str:
-    candidates = (
-        "process_id",
-        "slice_id",
-        "stability_result_id",
-        "operator_response_id",
-        "continuity_result_id",
-        "boundary_evidence_id",
-        "boundary_state_record_id",
-        "context_evidence_id",
-        "void_evidence_id",
-        "deferred_relation_record_id",
-        "trajectory_edge_id",
-    )
-    for field_name in candidates:
-        value = getattr(record, field_name, None)
-        if value:
-            return str(value)
-    raise ValueError(f"canonical record has no supported identity field: {type(record).__name__}")
+    field_name = _RECORD_ID_FIELDS.get(type(record))
+    if field_name is None:
+        raise ValueError(f"unsupported canonical record type: {type(record).__name__}")
+    value = getattr(record, field_name, None)
+    if not value:
+        raise ValueError(
+            f"canonical record {type(record).__name__} has no value for {field_name}"
+        )
+    return str(value)
 
 
 def _record_type(record: CanonicalRecord) -> str:
@@ -106,6 +111,13 @@ def _collect_records(result: LoopStepResult) -> list[CanonicalRecord]:
     ]
     if result.deferred_relation_record is not None:
         records.append(result.deferred_relation_record)
+
+    record_ids = [_record_id(record) for record in records]
+    if len(record_ids) != len(set(record_ids)):
+        duplicates = sorted(
+            record_id for record_id in set(record_ids) if record_ids.count(record_id) > 1
+        )
+        raise ValueError(f"duplicate record identities in publication group: {duplicates}")
     return records
 
 
