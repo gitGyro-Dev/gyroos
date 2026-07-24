@@ -169,6 +169,7 @@ def _history_item(result: LoopStepResult) -> ProcessHistoryItem:
 
 def _matches_trajectory_ref(edge: TrajectoryEdge, trajectory_ref: str) -> bool:
     return trajectory_ref in {
+        edge.relation_ref,
         edge.source_ref,
         edge.target_ref,
         edge.parent_process_ref,
