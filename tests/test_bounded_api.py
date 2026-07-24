@@ -275,7 +275,8 @@ def test_trajectory_query_returns_matching_edges_in_publication_order() -> None:
         first.json()["process_id"],
         second.json()["process_id"],
     ]
-    assert all(item["source_ref"] == "relation_001" for item in body["items"])
+    assert all(item["relation_ref"] == "relation_001" for item in body["items"])
+    assert all(item["source_ref"].startswith("structure_trajectory_") for item in body["items"])
     assert body["next_cursor"] is None
 
 
