@@ -49,6 +49,12 @@ class ReferenceResolver:
     store: InMemoryStore
 
     def validate(self, request: LoopStepRequest) -> None:
+        if (
+            request.slice_request.mode == SliceMode.SLICE
+            and request.slice_request.source_type != SliceSourceType.RUNTIME_STRUCTURE
+        ):
+            raise ValueError("initial SLICE requires source_type=RUNTIME_STRUCTURE")
+
         refs = [
             request.previous_state_ref,
             request.slice_request.parent_process_ref,
@@ -383,6 +389,7 @@ class ProcessExecutor:
             deferred_relation_record=deferred_record,
             trajectory_edges=[trajectory_edge],
             created_record_refs=created_refs,
+            replayed=False,
         )
         self.store.publish(
             result=result,
