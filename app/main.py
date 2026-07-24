@@ -21,6 +21,7 @@ from .repository_errors import (
     RepositorySchemaMismatch,
     RepositorySerializationError,
 )
+from .resource_limits import ResourceLimitMiddleware
 from .runtime import ProcessExecutor, ReferenceError
 from .security import require_runtime_bearer
 from .settings import settings
@@ -31,6 +32,7 @@ app = FastAPI(
     description="One HTTP request executes one bounded Gyro Process.",
     debug=settings.debug,
 )
+app.add_middleware(ResourceLimitMiddleware, runtime_settings=settings)
 protected = APIRouter(dependencies=[Depends(require_runtime_bearer)])
 executor = ProcessExecutor(store)
 
