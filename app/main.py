@@ -12,6 +12,7 @@ from .models import (
     LoopStepRequest,
     LoopStepResult,
     ProcessHistoryPage,
+    TrajectoryEdgePage,
 )
 from .repositories import store
 from .repository_errors import RepositoryIntegrityError
@@ -182,6 +183,36 @@ def get_loop_history(
             category="REPOSITORY",
             phase="PROCESS_HISTORY_QUERY",
             loop_id=loop_id,
+        )
+
+
+@app.get("/trajectory/{trajectory_ref}", response_model=TrajectoryEdgePage)
+def get_trajectory(
+    trajectory_ref: str,
+    limit: int = Query(default=20, ge=1, le=100),
+    cursor: str | None = Query(default=None),
+):
+    try:
+        return store.list_trajectory_edges(
+            trajectory_ref=trajectory_ref,
+            limit=limit,
+            cursor=cursor,
+        )
+    except ValueError as exc:
+        return api_error(
+            422,
+            code="GYRO_API_VALIDATION_TRAJECTORY_CURSOR",
+            message=str(exc),
+            category="VALIDATION",
+            phase="TRAJECTORY_QUERY",
+        )
+    except RepositoryIntegrityError as exc:
+        return api_error(
+            500,
+            code="GYRO_API_REPOSITORY_INTEGRITY",
+            message=str(exc),
+            category="REPOSITORY",
+            phase="TRAJECTORY_QUERY",
         )
 
 
