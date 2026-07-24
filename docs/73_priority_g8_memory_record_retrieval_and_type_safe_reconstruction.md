@@ -205,6 +205,14 @@ missing record remains None at repository level
 
 The existing GitHub Actions workflow runs both affected test files.
 
+Successful verification:
+
+```text
+GitHub Actions run = 30075798090
+Job = 89426127112
+Conclusion = success
+```
+
 ---
 
 ## 10. Responsibility Review
@@ -225,7 +233,7 @@ The endpoint does not mutate memory, repair records, select current scope, infer
 
 ```text
 G-8 Memory Record Retrieval and Type-safe Reconstruction
-= IMPLEMENTED
+= COMPLETE
 
 Typed response envelope
 = IMPLEMENTED
@@ -240,14 +248,7 @@ Digest, schema, and payload reconstruction boundaries
 = IMPLEMENTED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, G-8 may be marked:
-
-```text
-G-8
-= COMPLETE
+= SUCCESS
 ```
 
 The next Priority G step is:
