@@ -500,6 +500,35 @@ At each process cycle:
 
 ---
 
+## 🌐 Priority G Bounded Runtime API
+
+Priority G adds a bounded, persistent Runtime API without changing the invariant Core.
+
+```text
+POST /loop/step
+GET  /loop/state/{loop_id}
+GET  /loop/history/{loop_id}
+GET  /trajectory/{trajectory_ref}
+GET  /process/{process_id}
+GET  /memory/record/{record_id}
+```
+
+Runtime persistence is implemented through an atomic SQLite-backed repository boundary:
+
+```text
+complete Process result group
+→ atomic publication
+→ current-scope pointer update
+→ immutable Process and Trajectory history
+→ typed canonical reconstruction after restart
+```
+
+Query surfaces do not execute a new Process, select Operator Response, infer a hidden latest state, or convert repository absence into VOID, DEFER, STOP, or Stability results.
+
+Detailed contracts are recorded in `docs/66_*` through `docs/74_*`.
+
+---
+
 ## ❌ What GyroOS Does Not Do
 
 GyroOS does not:
@@ -551,13 +580,27 @@ gyroos/
     17_context_loop_controller.md
     18_void_defer_jump.md
     19_dynamic_equivalence_runtime.md
-  src/
-    core/
-    engines/
-    runtime/
-    api/
-  examples/
-  paper/
+    66_priority_g1_sqlite_persistence.md
+    67_priority_g2_repository_schema.md
+    68_priority_g3_type_safe_reconstruction.md
+    69_priority_g4_atomic_publication.md
+    70_priority_g5_current_scope_query_endpoint.md
+    71_priority_g6_process_history_query_endpoint.md
+    72_priority_g7_trajectory_query_endpoint.md
+    73_priority_g8_memory_record_retrieval_and_type_safe_reconstruction.md
+    74_priority_g9_restart_and_recovery_tests.md
+  app/
+    main.py
+    models.py
+    repositories.py
+    repository_errors.py
+    runtime.py
+    sqlite_repository.py
+  tests/
+    test_bounded_api.py
+    test_priority_f_poc.py
+    test_sqlite_repository.py
+    test_restart_recovery.py
 ```
 
 ---
@@ -574,58 +617,18 @@ Gyro Processₙ
 → Gyro Processₙ₊₁
 ```
 
-### Phase 5 — Context-aware Runtime
-
-Focus:
+### Priority G — Persistent Runtime Boundary
 
 ```text
-Context Runtime
-Re-Slice Engine
-Context Loop Controller
-Void / Defer / Jump handling
-Dynamic Equivalence Runtime
-```
+G-1 through G-9
+= implemented and verified
 
-### Phase 6 — Application Connection
-
-GyroAuth may use GyroOS outputs, but must not redefine GyroOS core.
-
----
-
-## 🔐 Application Layer: GyroAuth
-
-GyroAuth is an application built on top of GyroOS.
-
-GyroAuth must not be mixed into GyroOS core definitions.
-
-Repository:
-
-```text
-https://github.com/gitGyro-Dev/gyroauth
+G-10
+= cross-document review and refinement
 ```
 
 ---
 
-## 🧠 One-line Definition
+## 📄 License
 
-GyroOS is:
-
-> The execution layer that maps Structure → Slice → Stability into runtime continuity, repeats established sections through Operator Response, and supports Context-aware Re-Slice and Dynamic Equivalence at runtime.
-
----
-
-## 🔴 Final Statement
-
-GyroOS does not let Stability directly control the Loop.
-
-GyroOS implements:
-
-```text
-Stability → Operator Response → Next Process
-```
-
-while preserving the invariant core:
-
-```text
-Structure → Slice → Stability
-```
+See the repository license file for applicable terms.
