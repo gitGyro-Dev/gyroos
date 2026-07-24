@@ -12,7 +12,7 @@ def utc_now() -> datetime:
 
 
 class CanonicalModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", use_enum_values=False)
+    model_config = ConfigDict(extra="forbid", use_enum_values=True)
 
 
 class SliceMode(str, Enum):
@@ -22,24 +22,11 @@ class SliceMode(str, Enum):
 
 class SliceSourceType(str, Enum):
     RUNTIME_STRUCTURE = "RUNTIME_STRUCTURE"
-    SLICE_DONE = "SLICE_DONE"
     CONTEXT_EVIDENCE = "CONTEXT_EVIDENCE"
     BOUNDARY_EVIDENCE = "BOUNDARY_EVIDENCE"
     BOUNDARY_STATE_RECORD = "BOUNDARY_STATE_RECORD"
     VOID_EVIDENCE = "VOID_EVIDENCE"
-    TRAJECTORY_SEGMENT = "TRAJECTORY_SEGMENT"
-    PRIOR_PROCESS_RESULT = "PRIOR_PROCESS_RESULT"
-    RETAINED_RELATION = "RETAINED_RELATION"
-
-
-class BoundaryStateType(str, Enum):
-    NORMAL = "NORMAL"
-    NON = "NON"
-    UN = "UN"
-    ABSENCE = "ABSENCE"
-    BLANK = "BLANK"
-    UNKNOWN = "UNKNOWN"
-    VOID = "VOID"
+    PROCESS_RESULT = "PROCESS_RESULT"
 
 
 class StabilityStatus(str, Enum):
@@ -48,6 +35,7 @@ class StabilityStatus(str, Enum):
     UNSTABLE = "UNSTABLE"
     NOT_EVALUABLE = "NOT_EVALUABLE"
     VOID_RELATED = "VOID_RELATED"
+    UNKNOWN = "UNKNOWN"
 
 
 class OperatorResponseType(str, Enum):
@@ -68,46 +56,39 @@ class RuntimeContinuityType(str, Enum):
     STOPPED_FOR_CURRENT_SCOPE = "STOPPED_FOR_CURRENT_SCOPE"
 
 
+class BoundaryStateType(str, Enum):
+    NORMAL = "NORMAL"
+    UNKNOWN = "UNKNOWN"
+    VOID = "VOID"
+    CONFLICTING = "CONFLICTING"
+
+
+class StructureInput(CanonicalModel):
+    structure_id: str
+    current_mode: dict[str, Any]
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class OperatorOrientation(CanonicalModel):
-    orientation_id: str = Field(min_length=1)
-    weights: dict[str, float] = Field(default_factory=dict)
-    resolution: dict[str, float] = Field(default_factory=dict)
-    target_dimensions: list[str] = Field(default_factory=list)
-    constraints: dict[str, Any] = Field(default_factory=dict)
+    orientation_id: str
+    operator_ref: str | None = None
+    intent: str | None = None
+    focus: list[str] = Field(default_factory=list)
+    criteria: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class SlicePolicy(CanonicalModel):
-    policy_id: str = Field(min_length=1)
-    policy_type: str = Field(min_length=1)
+    policy_id: str
+    policy_type: str
     parameters: dict[str, Any] = Field(default_factory=dict)
-    constraints: dict[str, Any] = Field(default_factory=dict)
-    metadata: dict[str, Any] = Field(default_factory=dict)
-
-
-class RuntimeLimits(CanonicalModel):
-    max_slice_operations: int = Field(default=1, ge=1, le=1)
-    max_reslice_depth: int = Field(default=2, ge=1, le=16)
-    max_context_chain_length: int = Field(default=3, ge=1, le=64)
-    max_branch_count: int = Field(default=2, ge=1, le=64)
-    max_evidence_refs: int = Field(default=128, ge=1, le=4096)
-    max_payload_bytes: int = Field(default=1_048_576, ge=1024, le=16_777_216)
-    deadline_ms: int = Field(default=5000, ge=1, le=120_000)
-
-
-class RuntimeStructureInput(CanonicalModel):
-    structure_id: str = Field(min_length=1)
-    current_mode: dict[str, Any]
-    retained_conditions: dict[str, Any] = Field(default_factory=dict)
-    continuity_refs: list[str] = Field(default_factory=list)
-    constraints: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class SliceRequest(CanonicalModel):
     mode: SliceMode
     source_type: SliceSourceType
-    source_ref: str = Field(min_length=1)
+    source_ref: str
     orientation: OperatorOrientation
     slice_policy: SlicePolicy
     context_refs: list[str] = Field(default_factory=list)
@@ -120,44 +101,32 @@ class SliceRequest(CanonicalModel):
     requested_by_response_ref: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @model_validator(mode="after")
+    def validate_mode(self) -> "SliceRequest":
+        if self.mode == SliceMode.RESLICE:
+            if not self.parent_process_ref or not self.parent_slice_ref:
+                raise ValueError("RESLICE requires parent_process_ref and parent_slice_ref")
+            if not self.requested_by_response_ref:
+                raise ValueError("RESLICE requires requested_by_response_ref")
+        return self
+
+
+class RuntimeLimits(CanonicalModel):
+    max_slice_operations: int = Field(default=1, ge=1, le=1)
+
 
 class LoopStepRequest(CanonicalModel):
-    request_id: str = Field(min_length=1)
-    loop_id: str = Field(min_length=1)
-    structure: RuntimeStructureInput
+    request_id: str
+    loop_id: str
+    idempotency_key: str | None = None
+    structure: StructureInput
     slice_request: SliceRequest
     runtime_limits: RuntimeLimits = Field(default_factory=RuntimeLimits)
-    idempotency_key: str | None = None
-    client_trace_id: str | None = None
-    previous_state_ref: str | None = None
     expected_current_scope_ref: str | None = None
+    previous_state_ref: str | None = None
     policy_ref: str | None = None
-    request_context: dict[str, Any] | None = None
+    client_trace_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
-
-    @model_validator(mode="after")
-    def validate_source_contract(self) -> "LoopStepRequest":
-        req = self.slice_request
-        if req.mode == SliceMode.SLICE:
-            if req.source_type != SliceSourceType.RUNTIME_STRUCTURE:
-                raise ValueError("SLICE requires source_type=RUNTIME_STRUCTURE")
-            if req.source_ref != self.structure.structure_id:
-                raise ValueError("SLICE source_ref must equal structure.structure_id")
-        else:
-            missing = [
-                name
-                for name, value in {
-                    "parent_process_ref": req.parent_process_ref,
-                    "parent_slice_ref": req.parent_slice_ref,
-                    "requested_by_response_ref": req.requested_by_response_ref,
-                }.items()
-                if not value
-            ]
-            if missing:
-                raise ValueError(f"RESLICE missing lineage: {', '.join(missing)}")
-            if req.source_type == SliceSourceType.RUNTIME_STRUCTURE:
-                raise ValueError("RESLICE requires an explicitly retained Runtime source")
-        return self
 
 
 class SliceReadability(CanonicalModel):
@@ -167,8 +136,6 @@ class SliceReadability(CanonicalModel):
     target_relation_readability: float | None = Field(default=None, ge=0.0, le=1.0)
     unreadable_aspects: list[str] = Field(default_factory=list)
     reason: str | None = None
-    evidence_refs: list[str] = Field(default_factory=list)
-    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class BoundaryEvidence(CanonicalModel):
@@ -178,7 +145,6 @@ class BoundaryEvidence(CanonicalModel):
     relation_ref: str
     distinction_type: str
     boundary_readability: float = Field(ge=0.0, le=1.0)
-    source_evidence_refs: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -204,8 +170,7 @@ class ContextEvidence(CanonicalModel):
     relation_ref: str
     source_type: str
     content: dict[str, Any]
-    context_confidence: float = Field(ge=0.0, le=1.0)
-    source_evidence_refs: list[str] = Field(default_factory=list)
+    context_confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -217,8 +182,8 @@ class VoidEvidence(CanonicalModel):
     boundary_ref: str
     relation_ref: str
     reason: str
-    target_relation_readability: float | None = Field(default=None, ge=0.0, le=1.0)
-    connectability: float | None = Field(default=None, ge=0.0, le=1.0)
+    target_relation_readability: float = Field(ge=0.0, le=1.0)
+    connectability: float = Field(ge=0.0, le=1.0)
     supporting_evidence_refs: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -246,7 +211,7 @@ class SliceDone(CanonicalModel):
     parent_slice_ref: str | None = None
     source_type: SliceSourceType
     source_ref: str
-    created_at: datetime = Field(default_factory=utc_now)
+    completed_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -259,10 +224,8 @@ class StabilityResult(CanonicalModel):
     continuability: bool | None = None
     reason: str
     evidence_refs: list[str] = Field(default_factory=list)
-    supporting_evidence_refs: list[str] = Field(default_factory=list)
-    conflicting_evidence_refs: list[str] = Field(default_factory=list)
     evaluation_policy_ref: str | None = None
-    created_at: datetime = Field(default_factory=utc_now)
+    evaluated_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -273,10 +236,9 @@ class OperatorResponse(CanonicalModel):
     stability_result_ref: str
     response_type: OperatorResponseType
     reason: str
-    response_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    response_confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     considered_evidence_refs: list[str] = Field(default_factory=list)
     decisive_evidence_refs: list[str] = Field(default_factory=list)
-    conflicting_evidence_refs: list[str] = Field(default_factory=list)
     next_request: SliceRequest | None = None
     selected_by_policy_ref: str | None = None
     created_at: datetime = Field(default_factory=utc_now)
@@ -289,8 +251,8 @@ class RuntimeContinuityResult(CanonicalModel):
     operator_response_ref: str
     continuity_type: RuntimeContinuityType
     connected: bool
-    pending: bool = False
-    terminated_for_current_scope: bool = False
+    pending: bool
+    terminated_for_current_scope: bool
     source_ref: str
     target_ref: str | None = None
     created_at: datetime = Field(default_factory=utc_now)
@@ -368,6 +330,27 @@ class TrajectoryEdgePage(CanonicalModel):
     items: list[TrajectoryEdge] = Field(default_factory=list)
     limit: int = Field(ge=1, le=100)
     next_cursor: str | None = None
+
+
+MemoryRecord = (
+    LoopStepResult
+    | SliceDone
+    | StabilityResult
+    | OperatorResponse
+    | RuntimeContinuityResult
+    | BoundaryEvidence
+    | BoundaryStateRecord
+    | ContextEvidence
+    | VoidEvidence
+    | DeferredRelationRecord
+    | TrajectoryEdge
+)
+
+
+class MemoryRecordEnvelope(CanonicalModel):
+    record_id: str
+    record_type: str
+    record: MemoryRecord
 
 
 class ApiError(CanonicalModel):
