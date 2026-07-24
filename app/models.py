@@ -344,6 +344,24 @@ class CurrentScopeState(CanonicalModel):
     process: LoopStepResult
 
 
+class ProcessHistoryItem(CanonicalModel):
+    process_id: str
+    request_id: str
+    loop_id: str
+    completed_at: datetime
+    stability_status: StabilityStatus
+    stability_value: float | None = None
+    operator_response: OperatorResponseType
+    continuity_type: RuntimeContinuityType
+
+
+class ProcessHistoryPage(CanonicalModel):
+    loop_id: str
+    items: list[ProcessHistoryItem] = Field(default_factory=list)
+    limit: int = Field(ge=1, le=100)
+    next_cursor: str | None = None
+
+
 class ApiError(CanonicalModel):
     error_id: str
     error_code: str
