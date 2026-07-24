@@ -2,11 +2,17 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from .models import ApiError, CurrentScopeState, LoopStepRequest, LoopStepResult
+from .models import (
+    ApiError,
+    CurrentScopeState,
+    LoopStepRequest,
+    LoopStepResult,
+    ProcessHistoryPage,
+)
 from .repositories import store
 from .repository_errors import RepositoryIntegrityError
 from .runtime import ProcessExecutor, ReferenceError
@@ -149,6 +155,34 @@ def get_loop_state(loop_id: str):
         current_process_id=process_id,
         process=process,
     )
+
+
+@app.get("/loop/history/{loop_id}", response_model=ProcessHistoryPage)
+def get_loop_history(
+    loop_id: str,
+    limit: int = Query(default=20, ge=1, le=100),
+    cursor: str | None = Query(default=None),
+):
+    try:
+        return store.list_process_history(loop_id=loop_id, limit=limit, cursor=cursor)
+    except ValueError as exc:
+        return api_error(
+            422,
+            code="GYRO_API_VALIDATION_HISTORY_CURSOR",
+            message=str(exc),
+            category="VALIDATION",
+            phase="PROCESS_HISTORY_QUERY",
+            loop_id=loop_id,
+        )
+    except RepositoryIntegrityError as exc:
+        return api_error(
+            500,
+            code="GYRO_API_REPOSITORY_INTEGRITY",
+            message=str(exc),
+            category="REPOSITORY",
+            phase="PROCESS_HISTORY_QUERY",
+            loop_id=loop_id,
+        )
 
 
 @app.get("/process/{process_id}", response_model=LoopStepResult)
