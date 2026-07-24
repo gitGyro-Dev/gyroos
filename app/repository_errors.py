@@ -13,6 +13,10 @@ class IdempotencyConflict(RepositoryError):
     """Raised when one idempotency scope is reused with a different digest."""
 
 
+class RepositoryBusyError(RepositoryError):
+    """Raised when the repository is temporarily unavailable due to lock contention."""
+
+
 class RepositoryIntegrityError(RepositoryError):
     """Raised when persistent repository integrity is violated."""
 
