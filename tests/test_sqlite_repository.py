@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 
 import pytest
 
-from app.models import LoopStepRequest
-from app.repository_errors import IdempotencyConflict, RecordIdentityCollision
+from app.models import LoopStepRequest, StabilityResult
+from app.repository_errors import (
+    IdempotencyConflict,
+    RecordIdentityCollision,
+    RepositoryIntegrityError,
+    RepositorySchemaMismatch,
+    RepositorySerializationError,
+)
 from app.runtime import ProcessExecutor, canonical_digest
 from app.sqlite_repository import SQLiteStore
 
@@ -70,6 +77,79 @@ def test_sqlite_store_persists_and_reconstructs_complete_process(tmp_path: Path)
 
     for record_id in first_result.created_record_refs:
         assert second_store.get_record(record_id) is not None
+
+
+def test_sqlite_store_reconstructs_exact_typed_record_after_restart(tmp_path: Path) -> None:
+    database = tmp_path / "runtime.db"
+    request = LoopStepRequest.model_validate(base_request())
+    result = ProcessExecutor(SQLiteStore(database)).execute(request)
+
+    restored = SQLiteStore(database).get_record(result.stability.stability_result_id)
+    assert isinstance(restored, StabilityResult)
+    assert restored.stability_result_id == result.stability.stability_result_id
+    assert restored.status == result.stability.status
+
+
+def test_sqlite_store_rejects_canonical_digest_tampering(tmp_path: Path) -> None:
+    database = tmp_path / "runtime.db"
+    request = LoopStepRequest.model_validate(base_request())
+    result = ProcessExecutor(SQLiteStore(database)).execute(request)
+    record_id = result.stability.stability_result_id
+
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            "UPDATE runtime_records SET canonical_digest = ? WHERE record_id = ?",
+            ("0" * 64, record_id),
+        )
+
+    with pytest.raises(RepositoryIntegrityError, match="digest mismatch"):
+        SQLiteStore(database).get_record(record_id)
+
+
+def test_sqlite_store_rejects_schema_version_mismatch(tmp_path: Path) -> None:
+    database = tmp_path / "runtime.db"
+    request = LoopStepRequest.model_validate(base_request())
+    result = ProcessExecutor(SQLiteStore(database)).execute(request)
+    record_id = result.stability.stability_result_id
+
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            "UPDATE runtime_records SET schema_version = ? WHERE record_id = ?",
+            ("unsupported", record_id),
+        )
+
+    with pytest.raises(RepositorySchemaMismatch, match="unsupported schema_version"):
+        SQLiteStore(database).get_record(record_id)
+
+
+def test_sqlite_store_rejects_invalid_canonical_payload_reconstruction(
+    tmp_path: Path,
+) -> None:
+    database = tmp_path / "runtime.db"
+    request = LoopStepRequest.model_validate(base_request())
+    result = ProcessExecutor(SQLiteStore(database)).execute(request)
+    record_id = result.stability.stability_result_id
+
+    invalid_payload = json.dumps(
+        {"stability_result_id": record_id},
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    import hashlib
+
+    digest = hashlib.sha256(invalid_payload.encode("utf-8")).hexdigest()
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            """
+            UPDATE runtime_records
+            SET canonical_payload = ?, canonical_digest = ?
+            WHERE record_id = ?
+            """,
+            (invalid_payload, digest, record_id),
+        )
+
+    with pytest.raises(RepositorySerializationError, match="failed to reconstruct"):
+        SQLiteStore(database).get_record(record_id)
 
 
 def test_sqlite_store_preserves_current_scope_and_idempotency_after_restart(
