@@ -3,7 +3,36 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from threading import RLock
 
-from .models import LoopStepResult
+from .models import LoopStepResult, ProcessHistoryItem, ProcessHistoryPage
+
+
+MAX_HISTORY_LIMIT = 100
+DEFAULT_HISTORY_LIMIT = 20
+
+
+def _decode_cursor(cursor: str | None) -> int:
+    if cursor is None:
+        return 0
+    try:
+        offset = int(cursor)
+    except ValueError as exc:
+        raise ValueError("history cursor must be a non-negative integer offset") from exc
+    if offset < 0:
+        raise ValueError("history cursor must be a non-negative integer offset")
+    return offset
+
+
+def _history_item(result: LoopStepResult) -> ProcessHistoryItem:
+    return ProcessHistoryItem(
+        process_id=result.process_id,
+        request_id=result.request_id,
+        loop_id=result.loop_id,
+        completed_at=result.completed_at,
+        stability_status=result.stability.status,
+        stability_value=result.stability.value,
+        operator_response=result.operator_response.response_type,
+        continuity_type=result.continuity.continuity_type,
+    )
 
 
 @dataclass
@@ -12,6 +41,7 @@ class InMemoryStore:
     records: dict[str, object] = field(default_factory=dict)
     idempotency: dict[tuple[str, str], tuple[str, LoopStepResult]] = field(default_factory=dict)
     current_scope: dict[str, str] = field(default_factory=dict)
+    process_history: dict[str, list[str]] = field(default_factory=dict)
     _lock: RLock = field(default_factory=RLock)
 
     def get_process(self, process_id: str) -> LoopStepResult | None:
@@ -25,6 +55,28 @@ class InMemoryStore:
 
     def get_idempotent(self, loop_id: str, key: str) -> tuple[str, LoopStepResult] | None:
         return self.idempotency.get((loop_id, key))
+
+    def list_process_history(
+        self,
+        *,
+        loop_id: str,
+        limit: int = DEFAULT_HISTORY_LIMIT,
+        cursor: str | None = None,
+    ) -> ProcessHistoryPage:
+        if limit < 1 or limit > MAX_HISTORY_LIMIT:
+            raise ValueError(f"history limit must be between 1 and {MAX_HISTORY_LIMIT}")
+        offset = _decode_cursor(cursor)
+        process_ids = self.process_history.get(loop_id, [])
+        selected_ids = process_ids[offset : offset + limit]
+        items = [_history_item(self.processes[process_id]) for process_id in selected_ids]
+        next_offset = offset + len(selected_ids)
+        next_cursor = str(next_offset) if next_offset < len(process_ids) else None
+        return ProcessHistoryPage(
+            loop_id=loop_id,
+            items=items,
+            limit=limit,
+            next_cursor=next_cursor,
+        )
 
     def publish(
         self,
@@ -63,6 +115,7 @@ class InMemoryStore:
             self.processes[result.process_id] = result
             self.records.update(artifacts)
             self.current_scope[result.loop_id] = result.process_id
+            self.process_history.setdefault(result.loop_id, []).append(result.process_id)
             if idempotency_key:
                 self.idempotency[(result.loop_id, idempotency_key)] = (
                     request_digest,
