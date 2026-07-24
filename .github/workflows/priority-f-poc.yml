@@ -11,6 +11,7 @@ on:
       - "tests/test_sqlite_repository.py"
       - "tests/test_restart_recovery.py"
       - "tests/test_runtime_settings.py"
+      - "tests/test_authentication_boundary.py"
       - "requirements-api.txt"
       - ".github/workflows/priority-f-poc.yml"
   pull_request:
@@ -22,6 +23,7 @@ on:
       - "tests/test_sqlite_repository.py"
       - "tests/test_restart_recovery.py"
       - "tests/test_runtime_settings.py"
+      - "tests/test_authentication_boundary.py"
       - "requirements-api.txt"
       - ".github/workflows/priority-f-poc.yml"
 
@@ -48,7 +50,7 @@ jobs:
         run: python -m pip install -r requirements-api.txt
 
       - name: Run bounded Runtime and production hardening tests
-        run: python -m pytest tests/test_bounded_api.py tests/test_priority_f_poc.py tests/test_sqlite_repository.py tests/test_restart_recovery.py tests/test_runtime_settings.py -q
+        run: python -m pytest tests/test_bounded_api.py tests/test_priority_f_poc.py tests/test_sqlite_repository.py tests/test_restart_recovery.py tests/test_runtime_settings.py tests/test_authentication_boundary.py -q
 
       - name: Generate PoC result artifacts
         run: python poc/run_poc.py --output-dir poc/results
