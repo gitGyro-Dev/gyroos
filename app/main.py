@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -11,11 +11,16 @@ from .models import (
     CurrentScopeState,
     LoopStepRequest,
     LoopStepResult,
+    MemoryRecordEnvelope,
     ProcessHistoryPage,
     TrajectoryEdgePage,
 )
 from .repositories import store
-from .repository_errors import RepositoryIntegrityError
+from .repository_errors import (
+    RepositoryIntegrityError,
+    RepositorySchemaMismatch,
+    RepositorySerializationError,
+)
 from .runtime import ProcessExecutor, ReferenceError
 
 app = FastAPI(
@@ -220,15 +225,56 @@ def get_trajectory(
 def get_process(process_id: str):
     result = store.get_process(process_id)
     if result is None:
-        raise HTTPException(status_code=404, detail="Process not found")
+        return api_error(
+            404,
+            code="GYRO_API_NOT_FOUND_PROCESS",
+            message=f"Process not found: {process_id}",
+            category="NOT_FOUND",
+            phase="PROCESS_RETRIEVAL",
+        )
     return result
 
 
-@app.get("/memory/record/{record_id}")
+@app.get("/memory/record/{record_id}", response_model=MemoryRecordEnvelope)
 def get_memory_record(record_id: str):
-    record = store.get_record(record_id)
+    try:
+        record = store.get_record(record_id)
+    except RepositorySchemaMismatch as exc:
+        return api_error(
+            500,
+            code="GYRO_API_REPOSITORY_SCHEMA_MISMATCH",
+            message=str(exc),
+            category="REPOSITORY",
+            phase="MEMORY_RECORD_RECONSTRUCTION",
+        )
+    except RepositorySerializationError as exc:
+        return api_error(
+            500,
+            code="GYRO_API_REPOSITORY_RECONSTRUCTION",
+            message=str(exc),
+            category="REPOSITORY",
+            phase="MEMORY_RECORD_RECONSTRUCTION",
+        )
+    except RepositoryIntegrityError as exc:
+        return api_error(
+            500,
+            code="GYRO_API_REPOSITORY_INTEGRITY",
+            message=str(exc),
+            category="REPOSITORY",
+            phase="MEMORY_RECORD_RECONSTRUCTION",
+        )
+
     if record is None:
-        raise HTTPException(status_code=404, detail="Record not found")
-    if hasattr(record, "model_dump"):
-        return record.model_dump(mode="json")
-    return record
+        return api_error(
+            404,
+            code="GYRO_API_NOT_FOUND_MEMORY_RECORD",
+            message=f"Memory record not found: {record_id}",
+            category="NOT_FOUND",
+            phase="MEMORY_RECORD_RETRIEVAL",
+        )
+
+    return MemoryRecordEnvelope(
+        record_id=record_id,
+        record_type=type(record).__name__,
+        record=record,
+    )
