@@ -338,6 +338,12 @@ class LoopStepResult(CanonicalModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class CurrentScopeState(CanonicalModel):
+    loop_id: str
+    current_process_id: str
+    process: LoopStepResult
+
+
 class ApiError(CanonicalModel):
     error_id: str
     error_code: str
