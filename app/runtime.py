@@ -10,6 +10,7 @@ from .models import (
     BoundaryStateRecord,
     BoundaryStateType,
     ContextEvidence,
+    DeferredRelationRecord,
     LoopStepRequest,
     LoopStepResult,
     OperatorResponse,
@@ -23,6 +24,7 @@ from .models import (
     SliceSourceType,
     StabilityResult,
     StabilityStatus,
+    TrajectoryEdge,
     VoidEvidence,
 )
 from .repositories import InMemoryStore
@@ -327,6 +329,42 @@ class ProcessExecutor:
         if response.response_type == OperatorResponseType.STOP and response.next_request is not None:
             raise ValueError("STOP requires next_request=null")
 
+        deferred_record = None
+        if response.response_type == OperatorResponseType.DEFER:
+            deferred_record = DeferredRelationRecord(
+                deferred_relation_record_id=new_id("deferred_relation"),
+                process_id=process_id,
+                operator_response_ref=response.operator_response_id,
+                continuity_result_ref=continuity.continuity_result_id,
+                relation_ref=slice_done.source_ref,
+                evidence_refs=list(response.considered_evidence_refs),
+            )
+
+        trajectory_edge = TrajectoryEdge(
+            trajectory_edge_id=new_id("trajectory_edge"),
+            process_id=process_id,
+            operator_response_ref=response.operator_response_id,
+            continuity_result_ref=continuity.continuity_result_id,
+            edge_type=continuity.continuity_type,
+            source_ref=continuity.source_ref,
+            target_ref=continuity.target_ref,
+            parent_process_ref=slice_done.parent_process_ref,
+        )
+
+        created_refs = [
+            slice_done.slice_id,
+            stability.stability_result_id,
+            response.operator_response_id,
+            continuity.continuity_result_id,
+            trajectory_edge.trajectory_edge_id,
+            *(item.boundary_evidence_id for item in slice_done.boundary_evidence),
+            *(item.boundary_state_record_id for item in slice_done.boundary_state_records),
+            *(item.context_evidence_id for item in slice_done.context_evidence),
+            *(item.void_evidence_id for item in slice_done.void_evidence),
+        ]
+        if deferred_record is not None:
+            created_refs.append(deferred_record.deferred_relation_record_id)
+
         result = LoopStepResult(
             process_id=process_id,
             request_id=request.request_id,
@@ -335,12 +373,9 @@ class ProcessExecutor:
             stability=stability,
             operator_response=response,
             continuity=continuity,
-            created_record_refs=[
-                slice_done.slice_id,
-                stability.stability_result_id,
-                response.operator_response_id,
-                continuity.continuity_result_id,
-            ],
+            deferred_relation_record=deferred_record,
+            trajectory_edges=[trajectory_edge],
+            created_record_refs=created_refs,
         )
         self.store.publish(
             result=result,
