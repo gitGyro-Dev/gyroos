@@ -92,8 +92,8 @@ def test_restart_recovers_complete_runtime_state(tmp_path: Path) -> None:
 
     restored_process = restarted_store.get_process(second_result.process_id)
     assert restored_process is not None
-    assert restored_process.operator_response.response_type.value == "ADJUST"
-    assert restored_process.continuity.continuity_type.value == "ADJUSTED_CONNECTION"
+    assert restored_process.operator_response.response_type == "ADJUST"
+    assert restored_process.continuity.continuity_type == "ADJUSTED_CONNECTION"
 
 
 def test_restart_idempotent_replay_does_not_publish_new_state(tmp_path: Path) -> None:
