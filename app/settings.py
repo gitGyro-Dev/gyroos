@@ -54,6 +54,10 @@ class RuntimeSettings:
     sqlite_timeout_seconds: float
     authentication_required: bool
     api_bearer_token: str | None
+    max_request_body_bytes: int
+    rate_limit_requests: int
+    rate_limit_window_seconds: int
+    max_concurrent_requests: int
 
     @classmethod
     def from_env(cls) -> "RuntimeSettings":
@@ -92,6 +96,10 @@ class RuntimeSettings:
                 default_authentication_required,
             ),
             api_bearer_token=api_bearer_token,
+            max_request_body_bytes=_read_int("GYROOS_MAX_REQUEST_BODY_BYTES", 1_048_576),
+            rate_limit_requests=_read_int("GYROOS_RATE_LIMIT_REQUESTS", 120),
+            rate_limit_window_seconds=_read_int("GYROOS_RATE_LIMIT_WINDOW_SECONDS", 60),
+            max_concurrent_requests=_read_int("GYROOS_MAX_CONCURRENT_REQUESTS", 32),
         )
         settings.validate()
         return settings
@@ -103,10 +111,15 @@ class RuntimeSettings:
             raise ValueError("GYROOS_PORT must be between 1 and 65535")
         if self.sqlite_timeout_seconds <= 0:
             raise ValueError("GYROOS_SQLITE_TIMEOUT_SECONDS must be greater than zero")
+        if self.max_request_body_bytes <= 0:
+            raise ValueError("GYROOS_MAX_REQUEST_BODY_BYTES must be greater than zero")
+        if self.rate_limit_requests <= 0:
+            raise ValueError("GYROOS_RATE_LIMIT_REQUESTS must be greater than zero")
+        if self.rate_limit_window_seconds <= 0:
+            raise ValueError("GYROOS_RATE_LIMIT_WINDOW_SECONDS must be greater than zero")
+        if self.max_concurrent_requests <= 0:
+            raise ValueError("GYROOS_MAX_CONCURRENT_REQUESTS must be greater than zero")
 
-        # Preserve the H-1 production configuration contract before applying
-        # the H-2 authentication boundary. This keeps failures deterministic:
-        # storage and debug configuration are validated before auth secrets.
         if self.environment == RuntimeEnvironment.PRODUCTION:
             if not str(self.database_path).strip() or str(self.database_path) == ".":
                 raise ValueError("GYROOS_DATABASE_PATH is required in production")
