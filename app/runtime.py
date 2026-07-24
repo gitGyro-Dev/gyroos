@@ -377,7 +377,7 @@ class ProcessExecutor:
             stability=stability,
             operator_response=response,
             continuity=continuity,
-            deferred_relation=deferred_record,
+            deferred_relation_record=deferred_record,
             trajectory_edges=[trajectory_edge],
             created_record_refs=created_refs,
         )
