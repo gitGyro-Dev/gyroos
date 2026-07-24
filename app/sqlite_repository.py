@@ -21,6 +21,7 @@ from .models import (
     SliceDone,
     StabilityResult,
     TrajectoryEdge,
+    TrajectoryEdgePage,
     VoidEvidence,
 )
 from .repository_errors import (
@@ -46,7 +47,7 @@ CanonicalRecord: TypeAlias = (
 )
 
 SCHEMA_VERSION = "1"
-RUNTIME_VERSION = "priority-g6"
+RUNTIME_VERSION = "priority-g7"
 MAX_HISTORY_LIMIT = 100
 DEFAULT_HISTORY_LIMIT = 20
 
@@ -141,15 +142,15 @@ def _collect_records(result: LoopStepResult) -> list[CanonicalRecord]:
     return records
 
 
-def _decode_cursor(cursor: str | None) -> int:
+def _decode_cursor(cursor: str | None, *, label: str = "history") -> int:
     if cursor is None:
         return 0
     try:
         offset = int(cursor)
     except ValueError as exc:
-        raise ValueError("history cursor must be a non-negative integer offset") from exc
+        raise ValueError(f"{label} cursor must be a non-negative integer offset") from exc
     if offset < 0:
-        raise ValueError("history cursor must be a non-negative integer offset")
+        raise ValueError(f"{label} cursor must be a non-negative integer offset")
     return offset
 
 
@@ -164,6 +165,14 @@ def _history_item(result: LoopStepResult) -> ProcessHistoryItem:
         operator_response=result.operator_response.response_type,
         continuity_type=result.continuity.continuity_type,
     )
+
+
+def _matches_trajectory_ref(edge: TrajectoryEdge, trajectory_ref: str) -> bool:
+    return trajectory_ref in {
+        edge.source_ref,
+        edge.target_ref,
+        edge.parent_process_ref,
+    }
 
 
 class SQLiteStore:
@@ -208,6 +217,9 @@ class SQLiteStore:
 
                 CREATE INDEX IF NOT EXISTS idx_runtime_records_loop
                     ON runtime_records(loop_id, publication_order);
+
+                CREATE INDEX IF NOT EXISTS idx_runtime_records_type_order
+                    ON runtime_records(record_type, rowid);
 
                 CREATE TABLE IF NOT EXISTS current_scope (
                     loop_id TEXT PRIMARY KEY,
@@ -342,6 +354,46 @@ class SQLiteStore:
         return ProcessHistoryPage(
             loop_id=loop_id,
             items=items,
+            limit=limit,
+            next_cursor=next_cursor,
+        )
+
+    def list_trajectory_edges(
+        self,
+        *,
+        trajectory_ref: str,
+        limit: int = DEFAULT_HISTORY_LIMIT,
+        cursor: str | None = None,
+    ) -> TrajectoryEdgePage:
+        if limit < 1 or limit > MAX_HISTORY_LIMIT:
+            raise ValueError(f"trajectory limit must be between 1 and {MAX_HISTORY_LIMIT}")
+        offset = _decode_cursor(cursor, label="trajectory")
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT record_id, record_type, canonical_payload, canonical_digest, schema_version
+                FROM runtime_records
+                WHERE record_type = 'TrajectoryEdge'
+                ORDER BY rowid ASC
+                """
+            ).fetchall()
+
+        matching: list[TrajectoryEdge] = []
+        for row in rows:
+            record = self._reconstruct_row(row, str(row["record_id"]))
+            if not isinstance(record, TrajectoryEdge):
+                raise RepositoryIntegrityError(
+                    f"trajectory record {row['record_id']} is not TrajectoryEdge"
+                )
+            if _matches_trajectory_ref(record, trajectory_ref):
+                matching.append(record)
+
+        selected = matching[offset : offset + limit]
+        next_offset = offset + len(selected)
+        next_cursor = str(next_offset) if next_offset < len(matching) else None
+        return TrajectoryEdgePage(
+            trajectory_ref=trajectory_ref,
+            items=selected,
             limit=limit,
             next_cursor=next_cursor,
         )
