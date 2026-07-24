@@ -245,15 +245,6 @@ class SQLiteStore:
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
                 );
 
-                CREATE INDEX IF NOT EXISTS idx_runtime_records_process
-                    ON runtime_records(process_id, publication_order);
-
-                CREATE INDEX IF NOT EXISTS idx_runtime_records_loop
-                    ON runtime_records(loop_id, publication_order);
-
-                CREATE INDEX IF NOT EXISTS idx_runtime_records_type_publication
-                    ON runtime_records(record_type, publication_id, publication_order);
-
                 CREATE TABLE IF NOT EXISTS current_scope (
                     loop_id TEXT PRIMARY KEY,
                     process_id TEXT NOT NULL,
@@ -291,14 +282,26 @@ class SQLiteStore:
                     """,
                     (_SCHEMA_METADATA_KEY, SCHEMA_VERSION),
                 )
-                return
+            else:
+                stored_version = str(row["metadata_value"])
+                if stored_version != SCHEMA_VERSION:
+                    raise RepositorySchemaMismatch(
+                        "unsupported database schema version "
+                        f"{stored_version}; runtime supports {SCHEMA_VERSION}"
+                    )
 
-            stored_version = str(row["metadata_value"])
-            if stored_version != SCHEMA_VERSION:
-                raise RepositorySchemaMismatch(
-                    "unsupported database schema version "
-                    f"{stored_version}; runtime supports {SCHEMA_VERSION}"
-                )
+            connection.executescript(
+                """
+                CREATE INDEX IF NOT EXISTS idx_runtime_records_process
+                    ON runtime_records(process_id, publication_order);
+
+                CREATE INDEX IF NOT EXISTS idx_runtime_records_loop
+                    ON runtime_records(loop_id, publication_order);
+
+                CREATE INDEX IF NOT EXISTS idx_runtime_records_type_publication
+                    ON runtime_records(record_type, publication_id, publication_order);
+                """
+            )
 
     def _validate_legacy_schema(self, connection: sqlite3.Connection) -> None:
         tables = {
