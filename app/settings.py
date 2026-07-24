@@ -52,6 +52,8 @@ class RuntimeSettings:
     port: int
     debug: bool
     sqlite_timeout_seconds: float
+    authentication_required: bool
+    api_bearer_token: str | None
 
     @classmethod
     def from_env(cls) -> "RuntimeSettings":
@@ -71,6 +73,10 @@ class RuntimeSettings:
         raw_database_path = os.getenv("GYROOS_DATABASE_PATH")
         database_path = Path(raw_database_path) if raw_database_path else default_database
 
+        default_authentication_required = environment == RuntimeEnvironment.PRODUCTION
+        raw_token = os.getenv("GYROOS_API_BEARER_TOKEN")
+        api_bearer_token = raw_token.strip() if raw_token and raw_token.strip() else None
+
         settings = cls(
             environment=environment,
             database_path=database_path,
@@ -81,6 +87,11 @@ class RuntimeSettings:
                 environment == RuntimeEnvironment.DEVELOPMENT,
             ),
             sqlite_timeout_seconds=_read_float("GYROOS_SQLITE_TIMEOUT_SECONDS", 5.0),
+            authentication_required=_read_bool(
+                "GYROOS_AUTH_REQUIRED",
+                default_authentication_required,
+            ),
+            api_bearer_token=api_bearer_token,
         )
         settings.validate()
         return settings
@@ -92,12 +103,18 @@ class RuntimeSettings:
             raise ValueError("GYROOS_PORT must be between 1 and 65535")
         if self.sqlite_timeout_seconds <= 0:
             raise ValueError("GYROOS_SQLITE_TIMEOUT_SECONDS must be greater than zero")
+        if self.authentication_required and not self.api_bearer_token:
+            raise ValueError(
+                "GYROOS_API_BEARER_TOKEN is required when authentication is enabled"
+            )
 
         if self.environment == RuntimeEnvironment.PRODUCTION:
             if not str(self.database_path).strip() or str(self.database_path) == ".":
                 raise ValueError("GYROOS_DATABASE_PATH is required in production")
             if self.debug:
                 raise ValueError("GYROOS_DEBUG must be disabled in production")
+            if not self.authentication_required:
+                raise ValueError("GYROOS_AUTH_REQUIRED must be enabled in production")
 
 
 settings = RuntimeSettings.from_env()
