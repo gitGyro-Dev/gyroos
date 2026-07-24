@@ -33,11 +33,7 @@ class InMemoryStore:
         request_digest: str,
         idempotency_key: str | None,
     ) -> None:
-        """Publish one complete result group under one lock.
-
-        Generated artifacts are inserted only after the executor has validated the
-        complete result group. This is the in-memory atomic publication boundary.
-        """
+        """Publish one complete result group under one lock."""
         artifacts = {
             result.process_id: result,
             result.slice_done.slice_id: result.slice_done,
@@ -53,6 +49,12 @@ class InMemoryStore:
             artifacts[item.context_evidence_id] = item
         for item in result.slice_done.void_evidence:
             artifacts[item.void_evidence_id] = item
+        if result.deferred_relation_record is not None:
+            artifacts[
+                result.deferred_relation_record.deferred_relation_record_id
+            ] = result.deferred_relation_record
+        for item in result.trajectory_edges:
+            artifacts[item.trajectory_edge_id] = item
 
         with self._lock:
             collision = set(artifacts).intersection(self.records)
