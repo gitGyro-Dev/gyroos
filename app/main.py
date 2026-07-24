@@ -6,8 +6,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from .models import ApiError, LoopStepRequest, LoopStepResult
+from .models import ApiError, CurrentScopeState, LoopStepRequest, LoopStepResult
 from .repositories import store
+from .repository_errors import RepositoryIntegrityError
 from .runtime import ProcessExecutor, ReferenceError
 
 app = FastAPI(
@@ -114,6 +115,40 @@ def loop_step(request: LoopStepRequest):
             loop_id=request.loop_id,
             retryable=False,
         )
+
+
+@app.get("/loop/state/{loop_id}", response_model=CurrentScopeState)
+def get_loop_state(loop_id: str):
+    process_id = store.get_current_scope(loop_id)
+    if process_id is None:
+        return api_error(
+            404,
+            code="GYRO_API_NOT_FOUND_CURRENT_SCOPE",
+            message=f"Current scope not found for loop_id={loop_id}",
+            category="NOT_FOUND",
+            phase="CURRENT_SCOPE_QUERY",
+            loop_id=loop_id,
+        )
+
+    process = store.get_process(process_id)
+    if process is None:
+        error = RepositoryIntegrityError(
+            f"current scope for loop_id={loop_id} references missing process_id={process_id}"
+        )
+        return api_error(
+            500,
+            code="GYRO_API_REPOSITORY_INTEGRITY",
+            message=str(error),
+            category="REPOSITORY",
+            phase="CURRENT_SCOPE_QUERY",
+            loop_id=loop_id,
+        )
+
+    return CurrentScopeState(
+        loop_id=loop_id,
+        current_process_id=process_id,
+        process=process,
+    )
 
 
 @app.get("/process/{process_id}", response_model=LoopStepResult)
