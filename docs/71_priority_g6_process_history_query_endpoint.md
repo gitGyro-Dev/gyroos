@@ -283,7 +283,15 @@ unknown loop returns empty page
 invalid cursor is rejected
 ```
 
-The existing GitHub Actions workflow already runs both affected test files.
+GitHub Actions verification:
+
+```text
+run_id = 30073474793
+job_id = 89419069605
+conclusion = success
+```
+
+The bounded API, PoC, and SQLite repository test step completed successfully.
 
 ---
 
@@ -320,29 +328,22 @@ collapse history into current state
 
 ```text
 G-6 Process History Query Endpoint
-= IMPLEMENTED
+= COMPLETE
 
 InMemoryStore history support
-= IMPLEMENTED
+= VERIFIED
 
 SQLiteStore persistent history support
-= IMPLEMENTED
+= VERIFIED
 
 Bounded cursor pagination
-= IMPLEMENTED
+= VERIFIED
 
 Current scope / history separation
 = ACCEPTED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, G-6 may be marked:
-
-```text
-G-6
-= COMPLETE
+= PASS
 ```
 
 The next Priority G step is:
