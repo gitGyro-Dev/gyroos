@@ -47,9 +47,10 @@ CanonicalRecord: TypeAlias = (
 )
 
 SCHEMA_VERSION = "1"
-RUNTIME_VERSION = "priority-g7"
+RUNTIME_VERSION = "priority-h1"
 MAX_HISTORY_LIMIT = 100
 DEFAULT_HISTORY_LIMIT = 20
+DEFAULT_SQLITE_TIMEOUT_SECONDS = 5.0
 
 _RECORD_REGISTRY: dict[str, type[BaseModel]] = {
     "LoopStepResult": LoopStepResult,
@@ -177,20 +178,27 @@ def _matches_trajectory_ref(edge: TrajectoryEdge, trajectory_ref: str) -> bool:
 
 
 class SQLiteStore:
-    """SQLite-backed Runtime repository for the bounded Priority G prototype."""
+    """SQLite-backed Runtime repository for the bounded Priority H prototype."""
 
     def __init__(
         self,
         database_path: str | Path,
         *,
+        timeout_seconds: float = DEFAULT_SQLITE_TIMEOUT_SECONDS,
         failure_injector: Callable[[str, int], None] | None = None,
     ) -> None:
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be greater than zero")
         self.database_path = str(database_path)
+        self.timeout_seconds = float(timeout_seconds)
         self._failure_injector = failure_injector
         self._initialize_schema()
 
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.database_path)
+        connection = sqlite3.connect(
+            self.database_path,
+            timeout=self.timeout_seconds,
+        )
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
         return connection
@@ -413,8 +421,8 @@ class SQLiteStore:
             with self._connect() as connection:
                 connection.execute("BEGIN IMMEDIATE")
 
-                if idempotency_key:
-                    existing = connection.execute(
+                if idempotency_key is not None:
+                    prior = connection.execute(
                         """
                         SELECT request_digest, process_id
                         FROM idempotency_entries
@@ -422,22 +430,20 @@ class SQLiteStore:
                         """,
                         (result.loop_id, idempotency_key),
                     ).fetchone()
-                    if existing is not None:
-                        if str(existing["request_digest"]) != request_digest:
+                    if prior is not None:
+                        if str(prior["request_digest"]) != request_digest:
                             raise IdempotencyConflict(
-                                "idempotency scope already exists with a different request digest"
+                                "idempotency key already exists with a different request digest"
                             )
-                        if str(existing["process_id"]) != result.process_id:
-                            raise RepositoryIntegrityError(
-                                "matching idempotency digest references a different Process"
-                            )
-                        return
+                        raise RecordIdentityCollision(
+                            "idempotent publication already exists"
+                        )
 
-                for publication_order, record in enumerate(records):
-                    self._inject_failure("before_record_insert", publication_order)
+                for position, record in enumerate(records):
+                    self._inject_failure("before_record_insert", position)
                     payload_json = _canonical_json(record)
-                    record_id = _record_id(record)
                     record_type = _record_type(record)
+                    record_id = _record_id(record)
                     process_id = result.process_id
                     loop_id = result.loop_id if isinstance(record, LoopStepResult) else None
                     connection.execute(
@@ -465,9 +471,10 @@ class SQLiteStore:
                             SCHEMA_VERSION,
                             RUNTIME_VERSION,
                             publication_id,
-                            publication_order,
+                            position,
                         ),
                     )
+                    self._inject_failure("after_record_insert", position)
 
                 self._inject_failure("before_current_scope", len(records))
                 connection.execute(
@@ -481,8 +488,8 @@ class SQLiteStore:
                     (result.loop_id, result.process_id),
                 )
 
-                if idempotency_key:
-                    self._inject_failure("before_idempotency", len(records) + 1)
+                if idempotency_key is not None:
+                    self._inject_failure("before_idempotency", len(records))
                     connection.execute(
                         """
                         INSERT INTO idempotency_entries(
@@ -499,11 +506,10 @@ class SQLiteStore:
                             result.process_id,
                         ),
                     )
-        except (IdempotencyConflict, RepositoryIntegrityError):
-            raise
         except sqlite3.IntegrityError as exc:
-            raise RecordIdentityCollision(
-                "record, current-scope, or idempotency identity collision"
-            ) from exc
+            message = str(exc)
+            if "idempotency_entries" in message:
+                raise IdempotencyConflict(message) from exc
+            raise RecordIdentityCollision(message) from exc
         except sqlite3.DatabaseError as exc:
-            raise RepositoryIntegrityError("SQLite publication failed") from exc
+            raise RepositoryIntegrityError(str(exc)) from exc
