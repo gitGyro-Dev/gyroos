@@ -15,6 +15,8 @@ from .models import (
     DeferredRelationRecord,
     LoopStepResult,
     OperatorResponse,
+    ProcessHistoryItem,
+    ProcessHistoryPage,
     RuntimeContinuityResult,
     SliceDone,
     StabilityResult,
@@ -44,7 +46,9 @@ CanonicalRecord: TypeAlias = (
 )
 
 SCHEMA_VERSION = "1"
-RUNTIME_VERSION = "priority-g4"
+RUNTIME_VERSION = "priority-g6"
+MAX_HISTORY_LIMIT = 100
+DEFAULT_HISTORY_LIMIT = 20
 
 _RECORD_REGISTRY: dict[str, type[BaseModel]] = {
     "LoopStepResult": LoopStepResult,
@@ -137,6 +141,31 @@ def _collect_records(result: LoopStepResult) -> list[CanonicalRecord]:
     return records
 
 
+def _decode_cursor(cursor: str | None) -> int:
+    if cursor is None:
+        return 0
+    try:
+        offset = int(cursor)
+    except ValueError as exc:
+        raise ValueError("history cursor must be a non-negative integer offset") from exc
+    if offset < 0:
+        raise ValueError("history cursor must be a non-negative integer offset")
+    return offset
+
+
+def _history_item(result: LoopStepResult) -> ProcessHistoryItem:
+    return ProcessHistoryItem(
+        process_id=result.process_id,
+        request_id=result.request_id,
+        loop_id=result.loop_id,
+        completed_at=result.completed_at,
+        stability_status=result.stability.status,
+        stability_value=result.stability.value,
+        operator_response=result.operator_response.response_type,
+        continuity_type=result.continuity.continuity_type,
+    )
+
+
 class SQLiteStore:
     """SQLite-backed Runtime repository for the bounded Priority G prototype."""
 
@@ -201,26 +230,7 @@ class SQLiteStore:
         if self._failure_injector is not None:
             self._failure_injector(phase, position)
 
-    def get_process(self, process_id: str) -> LoopStepResult | None:
-        record = self.get_record(process_id)
-        if record is None:
-            return None
-        if not isinstance(record, LoopStepResult):
-            raise RepositoryIntegrityError(f"record {process_id} is not LoopStepResult")
-        return record
-
-    def get_record(self, record_id: str) -> CanonicalRecord | None:
-        with self._connect() as connection:
-            row = connection.execute(
-                """
-                SELECT record_type, canonical_payload, canonical_digest, schema_version
-                FROM runtime_records
-                WHERE record_id = ?
-                """,
-                (record_id,),
-            ).fetchone()
-        if row is None:
-            return None
+    def _reconstruct_row(self, row: sqlite3.Row, record_id: str) -> CanonicalRecord:
         if row["schema_version"] != SCHEMA_VERSION:
             raise RepositorySchemaMismatch(
                 f"unsupported schema_version={row['schema_version']} for record {record_id}"
@@ -242,6 +252,28 @@ class SQLiteStore:
             raise RepositorySerializationError(
                 f"failed to reconstruct record {record_id}"
             ) from exc
+
+    def get_process(self, process_id: str) -> LoopStepResult | None:
+        record = self.get_record(process_id)
+        if record is None:
+            return None
+        if not isinstance(record, LoopStepResult):
+            raise RepositoryIntegrityError(f"record {process_id} is not LoopStepResult")
+        return record
+
+    def get_record(self, record_id: str) -> CanonicalRecord | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT record_type, canonical_payload, canonical_digest, schema_version
+                FROM runtime_records
+                WHERE record_id = ?
+                """,
+                (record_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return self._reconstruct_row(row, record_id)
 
     def get_current_scope(self, loop_id: str) -> str | None:
         with self._connect() as connection:
@@ -273,6 +305,46 @@ class SQLiteStore:
                 "idempotency entry references a missing Process"
             )
         return str(row["request_digest"]), result
+
+    def list_process_history(
+        self,
+        *,
+        loop_id: str,
+        limit: int = DEFAULT_HISTORY_LIMIT,
+        cursor: str | None = None,
+    ) -> ProcessHistoryPage:
+        if limit < 1 or limit > MAX_HISTORY_LIMIT:
+            raise ValueError(f"history limit must be between 1 and {MAX_HISTORY_LIMIT}")
+        offset = _decode_cursor(cursor)
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT record_id, record_type, canonical_payload, canonical_digest, schema_version
+                FROM runtime_records
+                WHERE loop_id = ? AND record_type = 'LoopStepResult'
+                ORDER BY rowid ASC
+                LIMIT ? OFFSET ?
+                """,
+                (loop_id, limit + 1, offset),
+            ).fetchall()
+
+        has_more = len(rows) > limit
+        selected = rows[:limit]
+        items: list[ProcessHistoryItem] = []
+        for row in selected:
+            record = self._reconstruct_row(row, str(row["record_id"]))
+            if not isinstance(record, LoopStepResult):
+                raise RepositoryIntegrityError(
+                    f"history record {row['record_id']} is not LoopStepResult"
+                )
+            items.append(_history_item(record))
+        next_cursor = str(offset + len(selected)) if has_more else None
+        return ProcessHistoryPage(
+            loop_id=loop_id,
+            items=items,
+            limit=limit,
+            next_cursor=next_cursor,
+        )
 
     def publish(
         self,
