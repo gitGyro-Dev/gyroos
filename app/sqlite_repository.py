@@ -48,10 +48,16 @@ CanonicalRecord: TypeAlias = (
 )
 
 SCHEMA_VERSION = "1"
-RUNTIME_VERSION = "priority-h4"
+RUNTIME_VERSION = "priority-h1"
 MAX_HISTORY_LIMIT = 100
 DEFAULT_HISTORY_LIMIT = 20
 DEFAULT_SQLITE_TIMEOUT_SECONDS = 5.0
+_SCHEMA_METADATA_KEY = "database_schema_version"
+_REQUIRED_TABLES = {
+    "runtime_records",
+    "current_scope",
+    "idempotency_entries",
+}
 
 _RECORD_REGISTRY: dict[str, type[BaseModel]] = {
     "LoopStepResult": LoopStepResult,
@@ -215,6 +221,14 @@ class SQLiteStore:
 
     def _initialize_schema(self) -> None:
         with self._connect() as connection:
+            existing_tables = {
+                str(row[0])
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type = 'table'"
+                ).fetchall()
+            }
+            legacy_schema_present = bool(existing_tables & _REQUIRED_TABLES)
+
             connection.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS runtime_records (
@@ -254,8 +268,92 @@ class SQLiteStore:
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY(loop_id, idempotency_key)
                 );
+
+                CREATE TABLE IF NOT EXISTS schema_metadata (
+                    metadata_key TEXT PRIMARY KEY,
+                    metadata_value TEXT NOT NULL,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );
                 """
             )
+
+            row = connection.execute(
+                "SELECT metadata_value FROM schema_metadata WHERE metadata_key = ?",
+                (_SCHEMA_METADATA_KEY,),
+            ).fetchone()
+            if row is None:
+                if legacy_schema_present:
+                    self._validate_legacy_schema(connection)
+                connection.execute(
+                    """
+                    INSERT INTO schema_metadata(metadata_key, metadata_value)
+                    VALUES (?, ?)
+                    """,
+                    (_SCHEMA_METADATA_KEY, SCHEMA_VERSION),
+                )
+                return
+
+            stored_version = str(row["metadata_value"])
+            if stored_version != SCHEMA_VERSION:
+                raise RepositorySchemaMismatch(
+                    "unsupported database schema version "
+                    f"{stored_version}; runtime supports {SCHEMA_VERSION}"
+                )
+
+    def _validate_legacy_schema(self, connection: sqlite3.Connection) -> None:
+        tables = {
+            str(row[0])
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        missing_tables = sorted(_REQUIRED_TABLES - tables)
+        if missing_tables:
+            raise RepositorySchemaMismatch(
+                f"legacy database is missing required tables: {missing_tables}"
+            )
+
+        required_columns = {
+            "runtime_records": {
+                "record_id",
+                "record_type",
+                "process_id",
+                "loop_id",
+                "canonical_payload",
+                "canonical_digest",
+                "schema_version",
+                "runtime_version",
+                "publication_id",
+                "publication_order",
+            },
+            "current_scope": {"loop_id", "process_id"},
+            "idempotency_entries": {
+                "loop_id",
+                "idempotency_key",
+                "request_digest",
+                "process_id",
+            },
+        }
+        for table, expected in required_columns.items():
+            actual = {
+                str(row[1])
+                for row in connection.execute(f"PRAGMA table_info({table})").fetchall()
+            }
+            missing = sorted(expected - actual)
+            if missing:
+                raise RepositorySchemaMismatch(
+                    f"legacy table {table} is missing required columns: {missing}"
+                )
+
+    def get_database_schema_version(self) -> str:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT metadata_value FROM schema_metadata WHERE metadata_key = ?",
+                (_SCHEMA_METADATA_KEY,),
+            ).fetchone()
+        if row is None:
+            raise RepositorySchemaMismatch("database schema version metadata is missing")
+        return str(row["metadata_value"])
 
     def _inject_failure(self, phase: str, position: int) -> None:
         if self._failure_injector is not None:
@@ -521,9 +619,7 @@ class SQLiteStore:
             if "idempotency_entries" in message:
                 raise IdempotencyConflict(message) from exc
             raise RecordIdentityCollision(message) from exc
-        except sqlite3.OperationalError as exc:
+        except sqlite3.DatabaseError as exc:
             if _is_busy_error(exc):
                 raise RepositoryBusyError(str(exc)) from exc
-            raise RepositoryIntegrityError(str(exc)) from exc
-        except sqlite3.DatabaseError as exc:
             raise RepositoryIntegrityError(str(exc)) from exc
