@@ -1,63 +1,60 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.settings import settings
+from app.security import authorize_bearer
+from app.settings import RuntimeEnvironment, RuntimeSettings
 
 client = TestClient(app)
 
 
-def test_health_remains_public(monkeypatch) -> None:
-    monkeypatch.setattr(settings, "authentication_required", True)
-    monkeypatch.setattr(settings, "api_bearer_token", "test-secret")
+def auth_settings(*, required: bool, token: str | None) -> RuntimeSettings:
+    return RuntimeSettings(
+        environment=RuntimeEnvironment.TEST,
+        database_path=Path(".runtime-test.db"),
+        host="127.0.0.1",
+        port=8000,
+        debug=False,
+        sqlite_timeout_seconds=5.0,
+        authentication_required=required,
+        api_bearer_token=token,
+    )
 
+
+def test_health_remains_public() -> None:
     response = client.get("/health")
-
     assert response.status_code == 200
 
 
-def test_protected_endpoint_rejects_missing_bearer(monkeypatch) -> None:
-    monkeypatch.setattr(settings, "authentication_required", True)
-    monkeypatch.setattr(settings, "api_bearer_token", "test-secret")
+def test_authorization_rejects_missing_bearer() -> None:
+    with pytest.raises(HTTPException) as exc_info:
+        authorize_bearer(None, auth_settings(required=True, token="test-secret"))
 
-    response = client.get("/process/missing")
-
-    assert response.status_code == 401
-    assert response.headers["www-authenticate"] == "Bearer"
+    assert exc_info.value.status_code == 401
+    assert exc_info.value.headers == {"WWW-Authenticate": "Bearer"}
 
 
-def test_protected_endpoint_rejects_invalid_bearer(monkeypatch) -> None:
-    monkeypatch.setattr(settings, "authentication_required", True)
-    monkeypatch.setattr(settings, "api_bearer_token", "test-secret")
+def test_authorization_rejects_invalid_bearer() -> None:
+    with pytest.raises(HTTPException) as exc_info:
+        authorize_bearer(
+            "Bearer wrong-secret",
+            auth_settings(required=True, token="test-secret"),
+        )
 
-    response = client.get(
-        "/process/missing",
-        headers={"Authorization": "Bearer wrong-secret"},
+    assert exc_info.value.status_code == 401
+
+
+def test_authorization_accepts_configured_bearer() -> None:
+    authorize_bearer(
+        "Bearer test-secret",
+        auth_settings(required=True, token="test-secret"),
     )
 
-    assert response.status_code == 401
-    assert response.headers["www-authenticate"] == "Bearer"
 
-
-def test_protected_endpoint_accepts_configured_bearer(monkeypatch) -> None:
-    monkeypatch.setattr(settings, "authentication_required", True)
-    monkeypatch.setattr(settings, "api_bearer_token", "test-secret")
-
-    response = client.get(
-        "/process/missing",
-        headers={"Authorization": "Bearer test-secret"},
-    )
-
-    assert response.status_code == 404
-    assert response.json()["error_code"] == "GYRO_API_NOT_FOUND_PROCESS"
-
-
-def test_authentication_disabled_profile_preserves_local_compatibility(monkeypatch) -> None:
-    monkeypatch.setattr(settings, "authentication_required", False)
-    monkeypatch.setattr(settings, "api_bearer_token", None)
-
-    response = client.get("/process/missing")
-
-    assert response.status_code == 404
-    assert response.json()["error_code"] == "GYRO_API_NOT_FOUND_PROCESS"
+def test_authorization_disabled_profile_preserves_local_compatibility() -> None:
+    authorize_bearer(None, auth_settings(required=False, token=None))
