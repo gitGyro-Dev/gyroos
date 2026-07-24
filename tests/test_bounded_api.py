@@ -317,11 +317,24 @@ def test_trajectory_query_rejects_invalid_cursor() -> None:
     assert body["phase"] == "TRAJECTORY_QUERY"
 
 
-def test_published_process_and_record_can_be_retrieved() -> None:
+def test_published_process_and_typed_record_can_be_retrieved() -> None:
     created = client.post("/loop/step", json=base_request())
     body = created.json()
     process = client.get(f"/process/{body['process_id']}")
-    record = client.get(f"/memory/record/{body['stability']['stability_result_id']}")
+    record_id = body["stability"]["stability_result_id"]
+    record = client.get(f"/memory/record/{record_id}")
     assert process.status_code == 200
     assert record.status_code == 200
-    assert record.json()["status"] == "STABLE"
+    envelope = record.json()
+    assert envelope["record_id"] == record_id
+    assert envelope["record_type"] == "StabilityResult"
+    assert envelope["record"]["status"] == "STABLE"
+
+
+def test_missing_memory_record_returns_structured_404() -> None:
+    response = client.get("/memory/record/missing_record")
+    assert response.status_code == 404
+    body = response.json()
+    assert body["error_code"] == "GYRO_API_NOT_FOUND_MEMORY_RECORD"
+    assert body["category"] == "NOT_FOUND"
+    assert body["phase"] == "MEMORY_RECORD_RETRIEVAL"
