@@ -49,6 +49,7 @@ def setup_function() -> None:
     store.idempotency.clear()
     store.current_scope.clear()
     store.process_history.clear()
+    store.trajectory_history.clear()
 
 
 def test_health() -> None:
@@ -94,6 +95,7 @@ def test_idempotent_replay_does_not_create_second_process() -> None:
     assert second.json()["replayed"] is True
     assert len(store.processes) == 1
     assert len(store.process_history["loop_001"]) == 1
+    assert len(store.trajectory_history) == 1
 
 
 def test_void_is_runtime_result_and_defer_is_separate() -> None:
@@ -251,6 +253,67 @@ def test_process_history_rejects_invalid_cursor() -> None:
     body = response.json()
     assert body["error_code"] == "GYRO_API_VALIDATION_HISTORY_CURSOR"
     assert body["phase"] == "PROCESS_HISTORY_QUERY"
+
+
+def test_trajectory_query_returns_matching_edges_in_publication_order() -> None:
+    first = client.post(
+        "/loop/step",
+        json=base_request(request_id="trajectory_one", loop_id="trajectory_loop"),
+    )
+    second = client.post(
+        "/loop/step",
+        json=base_request(request_id="trajectory_two", loop_id="trajectory_loop"),
+    )
+    assert first.status_code == 200
+    assert second.status_code == 200
+
+    response = client.get("/trajectory/relation_001")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["trajectory_ref"] == "relation_001"
+    assert [item["process_id"] for item in body["items"]] == [
+        first.json()["process_id"],
+        second.json()["process_id"],
+    ]
+    assert all(item["source_ref"] == "relation_001" for item in body["items"])
+    assert body["next_cursor"] is None
+
+
+def test_trajectory_query_supports_bounded_cursor_pagination() -> None:
+    for index in range(3):
+        response = client.post(
+            "/loop/step",
+            json=base_request(request_id=f"trajectory_page_{index}", loop_id="trajectory_page_loop"),
+        )
+        assert response.status_code == 200
+
+    first_page = client.get("/trajectory/relation_001?limit=2")
+    assert first_page.status_code == 200
+    first_body = first_page.json()
+    assert len(first_body["items"]) == 2
+    assert first_body["next_cursor"] == "2"
+
+    second_page = client.get(
+        f"/trajectory/relation_001?limit=2&cursor={first_body['next_cursor']}"
+    )
+    assert second_page.status_code == 200
+    assert len(second_page.json()["items"]) == 1
+    assert second_page.json()["next_cursor"] is None
+
+
+def test_trajectory_query_empty_ref_returns_empty_page() -> None:
+    response = client.get("/trajectory/missing_relation")
+    assert response.status_code == 200
+    assert response.json()["items"] == []
+    assert response.json()["next_cursor"] is None
+
+
+def test_trajectory_query_rejects_invalid_cursor() -> None:
+    response = client.get("/trajectory/relation_001?cursor=invalid")
+    assert response.status_code == 422
+    body = response.json()
+    assert body["error_code"] == "GYRO_API_VALIDATION_TRAJECTORY_CURSOR"
+    assert body["phase"] == "TRAJECTORY_QUERY"
 
 
 def test_published_process_and_record_can_be_retrieved() -> None:
