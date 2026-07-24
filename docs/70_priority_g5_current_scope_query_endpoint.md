@@ -190,7 +190,7 @@ GET /loop/state/{loop_id}
 
 ## 9. Tests
 
-The bounded API tests now verify:
+The bounded API tests verify:
 
 ```text
 current-scope endpoint returns explicit loop_id
@@ -201,7 +201,15 @@ broken current-scope pointer returns repository integrity 500
 query does not execute a new Process
 ```
 
-The existing workflow already runs `tests/test_bounded_api.py`, so these tests are included in GitHub Actions.
+GitHub Actions run:
+
+```text
+run_id = 30072730648
+job_id = 89416797764
+conclusion = success
+```
+
+The job completed the bounded API, PoC, and SQLite repository test step successfully.
 
 ---
 
@@ -236,26 +244,19 @@ recovery mechanism
 
 ```text
 G-5 Current-scope Query Endpoint
-= IMPLEMENTED
+= COMPLETE
 
 Current scope / history separation
 = ACCEPTED
 
 Structured missing-scope behavior
-= IMPLEMENTED
+= VERIFIED
 
 Broken-pointer integrity behavior
-= IMPLEMENTED
+= VERIFIED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, G-5 may be marked:
-
-```text
-G-5
-= COMPLETE
+= PASS
 ```
 
 The next Priority G step is:
