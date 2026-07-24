@@ -12,6 +12,14 @@ class RuntimeEnvironment(StrEnum):
     PRODUCTION = "production"
 
 
+class LogLevel(StrEnum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
+
 def _read_bool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
     if raw is None:
@@ -44,6 +52,17 @@ def _read_float(name: str, default: float) -> float:
         raise ValueError(f"{name} must be numeric") from exc
 
 
+def _read_log_level(name: str, default: LogLevel) -> LogLevel:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return LogLevel(raw.strip().upper())
+    except ValueError as exc:
+        allowed = ", ".join(item.value for item in LogLevel)
+        raise ValueError(f"{name} must be one of: {allowed}") from exc
+
+
 @dataclass(frozen=True)
 class RuntimeSettings:
     environment: RuntimeEnvironment
@@ -58,6 +77,8 @@ class RuntimeSettings:
     rate_limit_requests: int
     rate_limit_window_seconds: int
     max_concurrent_requests: int
+    log_level: LogLevel = LogLevel.INFO
+    json_logging: bool = True
 
     @classmethod
     def from_env(cls) -> "RuntimeSettings":
@@ -81,6 +102,12 @@ class RuntimeSettings:
         raw_token = os.getenv("GYROOS_API_BEARER_TOKEN")
         api_bearer_token = raw_token.strip() if raw_token and raw_token.strip() else None
 
+        default_log_level = (
+            LogLevel.DEBUG
+            if environment == RuntimeEnvironment.DEVELOPMENT
+            else LogLevel.INFO
+        )
+
         settings = cls(
             environment=environment,
             database_path=database_path,
@@ -100,6 +127,8 @@ class RuntimeSettings:
             rate_limit_requests=_read_int("GYROOS_RATE_LIMIT_REQUESTS", 120),
             rate_limit_window_seconds=_read_int("GYROOS_RATE_LIMIT_WINDOW_SECONDS", 60),
             max_concurrent_requests=_read_int("GYROOS_MAX_CONCURRENT_REQUESTS", 32),
+            log_level=_read_log_level("GYROOS_LOG_LEVEL", default_log_level),
+            json_logging=_read_bool("GYROOS_JSON_LOGGING", True),
         )
         settings.validate()
         return settings
@@ -127,6 +156,8 @@ class RuntimeSettings:
                 raise ValueError("GYROOS_DEBUG must be disabled in production")
             if not self.authentication_required:
                 raise ValueError("GYROOS_AUTH_REQUIRED must be enabled in production")
+            if not self.json_logging:
+                raise ValueError("GYROOS_JSON_LOGGING must be enabled in production")
 
         if self.authentication_required and not self.api_bearer_token:
             raise ValueError(
