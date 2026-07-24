@@ -242,7 +242,7 @@ correct bearer is accepted
 authentication-disabled profile remains locally compatible
 ```
 
-The workflow now executes the H-2 test file.
+The workflow executes the H-2 test file and completed successfully.
 
 ---
 
@@ -292,32 +292,25 @@ The bearer token does not become part of canonical Process identity, request dig
 
 ```text
 H-2 Authentication and Authorization Boundary
-= IMPLEMENTED
+= COMPLETE
 
 Production authentication requirement
-= IMPLEMENTED
+= VERIFIED
 
 Shared protected-router boundary
-= IMPLEMENTED
+= VERIFIED
 
 Constant-time bearer validation
-= IMPLEMENTED
+= VERIFIED
 
 Public health / protected Runtime separation
-= IMPLEMENTED
+= VERIFIED
 
 Fine-grained authorization
 = DEFERRED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-2 may be marked:
-
-```text
-H-2
-= COMPLETE
+= PASS
 ```
 
 The next Priority H step is:
