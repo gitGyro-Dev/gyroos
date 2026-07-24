@@ -162,11 +162,15 @@ class SliceEngine:
                 )
             )
 
+        representation = dict(mode.get("representation", {}))
+        if "stability" in mode:
+            representation["stability"] = mode["stability"]
+
         return SliceDone(
             slice_id=slice_id,
             process_id=process_id,
             structure_ref=request.structure.structure_id,
-            representation=dict(mode.get("representation", mode)),
+            representation=representation,
             deviation=dict(mode.get("deviation", {})),
             readability=readability,
             boundary_evidence=boundary_evidence,
@@ -373,7 +377,7 @@ class ProcessExecutor:
             stability=stability,
             operator_response=response,
             continuity=continuity,
-            deferred_relation_record=deferred_record,
+            deferred_relation=deferred_record,
             trajectory_edges=[trajectory_edge],
             created_record_refs=created_refs,
         )
