@@ -39,6 +39,8 @@ def execute_request(payload: dict[str, Any]) -> dict[str, Any]:
 def summarize(scenario_id: str, result: dict[str, Any]) -> dict[str, Any]:
     slice_done = result["slice_done"]
     next_request = result["operator_response"].get("next_request")
+    deferred = result.get("deferred_relation_record")
+    edges = result.get("trajectory_edges", [])
     return {
         "scenario_id": scenario_id,
         "process_id": result["process_id"],
@@ -56,6 +58,23 @@ def summarize(scenario_id: str, result: dict[str, Any]) -> dict[str, Any]:
             "context": len(slice_done["context_evidence"]),
             "void": len(slice_done["void_evidence"]),
         },
+        "deferred_relation_record": None
+        if deferred is None
+        else {
+            "record_id": deferred["deferred_relation_record_id"],
+            "pending": deferred["pending"],
+            "relation_ref": deferred["relation_ref"],
+        },
+        "trajectory_edges": [
+            {
+                "edge_id": edge["trajectory_edge_id"],
+                "edge_type": edge["edge_type"],
+                "source_ref": edge["source_ref"],
+                "target_ref": edge["target_ref"],
+                "parent_process_ref": edge["parent_process_ref"],
+            }
+            for edge in edges
+        ],
         "next_request": None
         if next_request is None
         else {
@@ -93,6 +112,25 @@ def assert_expected(result: dict[str, Any], expected: dict[str, Any]) -> None:
         if not next_request or next_request["mode"] != expected["next_request_mode"]:
             raise AssertionError("expected bounded RESLICE next_request preparation")
 
+    if len(result.get("trajectory_edges", [])) != 1:
+        raise AssertionError("each bounded Process must publish one trajectory edge")
+    edge = result["trajectory_edges"][0]
+    if edge["edge_type"] != result["continuity"]["continuity_type"]:
+        raise AssertionError("trajectory edge and continuity type differ")
+
+    deferred = result.get("deferred_relation_record")
+    if result["operator_response"]["response_type"] == "DEFER":
+        if deferred is None or deferred["pending"] is not True:
+            raise AssertionError("DEFER must publish a pending DeferredRelationRecord")
+    elif deferred is not None:
+        raise AssertionError("non-DEFER response must not publish DeferredRelationRecord")
+
+
+def assert_records_retrievable(result: dict[str, Any]) -> None:
+    for record_ref in result["created_record_refs"]:
+        if store.get_record(record_ref) is None:
+            raise AssertionError(f"created record is not retrievable: {record_ref}")
+
 
 def run_scenario(path: Path) -> dict[str, Any]:
     spec = load_json(path)
@@ -121,6 +159,7 @@ def run_scenario(path: Path) -> dict[str, Any]:
         seed_summary = None
 
     assert_expected(result, spec["expected"])
+    assert_records_retrievable(result)
     return {
         "scenario_id": scenario_id,
         "expected": spec["expected"],
