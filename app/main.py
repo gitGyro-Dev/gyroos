@@ -17,6 +17,7 @@ from .models import (
 )
 from .repositories import store
 from .repository_errors import (
+    RepositoryBusyError,
     RepositoryIntegrityError,
     RepositorySchemaMismatch,
     RepositorySerializationError,
@@ -95,6 +96,17 @@ def loop_step(request: LoopStepRequest):
             phase="REFERENCE_RESOLUTION",
             request_id=request.request_id,
             loop_id=request.loop_id,
+        )
+    except RepositoryBusyError as exc:
+        return api_error(
+            503,
+            code="GYRO_API_REPOSITORY_BUSY",
+            message=str(exc),
+            category="REPOSITORY",
+            phase="PUBLICATION",
+            request_id=request.request_id,
+            loop_id=request.loop_id,
+            retryable=True,
         )
     except RuntimeError as exc:
         message = str(exc)
