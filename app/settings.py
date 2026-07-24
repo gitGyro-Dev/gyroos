@@ -103,11 +103,10 @@ class RuntimeSettings:
             raise ValueError("GYROOS_PORT must be between 1 and 65535")
         if self.sqlite_timeout_seconds <= 0:
             raise ValueError("GYROOS_SQLITE_TIMEOUT_SECONDS must be greater than zero")
-        if self.authentication_required and not self.api_bearer_token:
-            raise ValueError(
-                "GYROOS_API_BEARER_TOKEN is required when authentication is enabled"
-            )
 
+        # Preserve the H-1 production configuration contract before applying
+        # the H-2 authentication boundary. This keeps failures deterministic:
+        # storage and debug configuration are validated before auth secrets.
         if self.environment == RuntimeEnvironment.PRODUCTION:
             if not str(self.database_path).strip() or str(self.database_path) == ".":
                 raise ValueError("GYROOS_DATABASE_PATH is required in production")
@@ -115,6 +114,11 @@ class RuntimeSettings:
                 raise ValueError("GYROOS_DEBUG must be disabled in production")
             if not self.authentication_required:
                 raise ValueError("GYROOS_AUTH_REQUIRED must be enabled in production")
+
+        if self.authentication_required and not self.api_bearer_token:
+            raise ValueError(
+                "GYROOS_API_BEARER_TOKEN is required when authentication is enabled"
+            )
 
 
 settings = RuntimeSettings.from_env()
