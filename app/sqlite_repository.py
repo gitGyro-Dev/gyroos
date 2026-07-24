@@ -218,8 +218,8 @@ class SQLiteStore:
                 CREATE INDEX IF NOT EXISTS idx_runtime_records_loop
                     ON runtime_records(loop_id, publication_order);
 
-                CREATE INDEX IF NOT EXISTS idx_runtime_records_type_order
-                    ON runtime_records(record_type, rowid);
+                CREATE INDEX IF NOT EXISTS idx_runtime_records_type_publication
+                    ON runtime_records(record_type, publication_id, publication_order);
 
                 CREATE TABLE IF NOT EXISTS current_scope (
                     loop_id TEXT PRIMARY KEY,
