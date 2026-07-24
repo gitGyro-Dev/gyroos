@@ -3,22 +3,27 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from threading import RLock
 
-from .models import LoopStepResult, ProcessHistoryItem, ProcessHistoryPage
-
+from .models import (
+    LoopStepResult,
+    ProcessHistoryItem,
+    ProcessHistoryPage,
+    TrajectoryEdge,
+    TrajectoryEdgePage,
+)
 
 MAX_HISTORY_LIMIT = 100
 DEFAULT_HISTORY_LIMIT = 20
 
 
-def _decode_cursor(cursor: str | None) -> int:
+def _decode_cursor(cursor: str | None, *, label: str = "history") -> int:
     if cursor is None:
         return 0
     try:
         offset = int(cursor)
     except ValueError as exc:
-        raise ValueError("history cursor must be a non-negative integer offset") from exc
+        raise ValueError(f"{label} cursor must be a non-negative integer offset") from exc
     if offset < 0:
-        raise ValueError("history cursor must be a non-negative integer offset")
+        raise ValueError(f"{label} cursor must be a non-negative integer offset")
     return offset
 
 
@@ -35,6 +40,14 @@ def _history_item(result: LoopStepResult) -> ProcessHistoryItem:
     )
 
 
+def _matches_trajectory_ref(edge: TrajectoryEdge, trajectory_ref: str) -> bool:
+    return trajectory_ref in {
+        edge.source_ref,
+        edge.target_ref,
+        edge.parent_process_ref,
+    }
+
+
 @dataclass
 class InMemoryStore:
     processes: dict[str, LoopStepResult] = field(default_factory=dict)
@@ -42,6 +55,7 @@ class InMemoryStore:
     idempotency: dict[tuple[str, str], tuple[str, LoopStepResult]] = field(default_factory=dict)
     current_scope: dict[str, str] = field(default_factory=dict)
     process_history: dict[str, list[str]] = field(default_factory=dict)
+    trajectory_history: list[str] = field(default_factory=list)
     _lock: RLock = field(default_factory=RLock)
 
     def get_process(self, process_id: str) -> LoopStepResult | None:
@@ -74,6 +88,32 @@ class InMemoryStore:
         return ProcessHistoryPage(
             loop_id=loop_id,
             items=items,
+            limit=limit,
+            next_cursor=next_cursor,
+        )
+
+    def list_trajectory_edges(
+        self,
+        *,
+        trajectory_ref: str,
+        limit: int = DEFAULT_HISTORY_LIMIT,
+        cursor: str | None = None,
+    ) -> TrajectoryEdgePage:
+        if limit < 1 or limit > MAX_HISTORY_LIMIT:
+            raise ValueError(f"trajectory limit must be between 1 and {MAX_HISTORY_LIMIT}")
+        offset = _decode_cursor(cursor, label="trajectory")
+        matching_edges = [
+            edge
+            for record_id in self.trajectory_history
+            if isinstance((edge := self.records.get(record_id)), TrajectoryEdge)
+            and _matches_trajectory_ref(edge, trajectory_ref)
+        ]
+        selected = matching_edges[offset : offset + limit]
+        next_offset = offset + len(selected)
+        next_cursor = str(next_offset) if next_offset < len(matching_edges) else None
+        return TrajectoryEdgePage(
+            trajectory_ref=trajectory_ref,
+            items=selected,
             limit=limit,
             next_cursor=next_cursor,
         )
@@ -116,6 +156,9 @@ class InMemoryStore:
             self.records.update(artifacts)
             self.current_scope[result.loop_id] = result.process_id
             self.process_history.setdefault(result.loop_id, []).append(result.process_id)
+            self.trajectory_history.extend(
+                item.trajectory_edge_id for item in result.trajectory_edges
+            )
             if idempotency_key:
                 self.idempotency[(result.loop_id, idempotency_key)] = (
                     request_digest,
