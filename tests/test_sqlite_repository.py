@@ -11,13 +11,17 @@ from app.runtime import ProcessExecutor, canonical_digest
 from app.sqlite_repository import SQLiteStore
 
 
-def base_request() -> dict:
+def base_request(
+    *,
+    request_id: str = "sqlite_request_001",
+    loop_id: str = "sqlite_loop_001",
+) -> dict:
     return {
-        "request_id": "sqlite_request_001",
-        "loop_id": "sqlite_loop_001",
-        "idempotency_key": "sqlite_loop_001:step_001",
+        "request_id": request_id,
+        "loop_id": loop_id,
+        "idempotency_key": f"{loop_id}:{request_id}",
         "structure": {
-            "structure_id": "sqlite_structure_001",
+            "structure_id": f"sqlite_structure_{request_id}",
             "current_mode": {
                 "relation_ref": "sqlite_relation_001",
                 "representation": {"state": "readable"},
@@ -32,7 +36,7 @@ def base_request() -> dict:
         "slice_request": {
             "mode": "SLICE",
             "source_type": "RUNTIME_STRUCTURE",
-            "source_ref": "sqlite_structure_001",
+            "source_ref": f"sqlite_structure_{request_id}",
             "orientation": {"orientation_id": "sqlite_orientation_001"},
             "slice_policy": {
                 "policy_id": "sqlite_policy_continue",
@@ -83,6 +87,51 @@ def test_sqlite_store_preserves_current_scope_and_idempotency_after_restart(
     replay = ProcessExecutor(second_store).execute(request)
     assert replay.process_id == first_result.process_id
     assert replay.replayed is True
+
+
+def test_sqlite_store_process_history_survives_restart_and_paginates(
+    tmp_path: Path,
+) -> None:
+    database = tmp_path / "runtime.db"
+    first_store = SQLiteStore(database)
+    executor = ProcessExecutor(first_store)
+
+    for index in range(3):
+        request = LoopStepRequest.model_validate(
+            base_request(request_id=f"history_{index}", loop_id="sqlite_history_loop")
+        )
+        executor.execute(request)
+
+    second_store = SQLiteStore(database)
+    first_page = second_store.list_process_history(
+        loop_id="sqlite_history_loop",
+        limit=2,
+    )
+    assert [item.request_id for item in first_page.items] == ["history_0", "history_1"]
+    assert first_page.next_cursor == "2"
+
+    second_page = second_store.list_process_history(
+        loop_id="sqlite_history_loop",
+        limit=2,
+        cursor=first_page.next_cursor,
+    )
+    assert [item.request_id for item in second_page.items] == ["history_2"]
+    assert second_page.next_cursor is None
+
+
+def test_sqlite_store_process_history_returns_empty_page_for_unknown_loop(
+    tmp_path: Path,
+) -> None:
+    store = SQLiteStore(tmp_path / "runtime.db")
+    page = store.list_process_history(loop_id="missing_loop", limit=20)
+    assert page.items == []
+    assert page.next_cursor is None
+
+
+def test_sqlite_store_process_history_rejects_invalid_cursor(tmp_path: Path) -> None:
+    store = SQLiteStore(tmp_path / "runtime.db")
+    with pytest.raises(ValueError, match="history cursor"):
+        store.list_process_history(loop_id="loop", cursor="invalid")
 
 
 def test_sqlite_store_missing_record_remains_none(tmp_path: Path) -> None:
