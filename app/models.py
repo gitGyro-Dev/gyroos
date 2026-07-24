@@ -315,6 +315,7 @@ class TrajectoryEdge(CanonicalModel):
     operator_response_ref: str
     continuity_result_ref: str
     edge_type: RuntimeContinuityType
+    relation_ref: str
     source_ref: str
     target_ref: str | None = None
     parent_process_ref: str | None = None
