@@ -221,7 +221,7 @@ Recovery does not become the Loop Controller and does not reinterpret canonical 
 
 ```text
 G-9 Restart and Recovery Tests
-= IMPLEMENTED
+= COMPLETE
 
 Complete Runtime state recovery scenario
 = IMPLEMENTED
@@ -233,14 +233,16 @@ Empty and missing state recovery verification
 = IMPLEMENTED
 
 GitHub Actions execution verification
-= PENDING
+= SUCCESS
 ```
 
-After the updated workflow passes, G-9 may be marked:
+Verification evidence:
 
 ```text
-G-9
-= COMPLETE
+Workflow run: 30080831829
+Job: test-and-run-poc
+Job ID: 89441803281
+Conclusion: success
 ```
 
 The next Priority G step is:
