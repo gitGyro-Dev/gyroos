@@ -154,6 +154,39 @@ def test_current_scope_conflict_is_409_not_stop() -> None:
     assert response.json()["category"] == "IDENTITY_CONFLICT"
 
 
+def test_current_scope_endpoint_returns_explicit_current_process() -> None:
+    created = client.post(
+        "/loop/step",
+        json=base_request(request_id="scope_state", loop_id="scope_state_loop"),
+    )
+    assert created.status_code == 200
+    process_id = created.json()["process_id"]
+
+    response = client.get("/loop/state/scope_state_loop")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["loop_id"] == "scope_state_loop"
+    assert body["current_process_id"] == process_id
+    assert body["process"]["process_id"] == process_id
+
+
+def test_current_scope_endpoint_returns_404_when_scope_is_absent() -> None:
+    response = client.get("/loop/state/missing_loop")
+    assert response.status_code == 404
+    body = response.json()
+    assert body["error_code"] == "GYRO_API_NOT_FOUND_CURRENT_SCOPE"
+    assert body["category"] == "NOT_FOUND"
+
+
+def test_current_scope_endpoint_reports_broken_pointer_as_repository_error() -> None:
+    store.current_scope["broken_loop"] = "missing_process"
+    response = client.get("/loop/state/broken_loop")
+    assert response.status_code == 500
+    body = response.json()
+    assert body["error_code"] == "GYRO_API_REPOSITORY_INTEGRITY"
+    assert body["category"] == "REPOSITORY"
+
+
 def test_published_process_and_record_can_be_retrieved() -> None:
     created = client.post("/loop/step", json=base_request())
     body = created.json()
