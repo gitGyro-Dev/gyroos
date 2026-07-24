@@ -18,6 +18,10 @@ def clear_runtime_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "GYROOS_SQLITE_TIMEOUT_SECONDS",
         "GYROOS_AUTH_REQUIRED",
         "GYROOS_API_BEARER_TOKEN",
+        "GYROOS_MAX_REQUEST_BODY_BYTES",
+        "GYROOS_RATE_LIMIT_REQUESTS",
+        "GYROOS_RATE_LIMIT_WINDOW_SECONDS",
+        "GYROOS_MAX_CONCURRENT_REQUESTS",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -37,6 +41,10 @@ def test_development_profile_uses_safe_local_defaults(
     assert settings.sqlite_timeout_seconds == 5.0
     assert settings.authentication_required is False
     assert settings.api_bearer_token is None
+    assert settings.max_request_body_bytes == 1_048_576
+    assert settings.rate_limit_requests == 120
+    assert settings.rate_limit_window_seconds == 60
+    assert settings.max_concurrent_requests == 32
 
 
 def test_test_profile_has_isolated_default_database(
@@ -110,6 +118,10 @@ def test_production_accepts_explicit_safe_configuration(
     monkeypatch.setenv("GYROOS_DEBUG", "false")
     monkeypatch.setenv("GYROOS_SQLITE_TIMEOUT_SECONDS", "12.5")
     monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", "production-secret")
+    monkeypatch.setenv("GYROOS_MAX_REQUEST_BODY_BYTES", "524288")
+    monkeypatch.setenv("GYROOS_RATE_LIMIT_REQUESTS", "60")
+    monkeypatch.setenv("GYROOS_RATE_LIMIT_WINDOW_SECONDS", "30")
+    monkeypatch.setenv("GYROOS_MAX_CONCURRENT_REQUESTS", "16")
 
     settings = RuntimeSettings.from_env()
 
@@ -121,6 +133,10 @@ def test_production_accepts_explicit_safe_configuration(
     assert settings.sqlite_timeout_seconds == 12.5
     assert settings.authentication_required is True
     assert settings.api_bearer_token == "production-secret"
+    assert settings.max_request_body_bytes == 524288
+    assert settings.rate_limit_requests == 60
+    assert settings.rate_limit_window_seconds == 30
+    assert settings.max_concurrent_requests == 16
 
 
 @pytest.mark.parametrize(
@@ -135,6 +151,26 @@ def test_production_accepts_explicit_safe_configuration(
             "GYROOS_SQLITE_TIMEOUT_SECONDS",
             "0",
             "GYROOS_SQLITE_TIMEOUT_SECONDS must be greater than zero",
+        ),
+        (
+            "GYROOS_MAX_REQUEST_BODY_BYTES",
+            "0",
+            "GYROOS_MAX_REQUEST_BODY_BYTES must be greater than zero",
+        ),
+        (
+            "GYROOS_RATE_LIMIT_REQUESTS",
+            "0",
+            "GYROOS_RATE_LIMIT_REQUESTS must be greater than zero",
+        ),
+        (
+            "GYROOS_RATE_LIMIT_WINDOW_SECONDS",
+            "0",
+            "GYROOS_RATE_LIMIT_WINDOW_SECONDS must be greater than zero",
+        ),
+        (
+            "GYROOS_MAX_CONCURRENT_REQUESTS",
+            "0",
+            "GYROOS_MAX_CONCURRENT_REQUESTS must be greater than zero",
         ),
     ],
 )
