@@ -15,6 +15,7 @@ from .models import (
     ProcessHistoryPage,
     TrajectoryEdgePage,
 )
+from .observability import RequestDiagnosticsMiddleware, configure_logging
 from .repositories import store
 from .repository_errors import (
     RepositoryBusyError,
@@ -27,6 +28,7 @@ from .runtime import ProcessExecutor, ReferenceError
 from .security import require_runtime_bearer
 from .settings import settings
 
+configure_logging(settings)
 app = FastAPI(
     title="GyroOS Bounded Runtime API",
     version="0.1.0",
@@ -34,6 +36,7 @@ app = FastAPI(
     debug=settings.debug,
 )
 app.add_middleware(ResourceLimitMiddleware, runtime_settings=settings)
+app.add_middleware(RequestDiagnosticsMiddleware)
 protected = APIRouter(dependencies=[Depends(require_runtime_bearer)])
 executor = ProcessExecutor(store)
 
