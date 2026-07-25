@@ -7,6 +7,8 @@ from .models import (
     BoundaryEvaluation,
     BoundaryReadabilityState,
     ContinuationCondition,
+    ContinuityReadabilityContext,
+    ContinuityRelationRecord,
     DifferenceObject,
     DifferenceRepresentationType,
     IncorporationRecord,
@@ -521,5 +523,99 @@ class ReadabilityRelationBundleBuilder:
             scene_readability_relation_refs=[
                 item.scene_readability_relation_id for item in relation_items
             ],
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class ContinuityReadabilityContextBuilder:
+    """Construct an explicit continuity-readability scope without evaluating it."""
+
+    def build(
+        self,
+        *,
+        process_id: str,
+        source_slice_ref: str,
+        target_slice_ref: str,
+        orientation_ref: str | None = None,
+        context_refs: list[str] | None = None,
+        readability_context_refs: list[str] | None = None,
+        source_record_refs: list[str] | None = None,
+        target_record_refs: list[str] | None = None,
+        provisional: bool = True,
+        metadata: dict[str, object] | None = None,
+        continuity_readability_context_id: str | None = None,
+    ) -> ContinuityReadabilityContext:
+        return ContinuityReadabilityContext(
+            continuity_readability_context_id=(
+                continuity_readability_context_id
+                or new_vnext_id("continuity_readability_context")
+            ),
+            process_id=process_id,
+            source_slice_ref=source_slice_ref,
+            target_slice_ref=target_slice_ref,
+            orientation_ref=orientation_ref,
+            context_refs=list(context_refs or []),
+            readability_context_refs=list(readability_context_refs or []),
+            source_record_refs=list(source_record_refs or []),
+            target_record_refs=list(target_record_refs or []),
+            provisional=provisional,
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class ContinuityRelationRecordBuilder:
+    """Construct one explicit continuity-readability relation statement only."""
+
+    def build(
+        self,
+        *,
+        continuity_context: ContinuityReadabilityContext,
+        source_ref: str,
+        target_ref: str,
+        relation_type: str,
+        readable: bool,
+        continuity_state: str | None = None,
+        provisional: bool = True,
+        authoritative: bool = False,
+        source_refs: list[str] | None = None,
+        evidence_refs: list[str] | None = None,
+        metadata: dict[str, object] | None = None,
+        continuity_relation_id: str | None = None,
+        expected_context_ref: str | None = None,
+        expected_process_id: str | None = None,
+    ) -> ContinuityRelationRecord:
+        if (
+            expected_context_ref is not None
+            and expected_context_ref
+            != continuity_context.continuity_readability_context_id
+        ):
+            raise ValueError(
+                "expected_context_ref must match ContinuityReadabilityContext"
+            )
+        if (
+            expected_process_id is not None
+            and expected_process_id != continuity_context.process_id
+        ):
+            raise ValueError(
+                "expected_process_id must match ContinuityReadabilityContext process_id"
+            )
+
+        return ContinuityRelationRecord(
+            continuity_relation_id=(
+                continuity_relation_id or new_vnext_id("continuity_relation")
+            ),
+            process_id=continuity_context.process_id,
+            continuity_readability_context_ref=(
+                continuity_context.continuity_readability_context_id
+            ),
+            source_ref=source_ref,
+            target_ref=target_ref,
+            relation_type=relation_type,
+            readable=readable,
+            continuity_state=continuity_state,
+            provisional=provisional,
+            authoritative=authoritative,
+            source_refs=list(source_refs or []),
+            evidence_refs=list(evidence_refs or []),
             metadata=deepcopy(metadata or {}),
         )
