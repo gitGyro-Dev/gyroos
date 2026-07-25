@@ -233,7 +233,16 @@ expected scene/context refs are validated
 source/evidence refs and nested metadata are copied
 ```
 
-The Priority F workflow now runs this test with the accepted Priority G/H regression suite and all earlier vNext tests.
+The Priority F workflow runs this test with the accepted Priority G/H regression suite and all earlier vNext tests.
+
+Verified workflow runs:
+
+```text
+30150441490 = success
+30150475350 = success
+30150490148 = success
+30150512003 = success
+```
 
 ---
 
@@ -290,10 +299,10 @@ Current RC Runtime contract changed
 
 ```text
 SceneReadabilityRelation
-= IMPLEMENTED AS ISOLATED REFERENCE MODEL
+= VERIFIED AS ISOLATED REFERENCE MODEL
 
 SceneReadabilityRelationBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 SemanticAssemblyService
 = UNCHANGED
@@ -305,14 +314,14 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
 
 ---
 
 ## 12. Next Decision
 
-After workflow verification, review whether Incorporated Readability should next add:
+Review whether Incorporated Readability should next add:
 
 ```text
 ReadabilityRelationBundle
