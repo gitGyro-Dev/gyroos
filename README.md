@@ -525,7 +525,51 @@ complete Process result group
 
 Query surfaces do not execute a new Process, select Operator Response, infer a hidden latest state, or convert repository absence into VOID, DEFER, STOP, or Stability results.
 
-Detailed contracts are recorded in `docs/66_*` through `docs/74_*`.
+Detailed contracts are recorded in `docs/66_*` through `docs/75_*`.
+
+---
+
+## 🛡️ Priority H Production Hardening
+
+Priority H hardens the Priority G Runtime boundary without adding new Gyro Process semantics.
+
+Implemented controls include:
+
+```text
+development / test / production configuration profiles
+production fail-fast validation
+Bearer protection for Runtime endpoints
+request-body, rate, and concurrency limits
+SQLite WAL and bounded lock handling
+JSON structured logging and X-Request-ID correlation
+database schema compatibility checks
+verified backup and restore operations
+production token quality and response security headers
+bounded load and stress regression tests
+```
+
+Public endpoint:
+
+```text
+GET /health
+```
+
+Protected endpoints:
+
+```text
+POST /loop/step
+GET  /loop/state/{loop_id}
+GET  /loop/history/{loop_id}
+GET  /trajectory/{trajectory_ref}
+GET  /process/{process_id}
+GET  /memory/record/{record_id}
+```
+
+Production deployment requires explicit environment configuration, including a persistent database path, authentication, a non-placeholder bearer token of at least 32 characters, JSON logging, and positive resource limits.
+
+Priority H establishes a bounded single-host SQLite release-candidate boundary. It does not claim TLS termination, distributed coordination, principal-level authorization, scheduled encrypted backups, external metrics/tracing, or production SLOs.
+
+Detailed contracts are recorded in `docs/76_*` through `docs/86_*`.
 
 ---
 
@@ -589,18 +633,45 @@ gyroos/
     72_priority_g7_trajectory_query_endpoint.md
     73_priority_g8_memory_record_retrieval_and_type_safe_reconstruction.md
     74_priority_g9_restart_and_recovery_tests.md
+    75_priority_g10_cross_document_review_and_refinement.md
+    76_priority_h_production_hardening_overview.md
+    77_priority_h1_configuration_and_environment_separation.md
+    78_priority_h2_authentication_and_authorization_boundary.md
+    79_priority_h3_request_size_rate_and_resource_limits.md
+    80_priority_h4_concurrency_and_sqlite_locking.md
+    81_priority_h5_structured_logging_and_operational_diagnostics.md
+    82_priority_h6_schema_migration_and_compatibility.md
+    83_priority_h7_backup_restore_and_recovery_operations.md
+    84_priority_h8_security_review_and_secret_handling.md
+    85_priority_h9_load_and_stress_tests.md
+    86_priority_h10_production_readiness_review.md
   app/
+    backup.py
     main.py
     models.py
+    observability.py
     repositories.py
     repository_errors.py
+    resource_limits.py
     runtime.py
+    security.py
+    security_headers.py
+    settings.py
     sqlite_repository.py
   tests/
+    test_authentication_boundary.py
+    test_backup_restore.py
     test_bounded_api.py
+    test_load_stress.py
+    test_observability.py
     test_priority_f_poc.py
-    test_sqlite_repository.py
+    test_resource_limits.py
     test_restart_recovery.py
+    test_runtime_settings.py
+    test_schema_compatibility.py
+    test_security_hardening.py
+    test_sqlite_locking.py
+    test_sqlite_repository.py
 ```
 
 ---
@@ -620,11 +691,26 @@ Gyro Processₙ
 ### Priority G — Persistent Runtime Boundary
 
 ```text
-G-1 through G-9
-= implemented and verified
+G-1 through G-10
+= COMPLETE
+```
 
-G-10
-= cross-document review and refinement
+### Priority H — Production Hardening
+
+```text
+H-1 through H-10
+= COMPLETE
+
+Bounded Runtime implementation
+= READY FOR RELEASE-CANDIDATE REVIEW
+```
+
+Next:
+
+```text
+Priority G + Priority H Cross Review
+→ RC Review
+→ RC Acceptance or targeted return-to-hardening
 ```
 
 ---
