@@ -252,7 +252,7 @@ No secret value becomes part of canonical Process memory, trajectory, Stability,
 
 ```text
 H-8 Security Review and Secret Handling
-= IMPLEMENTED
+= COMPLETE
 
 Production token minimum length
 = IMPLEMENTED
@@ -267,14 +267,10 @@ HTTP security headers
 = IMPLEMENTED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-8 may be marked:
-
-```text
-H-8
 = COMPLETE
+
+Verified run
+= 30146335208
 ```
 
 The next Priority H step is:
