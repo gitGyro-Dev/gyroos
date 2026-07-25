@@ -393,3 +393,48 @@ class IncorporatedReadabilityAssemblyResult(VNextModel):
     incorporations: list[IncorporationRecord] = Field(default_factory=list)
     scene_relations: list[SceneReadabilityRelation] = Field(default_factory=list)
     bundle: ReadabilityRelationBundle
+
+
+class ContinuityReadabilityContext(VNextModel):
+    """Explicit scope for reading a possible relation across two slice references.
+
+    This model does not assert continuity, calculate a score, establish identity,
+    or create a Trajectory. It only records the explicit references available for
+    one continuity-readability statement.
+    """
+
+    continuity_readability_context_id: str
+    process_id: str
+    source_slice_ref: str
+    target_slice_ref: str
+    orientation_ref: str | None = None
+    context_refs: list[str] = Field(default_factory=list)
+    readability_context_refs: list[str] = Field(default_factory=list)
+    source_record_refs: list[str] = Field(default_factory=list)
+    target_record_refs: list[str] = Field(default_factory=list)
+    provisional: bool = True
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ContinuityRelationRecord(VNextModel):
+    """One explicit continuity-readability relation statement.
+
+    The record does not guarantee continuity, select continuation behavior, map an
+    OperatorResponse, prove Identity continuity, or function as a Trajectory edge.
+    """
+
+    continuity_relation_id: str
+    process_id: str
+    continuity_readability_context_ref: str
+    source_ref: str
+    target_ref: str
+    relation_type: str
+    readable: bool
+    continuity_state: str | None = None
+    provisional: bool = True
+    authoritative: bool = False
+    source_refs: list[str] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
