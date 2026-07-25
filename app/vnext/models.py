@@ -336,3 +336,60 @@ class ReadabilityRelationBundle(VNextModel):
     scene_readability_relation_refs: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ReadabilityContextSpec(VNextModel):
+    readable_item_refs: list[str] = Field(default_factory=list)
+    unresolved_item_refs: list[str] = Field(default_factory=list)
+    excluded_item_refs: list[str] = Field(default_factory=list)
+    source_context_refs: list[str] = Field(default_factory=list)
+    provisional: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    readability_context_id: str | None = None
+
+
+class IncorporationSpec(VNextModel):
+    before_context_ref: str
+    after_context_ref: str
+    incorporated_item_refs: list[str] = Field(default_factory=list)
+    rejected_item_refs: list[str] = Field(default_factory=list)
+    update_reason: str
+    provisional: bool = True
+    reversible: bool = True
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    incorporation_record_id: str | None = None
+
+
+class SceneReadabilityRelationSpec(VNextModel):
+    readability_context_ref: str
+    relation_type: str
+    provisional: bool = True
+    authoritative: bool = False
+    source_refs: list[str] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    scene_readability_relation_id: str | None = None
+
+
+class IncorporatedReadabilityAssemblyRequest(VNextModel):
+    """Explicit input specification for isolated readability assembly only."""
+
+    process_id: str
+    slice_ref: str
+    scene: StabilityScene
+    contexts: list[ReadabilityContextSpec] = Field(default_factory=list)
+    incorporations: list[IncorporationSpec] = Field(default_factory=list)
+    scene_relations: list[SceneReadabilityRelationSpec] = Field(default_factory=list)
+    bundle_metadata: dict[str, Any] = Field(default_factory=dict)
+    readability_relation_bundle_id: str | None = None
+
+
+class IncorporatedReadabilityAssemblyResult(VNextModel):
+    """Complete in-memory output of one isolated readability assembly operation."""
+
+    scene: StabilityScene
+    contexts: list[ReadabilityContext] = Field(default_factory=list)
+    incorporations: list[IncorporationRecord] = Field(default_factory=list)
+    scene_relations: list[SceneReadabilityRelation] = Field(default_factory=list)
+    bundle: ReadabilityRelationBundle
