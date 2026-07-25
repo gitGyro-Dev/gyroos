@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from app.vnext.builders import StabilityObservationBuilder, StabilitySceneBuilder
-from app.vnext.models import LocalArticulation
+from app.vnext.models import LocalArticulation, StabilityObservation
 
 
 def build_scene():
@@ -38,7 +38,7 @@ def test_observation_references_scene_without_replacing_it() -> None:
     assert observation.classification == "STABLE"
     assert observation.confidence == 0.84
     assert observation.policy_ref == "policy_001"
-    assert "articulation" not in observation.model_fields
+    assert "articulation" not in StabilityObservation.model_fields
 
 
 def test_observation_does_not_require_score_or_classification() -> None:
