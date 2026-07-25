@@ -308,19 +308,19 @@ Current RC Runtime contract changed
 
 ```text
 TrajectoryNodeSpec
-= IMPLEMENTED AS ISOLATED INPUT MODEL
+= VERIFIED AS ISOLATED INPUT MODEL
 
 TrajectoryEdgeSpec
-= IMPLEMENTED AS ISOLATED INPUT MODEL
+= VERIFIED AS ISOLATED INPUT MODEL
 
 TrajectoryAssemblyRequest
-= IMPLEMENTED AS ISOLATED INPUT MODEL
+= VERIFIED AS ISOLATED INPUT MODEL
 
 TrajectoryAssemblyService
-= IMPLEMENTED AS ISOLATED ORCHESTRATION FACADE
+= VERIFIED AS ISOLATED ORCHESTRATION FACADE
 
 TrajectoryAssemblyResult
-= IMPLEMENTED AS ISOLATED IN-MEMORY RESULT
+= VERIFIED AS ISOLATED IN-MEMORY RESULT
 
 Current /loop/step behavior
 = UNCHANGED
@@ -329,14 +329,23 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+```
+
+Verified workflow runs:
+
+```text
+30158004382 = success
+30158015270 = success
+30158033108 = success
+30158051683 = success
 ```
 
 ---
 
 ## 13. Next Decision
 
-After workflow verification, perform:
+Perform:
 
 ```text
 Trajectory Assembly Review
