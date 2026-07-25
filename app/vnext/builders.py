@@ -21,6 +21,9 @@ from .models import (
     SemanticRealizationBundle,
     StabilityObservation,
     StabilityScene,
+    TrajectoryEdge,
+    TrajectoryGraph,
+    TrajectoryNode,
     UnresolvedLocalItem,
 )
 
@@ -308,7 +311,8 @@ class ContinuityReadabilityContextBuilder:
               readability_context_refs: list[str] | None = None,
               source_record_refs: list[str] | None = None,
               target_record_refs: list[str] | None = None,
-              provisional: bool = True, metadata: dict[str, object] | None = None,
+              provisional: bool = True,
+              metadata: dict[str, object] | None = None,
               continuity_readability_context_id: str | None = None) -> ContinuityReadabilityContext:
         return ContinuityReadabilityContext(
             continuity_readability_context_id=continuity_readability_context_id or new_vnext_id("continuity_readability_context"),
@@ -357,8 +361,6 @@ class ContinuityRelationRecordBuilder:
 
 
 class ContinuityRelationBundleBuilder:
-    """Group continuity relation records by reference without interpreting them."""
-
     def build(self, *, continuity_context: ContinuityReadabilityContext,
               relations: list[ContinuityRelationRecord] | None = None,
               metadata: dict[str, object] | None = None,
@@ -374,5 +376,107 @@ class ContinuityRelationBundleBuilder:
             process_id=continuity_context.process_id,
             continuity_readability_context_ref=continuity_context.continuity_readability_context_id,
             continuity_relation_refs=[item.continuity_relation_id for item in relation_items],
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class TrajectoryNodeBuilder:
+    """Construct one reference-only Trajectory node without resolving the record."""
+
+    def build(self, *, process_id: str, record_ref: str, record_type: str,
+              slice_ref: str | None = None, node_role: str | None = None,
+              provisional: bool = True, metadata: dict[str, object] | None = None,
+              trajectory_node_id: str | None = None) -> TrajectoryNode:
+        return TrajectoryNode(
+            trajectory_node_id=trajectory_node_id or new_vnext_id("trajectory_node"),
+            process_id=process_id,
+            record_ref=record_ref,
+            record_type=record_type,
+            slice_ref=slice_ref,
+            node_role=node_role,
+            provisional=provisional,
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class TrajectoryEdgeBuilder:
+    """Construct one explicit edge between existing Trajectory nodes."""
+
+    def build(self, *, source_node: TrajectoryNode, target_node: TrajectoryNode,
+              edge_type: str, relation_ref: str | None = None, readable: bool = True,
+              provisional: bool = True, authoritative: bool = False,
+              evidence_refs: list[str] | None = None,
+              metadata: dict[str, object] | None = None,
+              trajectory_edge_id: str | None = None,
+              expected_source_node_ref: str | None = None,
+              expected_target_node_ref: str | None = None) -> TrajectoryEdge:
+        if source_node.process_id != target_node.process_id:
+            raise ValueError("source and target TrajectoryNode process_id values must match")
+        if source_node.trajectory_node_id == target_node.trajectory_node_id:
+            raise ValueError("source and target TrajectoryNode references must be distinct")
+        if expected_source_node_ref is not None and expected_source_node_ref != source_node.trajectory_node_id:
+            raise ValueError("expected_source_node_ref must match source TrajectoryNode")
+        if expected_target_node_ref is not None and expected_target_node_ref != target_node.trajectory_node_id:
+            raise ValueError("expected_target_node_ref must match target TrajectoryNode")
+        return TrajectoryEdge(
+            trajectory_edge_id=trajectory_edge_id or new_vnext_id("trajectory_edge"),
+            process_id=source_node.process_id,
+            source_node_ref=source_node.trajectory_node_id,
+            target_node_ref=target_node.trajectory_node_id,
+            edge_type=edge_type,
+            relation_ref=relation_ref,
+            readable=readable,
+            provisional=provisional,
+            authoritative=authoritative,
+            evidence_refs=list(evidence_refs or []),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class TrajectoryGraphBuilder:
+    """Group explicit nodes and edges by reference without graph interpretation."""
+
+    def build(self, *, process_id: str,
+              nodes: list[TrajectoryNode] | None = None,
+              edges: list[TrajectoryEdge] | None = None,
+              root_node_refs: list[str] | None = None,
+              terminal_node_refs: list[str] | None = None,
+              provisional: bool = True,
+              metadata: dict[str, object] | None = None,
+              trajectory_graph_id: str | None = None) -> TrajectoryGraph:
+        node_items = nodes or []
+        edge_items = edges or []
+        node_ids: set[str] = set()
+        for node in node_items:
+            if node.process_id != process_id:
+                raise ValueError("TrajectoryNode process_id must match graph process_id")
+            if node.trajectory_node_id in node_ids:
+                raise ValueError("TrajectoryNode IDs must be unique within one graph")
+            node_ids.add(node.trajectory_node_id)
+        edge_ids: set[str] = set()
+        for edge in edge_items:
+            if edge.process_id != process_id:
+                raise ValueError("TrajectoryEdge process_id must match graph process_id")
+            if edge.trajectory_edge_id in edge_ids:
+                raise ValueError("TrajectoryEdge IDs must be unique within one graph")
+            if edge.source_node_ref not in node_ids:
+                raise ValueError("TrajectoryEdge source_node_ref must reference a bundled TrajectoryNode")
+            if edge.target_node_ref not in node_ids:
+                raise ValueError("TrajectoryEdge target_node_ref must reference a bundled TrajectoryNode")
+            edge_ids.add(edge.trajectory_edge_id)
+        root_refs = list(root_node_refs or [])
+        terminal_refs = list(terminal_node_refs or [])
+        if any(node_ref not in node_ids for node_ref in root_refs):
+            raise ValueError("root_node_refs must reference bundled TrajectoryNode records")
+        if any(node_ref not in node_ids for node_ref in terminal_refs):
+            raise ValueError("terminal_node_refs must reference bundled TrajectoryNode records")
+        return TrajectoryGraph(
+            trajectory_graph_id=trajectory_graph_id or new_vnext_id("trajectory_graph"),
+            process_id=process_id,
+            trajectory_node_refs=[item.trajectory_node_id for item in node_items],
+            trajectory_edge_refs=[item.trajectory_edge_id for item in edge_items],
+            root_node_refs=root_refs,
+            terminal_node_refs=terminal_refs,
+            provisional=provisional,
             metadata=deepcopy(metadata or {}),
         )
