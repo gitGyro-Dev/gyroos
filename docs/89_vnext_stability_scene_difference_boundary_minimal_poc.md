@@ -245,7 +245,20 @@ usable Boundary requires readable distinction
 USABLE_BOUNDARY state requires usable distinction
 ```
 
-The existing GitHub Actions workflow now runs this isolated vNext test file together with the accepted Priority G/H regression suite.
+The existing GitHub Actions workflow runs this isolated vNext test file together with the accepted Priority G/H regression suite.
+
+Successful verification runs:
+
+```text
+Run ID: 30147502129
+Conclusion: success
+
+Run ID: 30147518802
+Conclusion: success
+
+Run ID: 30147551711
+Conclusion: success
+```
 
 ---
 
@@ -295,16 +308,23 @@ These omissions are intentional.
 
 ## 9. Next Design Decision
 
-After workflow verification, the next step should remain small.
-
-Recommended next choice:
+The next step remains intentionally small:
 
 ```text
-A. Add a pure internal builder that constructs StabilityScene from explicit inputs
+Add a pure internal builder that constructs StabilityScene from explicit inputs.
+```
 
-or
+The builder must not:
 
-B. Add a pure internal BoundaryEvaluator interface that consumes DifferenceObject and explicit policy input
+```text
+calculate Stability
+infer missing relations
+classify continuation
+create Difference
+create Boundary
+select OperatorResponse
+modify /loop/step
+persist canonical records
 ```
 
 Do not connect the models to `/loop/step` until the internal responsibility boundary is reviewed.
@@ -345,13 +365,13 @@ Developer Toolkit responsibility mixed into Runtime
 
 ```text
 vNext Stability Scene model
-= IMPLEMENTED AS ISOLATED POC
+= VERIFIED ISOLATED POC
 
 vNext DifferenceObject model
-= IMPLEMENTED AS ISOLATED POC
+= VERIFIED ISOLATED POC
 
 vNext BoundaryEvaluation model
-= IMPLEMENTED AS ISOLATED POC
+= VERIFIED ISOLATED POC
 
 Current /loop/step behavior
 = UNCHANGED
@@ -360,5 +380,5 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
