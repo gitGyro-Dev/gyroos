@@ -12,6 +12,7 @@ from .models import (
     IncorporationRecord,
     LocalArticulation,
     ReadabilityContext,
+    ReadabilityRelationBundle,
     ReadableRelation,
     SceneReadabilityRelation,
     SemanticRealizationBundle,
@@ -438,5 +439,87 @@ class SceneReadabilityRelationBuilder:
             authoritative=authoritative,
             source_refs=list(source_refs or []),
             evidence_refs=list(evidence_refs or []),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class ReadabilityRelationBundleBuilder:
+    """Group Incorporated Readability records by reference without selecting them."""
+
+    def build(
+        self,
+        *,
+        process_id: str,
+        slice_ref: str,
+        readability_contexts: list[ReadabilityContext] | None = None,
+        incorporation_records: list[IncorporationRecord] | None = None,
+        scene_readability_relations: list[SceneReadabilityRelation] | None = None,
+        metadata: dict[str, object] | None = None,
+        readability_relation_bundle_id: str | None = None,
+    ) -> ReadabilityRelationBundle:
+        context_items = readability_contexts or []
+        incorporation_items = incorporation_records or []
+        relation_items = scene_readability_relations or []
+
+        context_ids: set[str] = set()
+        for context in context_items:
+            if context.process_id != process_id:
+                raise ValueError(
+                    "ReadabilityContext process_id must match bundle process_id"
+                )
+            if context.slice_ref != slice_ref:
+                raise ValueError(
+                    "ReadabilityContext slice_ref must match bundle slice_ref"
+                )
+            context_ids.add(context.readability_context_id)
+
+        for record in incorporation_items:
+            if record.process_id != process_id:
+                raise ValueError(
+                    "IncorporationRecord process_id must match bundle process_id"
+                )
+            if record.slice_ref != slice_ref:
+                raise ValueError(
+                    "IncorporationRecord slice_ref must match bundle slice_ref"
+                )
+            if record.before_context_ref not in context_ids:
+                raise ValueError(
+                    "IncorporationRecord before_context_ref must reference a bundled ReadabilityContext"
+                )
+            if record.after_context_ref not in context_ids:
+                raise ValueError(
+                    "IncorporationRecord after_context_ref must reference a bundled ReadabilityContext"
+                )
+
+        for relation in relation_items:
+            if relation.process_id != process_id:
+                raise ValueError(
+                    "SceneReadabilityRelation process_id must match bundle process_id"
+                )
+            if relation.slice_ref != slice_ref:
+                raise ValueError(
+                    "SceneReadabilityRelation slice_ref must match bundle slice_ref"
+                )
+            if relation.readability_context_ref not in context_ids:
+                raise ValueError(
+                    "SceneReadabilityRelation must reference a bundled ReadabilityContext"
+                )
+
+        return ReadabilityRelationBundle(
+            readability_relation_bundle_id=(
+                readability_relation_bundle_id
+                or new_vnext_id("readability_relation_bundle")
+            ),
+            process_id=process_id,
+            slice_ref=slice_ref,
+            readability_context_refs=[
+                item.readability_context_id for item in context_items
+            ],
+            incorporation_record_refs=[
+                item.incorporation_record_id for item in incorporation_items
+            ],
+            scene_readability_relation_refs=[
+                item.scene_readability_relation_id for item in relation_items
+            ],
             metadata=deepcopy(metadata or {}),
         )
