@@ -162,3 +162,22 @@ class BoundaryEvaluation(VNextModel):
                 "USABLE_BOUNDARY state requires usable_distinction=true"
             )
         return self
+
+
+class SemanticRealizationBundle(VNextModel):
+    """Reference-only grouping of isolated vNext semantic records.
+
+    The bundle is not a canonical Process result, persistence transaction, or
+    evaluation engine. It only records that the referenced objects belong to
+    one explicit process and slice scope.
+    """
+
+    semantic_bundle_id: str
+    process_id: str
+    slice_ref: str
+    stability_scene_ref: str
+    stability_observation_refs: list[str] = Field(default_factory=list)
+    difference_refs: list[str] = Field(default_factory=list)
+    boundary_evaluation_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
