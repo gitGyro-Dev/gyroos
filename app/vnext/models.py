@@ -248,3 +248,53 @@ class SemanticAssemblyResult(VNextModel):
     differences: list[DifferenceObject] = Field(default_factory=list)
     boundary_evaluations: list[BoundaryEvaluation] = Field(default_factory=list)
     bundle: SemanticRealizationBundle
+
+
+class ReadabilityContext(VNextModel):
+    """Explicit readability state available at one runtime point.
+
+    This is not raw history storage, model training state, or a complete Context
+    object. It records which items are currently available as readable inputs.
+    """
+
+    readability_context_id: str
+    process_id: str
+    slice_ref: str
+    readable_item_refs: list[str] = Field(default_factory=list)
+    unresolved_item_refs: list[str] = Field(default_factory=list)
+    excluded_item_refs: list[str] = Field(default_factory=list)
+    source_context_refs: list[str] = Field(default_factory=list)
+    provisional: bool = True
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class IncorporationRecord(VNextModel):
+    """Explicit record of a readability-context update.
+
+    The record states what was incorporated or rejected. It does not perform
+    learning, conflict resolution, rollback, or context replacement itself.
+    """
+
+    incorporation_record_id: str
+    process_id: str
+    slice_ref: str
+    before_context_ref: str
+    after_context_ref: str
+    incorporated_item_refs: list[str] = Field(default_factory=list)
+    rejected_item_refs: list[str] = Field(default_factory=list)
+    update_reason: str
+    provisional: bool = True
+    reversible: bool = True
+    evidence_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_incorporation_content(self) -> "IncorporationRecord":
+        overlap = set(self.incorporated_item_refs) & set(self.rejected_item_refs)
+        if overlap:
+            raise ValueError(
+                "the same item cannot be both incorporated and rejected"
+            )
+        return self
