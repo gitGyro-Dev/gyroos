@@ -85,8 +85,26 @@ def test_unknown_database_schema_version_is_rejected(tmp_path: Path) -> None:
 def test_incomplete_legacy_schema_is_rejected(tmp_path: Path) -> None:
     database = tmp_path / "incomplete.db"
     with sqlite3.connect(database) as connection:
-        connection.execute(
-            "CREATE TABLE runtime_records(record_id TEXT PRIMARY KEY)"
+        connection.executescript(
+            """
+            CREATE TABLE runtime_records (
+                record_id TEXT PRIMARY KEY,
+                record_type TEXT NOT NULL,
+                process_id TEXT,
+                loop_id TEXT,
+                canonical_payload TEXT NOT NULL,
+                canonical_digest TEXT NOT NULL,
+                schema_version TEXT NOT NULL,
+                runtime_version TEXT NOT NULL,
+                publication_id TEXT NOT NULL,
+                publication_order INTEGER NOT NULL
+            );
+
+            CREATE TABLE current_scope (
+                loop_id TEXT PRIMARY KEY,
+                process_id TEXT NOT NULL
+            );
+            """
         )
 
     with pytest.raises(RepositorySchemaMismatch, match="missing required tables"):
