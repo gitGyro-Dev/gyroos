@@ -201,6 +201,8 @@ unsupported schema version is rejected during restore
 
 The workflow now executes the H-7 backup and restore test file.
 
+GitHub Actions run `30142048608` completed successfully.
+
 ---
 
 ## 9. Operational Guidance
@@ -269,7 +271,7 @@ Backup metadata does not become part of canonical Process memory, trajectory, St
 
 ```text
 H-7 Backup, Restore, and Recovery Operations
-= IMPLEMENTED
+= COMPLETE
 
 Consistent SQLite backup
 = IMPLEMENTED
@@ -287,13 +289,6 @@ Implicit overwrite
 = PROHIBITED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-7 may be marked:
-
-```text
-H-7
 = COMPLETE
 ```
 
