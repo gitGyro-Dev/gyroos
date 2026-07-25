@@ -197,6 +197,13 @@ The existing repository tests continue to verify record-level schema mismatch ha
 
 The workflow now executes the H-6 schema compatibility test file.
 
+Verified GitHub Actions run:
+
+```text
+run_id = 30141699950
+conclusion = success
+```
+
 ---
 
 ## 10. Deferred Migration Work
@@ -244,7 +251,7 @@ Database schema metadata does not become part of Process identity, trajectory, S
 
 ```text
 H-6 Schema Migration and Compatibility
-= IMPLEMENTED
+= COMPLETE
 
 Persistent database schema metadata
 = IMPLEMENTED
@@ -259,13 +266,6 @@ Destructive automatic migration
 = NOT IMPLEMENTED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-6 may be marked:
-
-```text
-H-6
 = COMPLETE
 ```
 
