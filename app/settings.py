@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 
@@ -72,7 +72,7 @@ class RuntimeSettings:
     debug: bool
     sqlite_timeout_seconds: float
     authentication_required: bool
-    api_bearer_token: str | None
+    api_bearer_token: str | None = field(repr=False)
     max_request_body_bytes: int
     rate_limit_requests: int
     rate_limit_window_seconds: int
@@ -163,6 +163,25 @@ class RuntimeSettings:
             raise ValueError(
                 "GYROOS_API_BEARER_TOKEN is required when authentication is enabled"
             )
+
+        if self.environment == RuntimeEnvironment.PRODUCTION:
+            token = self.api_bearer_token or ""
+            if len(token) < 32:
+                raise ValueError(
+                    "GYROOS_API_BEARER_TOKEN must be at least 32 characters in production"
+                )
+            if token.lower() in {
+                "changeme",
+                "change-me",
+                "default",
+                "password",
+                "production-secret",
+                "secret",
+                "test-secret",
+            }:
+                raise ValueError(
+                    "GYROOS_API_BEARER_TOKEN must not use a placeholder value in production"
+                )
 
 
 settings = RuntimeSettings.from_env()
