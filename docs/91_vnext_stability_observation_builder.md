@@ -89,7 +89,7 @@ The builder performs only:
 reference one existing StabilityScene
 validate an optional expected scene reference
 copy explicit observation values
-copy evidence and metadata
+deep-copy evidence and metadata
 create one StabilityObservation ID when not supplied
 ```
 
@@ -149,7 +149,7 @@ evidence_refs
 metadata
 ```
 
-are copied into the observation.
+are copied into the observation, including nested metadata structures.
 
 Later caller mutation does not change the created observation.
 
@@ -171,10 +171,20 @@ explicit score, classification, confidence, and policy are preserved
 score and classification are optional
 scene content does not cause implicit observation inference
 expected scene reference mismatch is rejected
-mutable evidence and metadata inputs are copied
+mutable evidence and nested metadata inputs are copied
 ```
 
-The existing workflow now executes this test with the accepted G/H regression suite and earlier vNext tests.
+The existing workflow executes this test with the accepted G/H regression suite and earlier vNext tests.
+
+Successful verification:
+
+```text
+Run ID: 30148408928
+Job: test-and-run-poc
+Conclusion: success
+```
+
+The same final revision was reported successful across all three triggered workflow runs.
 
 ---
 
@@ -198,7 +208,7 @@ The accepted release-candidate Runtime behavior remains unchanged.
 
 ## 10. Next Decision
 
-After workflow verification, the next small step should return to the third original concept:
+The next small step returns to the third original concept:
 
 ```text
 DifferenceObject
@@ -241,7 +251,7 @@ Current RC Runtime contract changed
 
 ```text
 StabilityObservationBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 StabilitySceneBuilder
 = VERIFIED AS ISOLATED PURE BUILDER
@@ -253,5 +263,5 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
