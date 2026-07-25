@@ -531,43 +531,28 @@ Detailed contracts are recorded in `docs/66_*` through `docs/75_*`.
 
 ## 🛡️ Priority H Production Hardening
 
-Priority H hardens the Priority G Runtime boundary without adding new Gyro Process semantics.
+Priority H hardens the Priority G Runtime boundary without changing canonical Gyro Process semantics.
 
-Implemented controls include:
+Implemented controls:
 
 ```text
-development / test / production configuration profiles
-production fail-fast validation
-Bearer protection for Runtime endpoints
-request-body, rate, and concurrency limits
-SQLite WAL and bounded lock handling
+development / test / production settings profiles
+production configuration fail-fast
+Bearer authentication for Runtime endpoints
+request-body, rate, and concurrent-request limits
+SQLite WAL and bounded lock waiting
+retryable repository-busy classification
 JSON structured logging and X-Request-ID correlation
-database schema compatibility checks
-verified backup and restore operations
-production token quality and response security headers
-bounded load and stress regression tests
+database schema compatibility validation
+verified SQLite backup and restore
+production token quality checks
+security response headers
+bounded concurrent and sustained load tests
 ```
 
-Public endpoint:
+The current candidate remains a bounded, single-host, SQLite-backed Runtime with one configured Bearer token.
 
-```text
-GET /health
-```
-
-Protected endpoints:
-
-```text
-POST /loop/step
-GET  /loop/state/{loop_id}
-GET  /loop/history/{loop_id}
-GET  /trajectory/{trajectory_ref}
-GET  /process/{process_id}
-GET  /memory/record/{record_id}
-```
-
-Production deployment requires explicit environment configuration, including a persistent database path, authentication, a non-placeholder bearer token of at least 32 characters, JSON logging, and positive resource limits.
-
-Priority H establishes a bounded single-host SQLite release-candidate boundary. It does not claim TLS termination, distributed coordination, principal-level authorization, scheduled encrypted backups, external metrics/tracing, or production SLOs.
+Public production exposure still requires deployment declarations for TLS, network policy, secret injection, backup storage, logging destination, capacity, rollback, and operator ownership.
 
 Detailed contracts are recorded in `docs/76_*` through `docs/86_*`.
 
@@ -645,6 +630,8 @@ gyroos/
     84_priority_h8_security_review_and_secret_handling.md
     85_priority_h9_load_and_stress_tests.md
     86_priority_h10_production_readiness_review.md
+    87_priority_g_h_cross_review.md
+    88_release_candidate_review.md
   app/
     backup.py
     main.py
@@ -700,17 +687,33 @@ G-1 through G-10
 ```text
 H-1 through H-10
 = COMPLETE
+```
 
-Bounded Runtime implementation
-= READY FOR RELEASE-CANDIDATE REVIEW
+### Release Candidate
+
+```text
+Priority G + Priority H Cross Review
+= COMPLETE
+
+RC Review
+= COMPLETE
+
+Canonical Runtime implementation
+= ACCEPTED AS RELEASE CANDIDATE
+
+Bounded single-host SQLite Runtime
+= RC ACCEPTANCE RECOMMENDED
+
+Deployment-specific public production readiness
+= CONDITIONAL / NOT YET ACCEPTED
 ```
 
 Next:
 
 ```text
-Priority G + Priority H Cross Review
-→ RC Review
-→ RC Acceptance or targeted return-to-hardening
+RC Acceptance
+→ accepted RC record / version marker
+→ reproducible release packaging
 ```
 
 ---
