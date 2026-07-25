@@ -10,6 +10,7 @@ from .models import (
     DifferenceObject,
     LocalArticulation,
     ReadableRelation,
+    SemanticRealizationBundle,
     StabilityObservation,
     StabilityScene,
     UnresolvedLocalItem,
@@ -161,5 +162,77 @@ class BoundaryEvaluationBuilder:
             provisional=provisional,
             policy_ref=policy_ref,
             evidence_refs=list(evidence_refs or []),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class SemanticRealizationBundleBuilder:
+    """Group existing vNext records by reference without evaluating them.
+
+    The builder validates common process/slice scope and reference ownership.
+    It does not copy complete records into the bundle, order evaluations,
+    select a preferred observation, or create persistence semantics.
+    """
+
+    def build(
+        self,
+        *,
+        scene: StabilityScene,
+        observations: list[StabilityObservation] | None = None,
+        differences: list[DifferenceObject] | None = None,
+        boundary_evaluations: list[BoundaryEvaluation] | None = None,
+        metadata: dict[str, object] | None = None,
+        semantic_bundle_id: str | None = None,
+    ) -> SemanticRealizationBundle:
+        observation_items = observations or []
+        difference_items = differences or []
+        boundary_items = boundary_evaluations or []
+
+        for observation in observation_items:
+            if observation.stability_scene_ref != scene.stability_scene_id:
+                raise ValueError(
+                    "StabilityObservation must reference the bundled StabilityScene"
+                )
+
+        difference_ids: set[str] = set()
+        for difference in difference_items:
+            if difference.process_id != scene.process_id:
+                raise ValueError(
+                    "DifferenceObject process_id must match StabilityScene process_id"
+                )
+            if difference.slice_ref != scene.slice_ref:
+                raise ValueError(
+                    "DifferenceObject slice_ref must match StabilityScene slice_ref"
+                )
+            difference_ids.add(difference.difference_id)
+
+        for evaluation in boundary_items:
+            if evaluation.process_id != scene.process_id:
+                raise ValueError(
+                    "BoundaryEvaluation process_id must match StabilityScene process_id"
+                )
+            if evaluation.slice_ref != scene.slice_ref:
+                raise ValueError(
+                    "BoundaryEvaluation slice_ref must match StabilityScene slice_ref"
+                )
+            if evaluation.difference_ref not in difference_ids:
+                raise ValueError(
+                    "BoundaryEvaluation must reference a DifferenceObject in the bundle"
+                )
+
+        return SemanticRealizationBundle(
+            semantic_bundle_id=(
+                semantic_bundle_id or new_vnext_id("semantic_bundle")
+            ),
+            process_id=scene.process_id,
+            slice_ref=scene.slice_ref,
+            stability_scene_ref=scene.stability_scene_id,
+            stability_observation_refs=[
+                item.stability_observation_id for item in observation_items
+            ],
+            difference_refs=[item.difference_id for item in difference_items],
+            boundary_evaluation_refs=[
+                item.boundary_evaluation_id for item in boundary_items
+            ],
             metadata=deepcopy(metadata or {}),
         )
