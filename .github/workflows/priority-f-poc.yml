@@ -66,7 +66,7 @@ jobs:
         run: python -m pip install -r requirements-api.txt
 
       - name: Run bounded Runtime and production hardening tests
-        run: python -m pytest tests/test_bounded_api.py tests/test_priority_f_poc.py tests/test_sqlite_repository.py tests/test_restart_recovery.py tests/test_runtime_settings.py tests/test_authentication_boundary.py tests/test_resource_limits.py tests/test_sqlite_locking.py tests/test_observability.py tests/test_schema_compatibility.py tests/test_backup_restore.py tests/test_security_hardening.py tests/test_load_stress.py tests/vnext/test_semantic_models.py tests/vnext/test_stability_scene_builder.py tests/vnext/test_stability_observation_builder.py tests/vnext/test_boundary_evaluation_builder.py tests/vnext/test_semantic_realization_bundle_builder.py -q
+        run: python -m pytest tests/test_bounded_api.py tests/test_priority_f_poc.py tests/test_sqlite_repository.py tests/test_restart_recovery.py tests/test_runtime_settings.py tests/test_authentication_boundary.py tests/test_resource_limits.py tests/test_sqlite_locking.py tests/test_observability.py tests/test_schema_compatibility.py tests/test_backup_restore.py tests/test_security_hardening.py tests/test_load_stress.py tests/vnext/test_semantic_models.py tests/vnext/test_stability_scene_builder.py tests/vnext/test_stability_observation_builder.py tests/vnext/test_boundary_evaluation_builder.py tests/vnext/test_semantic_realization_bundle_builder.py tests/vnext/test_difference_object_builder.py -q
 
       - name: Generate PoC result artifacts
         run: python poc/run_poc.py --output-dir poc/results
