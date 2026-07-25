@@ -224,12 +224,21 @@ BoundaryEvaluationSpec outside the assembled Difference set is rejected
 nested request inputs remain isolated through builder copy boundaries
 ```
 
-The existing workflow now executes this end-to-end isolated assembly test together with:
+The existing workflow executes this end-to-end isolated assembly test together with:
 
 ```text
 Priority G regression tests
 Priority H regression tests
 all earlier vNext model and builder tests
+```
+
+Verified successful workflow runs:
+
+```text
+30149667186
+30149679505
+30149695400
+30149713689
 ```
 
 ---
@@ -258,17 +267,15 @@ The accepted release-candidate Runtime behavior remains unchanged.
 
 ## 11. Next Decision
 
-After workflow verification, the initial vNext semantic construction pipeline will be complete as an isolated in-memory PoC.
+The initial vNext semantic construction pipeline is complete as an isolated in-memory PoC.
 
-The next decision should be a review, not an immediate Runtime connection.
-
-Recommended next step:
+The next decision is a review, not an immediate Runtime connection.
 
 ```text
 vNext Semantic Assembly Review
 ```
 
-That review should determine whether the next concept is:
+That review determines whether the next concept is:
 
 ```text
 Incorporated Readability
@@ -276,7 +283,7 @@ Incorporated Readability
 
 or whether a compatibility projection experiment is needed before further semantic expansion.
 
-No `/loop/step` or SQLite integration should begin until that review is complete.
+No `/loop/step` or SQLite integration begins before that review is complete.
 
 ---
 
@@ -314,13 +321,13 @@ DifferenceObjectBuilder
 = VERIFIED AS ISOLATED PURE BUILDER
 
 SemanticAssemblyRequest
-= IMPLEMENTED AS ISOLATED INPUT MODEL
+= VERIFIED AS ISOLATED INPUT MODEL
 
 SemanticAssemblyService
-= IMPLEMENTED AS ISOLATED ORCHESTRATION FACADE
+= VERIFIED AS ISOLATED ORCHESTRATION FACADE
 
 SemanticAssemblyResult
-= IMPLEMENTED AS ISOLATED IN-MEMORY RESULT
+= VERIFIED AS ISOLATED IN-MEMORY RESULT
 
 Current /loop/step behavior
 = UNCHANGED
@@ -329,5 +336,5 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
