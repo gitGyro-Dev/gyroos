@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from uuid import uuid4
 
 from .models import (
@@ -56,7 +57,7 @@ class StabilitySceneBuilder:
                 item.model_copy(deep=True) for item in (continuation_conditions or [])
             ],
             evidence_refs=list(evidence_refs or []),
-            metadata=dict(metadata or {}),
+            metadata=deepcopy(metadata or {}),
         )
 
 
@@ -99,5 +100,5 @@ class StabilityObservationBuilder:
             confidence=confidence,
             policy_ref=policy_ref,
             evidence_refs=list(evidence_refs or []),
-            metadata=dict(metadata or {}),
+            metadata=deepcopy(metadata or {}),
         )
