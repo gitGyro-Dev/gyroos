@@ -1,0 +1,164 @@
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class VNextModel(BaseModel):
+    """Closed experimental model boundary for the vNext semantic PoC."""
+
+    model_config = ConfigDict(extra="forbid", use_enum_values=True)
+
+
+class DifferenceRepresentationType(str, Enum):
+    SCALAR = "SCALAR"
+    VECTOR = "VECTOR"
+    TUPLE = "TUPLE"
+    RELATION = "RELATION"
+    CATEGORY = "CATEGORY"
+    PARTIAL_ORDER = "PARTIAL_ORDER"
+    SYMBOLIC = "SYMBOLIC"
+    DISTRIBUTION = "DISTRIBUTION"
+    FIELD = "FIELD"
+    DOMAIN_DEFINED = "DOMAIN_DEFINED"
+
+
+class BoundaryReadabilityState(str, Enum):
+    UNREADABLE = "UNREADABLE"
+    CANDIDATE = "CANDIDATE"
+    READABLE_DISTINCTION = "READABLE_DISTINCTION"
+    USABLE_BOUNDARY = "USABLE_BOUNDARY"
+
+
+class LocalArticulation(VNextModel):
+    articulation_id: str
+    process_id: str
+    slice_ref: str
+    representation: dict[str, Any]
+    readable: bool = True
+    source_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ReadableRelation(VNextModel):
+    relation_id: str
+    source_ref: str
+    target_ref: str | None = None
+    relation_type: str
+    readable: bool = True
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class UnresolvedLocalItem(VNextModel):
+    unresolved_item_id: str
+    description: str
+    reason: str | None = None
+    related_refs: list[str] = Field(default_factory=list)
+    provisional: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ContinuationCondition(VNextModel):
+    condition_id: str
+    description: str
+    satisfied: bool | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
+    policy_ref: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class StabilityScene(VNextModel):
+    """Runtime representation of K_n; not a scalar Stability score."""
+
+    stability_scene_id: str
+    process_id: str
+    slice_ref: str
+    articulation: LocalArticulation
+    readable_relations: list[ReadableRelation] = Field(default_factory=list)
+    unresolved_local_items: list[UnresolvedLocalItem] = Field(default_factory=list)
+    continuation_conditions: list[ContinuationCondition] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class StabilityObservation(VNextModel):
+    """Optional observation of a StabilityScene; it does not replace the scene."""
+
+    stability_observation_id: str
+    stability_scene_ref: str
+    score: float | None = Field(default=None, ge=0.0, le=1.0)
+    classification: str | None = None
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    policy_ref: str | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
+    observed_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class DifferenceObject(VNextModel):
+    """Slice-relative Difference without assuming distance, error, or scalar form."""
+
+    difference_id: str
+    process_id: str
+    slice_ref: str
+    orientation_ref: str | None = None
+    context_refs: list[str] = Field(default_factory=list)
+    representation_type: DifferenceRepresentationType
+    representation: Any
+    defined: bool = True
+    comparable: bool | None = None
+    evaluative: bool = False
+    slice_relative: bool = True
+    source_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_defined_representation(self) -> "DifferenceObject":
+        if self.defined and self.representation is None:
+            raise ValueError("defined DifferenceObject requires representation")
+        return self
+
+
+class BoundaryEvaluation(VNextModel):
+    """Evaluation of whether Difference is readable and usable as a Boundary."""
+
+    boundary_evaluation_id: str
+    process_id: str
+    slice_ref: str
+    difference_ref: str
+    orientation_ref: str | None = None
+    context_refs: list[str] = Field(default_factory=list)
+    readability_state: BoundaryReadabilityState
+    readable_as_distinction: bool
+    usable_distinction: bool
+    provisional: bool = True
+    policy_ref: str | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
+    evaluated_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_readability_consistency(self) -> "BoundaryEvaluation":
+        if self.usable_distinction and not self.readable_as_distinction:
+            raise ValueError(
+                "usable Boundary distinction requires readable_as_distinction=true"
+            )
+        if (
+            self.readability_state == BoundaryReadabilityState.USABLE_BOUNDARY
+            and not self.usable_distinction
+        ):
+            raise ValueError(
+                "USABLE_BOUNDARY state requires usable_distinction=true"
+            )
+        return self
