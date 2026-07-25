@@ -7,6 +7,7 @@ from app.vnext.models import (
     ContinuationCondition,
     LocalArticulation,
     ReadableRelation,
+    StabilityScene,
     UnresolvedLocalItem,
 )
 
@@ -60,8 +61,8 @@ def test_builder_constructs_scene_from_explicit_inputs_only() -> None:
     assert scene.continuation_conditions == [condition]
     assert scene.evidence_refs == ["evidence_001"]
     assert scene.metadata == {"source": "explicit-test-input"}
-    assert "score" not in scene.model_fields
-    assert "classification" not in scene.model_fields
+    assert "score" not in StabilityScene.model_fields
+    assert "classification" not in StabilityScene.model_fields
 
 
 def test_builder_allows_scene_without_relations_or_conditions() -> None:
