@@ -189,6 +189,15 @@ nested metadata is copied
 
 The Priority F workflow now runs this test with the accepted Priority G/H regression suite and all earlier vNext tests.
 
+Verified workflow runs:
+
+```text
+30150803989 = success
+30150848799 = success
+30150866672 = success
+30150887046 = success
+```
+
 ---
 
 ## 8. Isolation Boundary
@@ -244,10 +253,10 @@ Current RC Runtime contract changed
 
 ```text
 ReadabilityRelationBundle
-= IMPLEMENTED AS ISOLATED REFERENCE MODEL
+= VERIFIED AS ISOLATED REFERENCE MODEL
 
 ReadabilityRelationBundleBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 SemanticAssemblyService
 = UNCHANGED
@@ -259,25 +268,25 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
 ```
 
 ---
 
 ## 11. Next Decision
 
-After workflow verification, review whether the next minimal step should be:
+The next minimal step is:
 
 ```text
 A. Incorporated Readability Assembly Service
 ```
 
-that coordinates explicit context, incorporation, relation, and bundle builders without selection or persistence;
+It should coordinate explicit context, incorporation, relation, and bundle builders without selection or persistence.
 
-or:
+After that implementation is verified and reviewed, proceed to:
 
 ```text
 B. Continuity Readability model design
 ```
 
-Do not connect either bundle to `/loop/step` or SQLite until that review is complete.
+Do not connect either bundle to `/loop/step` or SQLite until the assembly review is complete.
