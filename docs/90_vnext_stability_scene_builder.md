@@ -156,12 +156,25 @@ articulation slice mismatch is rejected
 mutable caller inputs are copied
 ```
 
-The existing workflow now executes the builder tests together with:
+The existing workflow executes the builder tests together with:
 
 ```text
 Priority G regression tests
 Priority H regression tests
 vNext semantic model tests
+```
+
+Successful workflow verification:
+
+```text
+Run ID: 30148100831
+Conclusion: success
+
+Run ID: 30148110991
+Conclusion: success
+
+Run ID: 30148122810
+Conclusion: success
 ```
 
 ---
@@ -185,7 +198,7 @@ The accepted release-candidate Runtime behavior remains unchanged.
 
 ## 9. Next Decision
 
-After workflow verification, the next step should remain small.
+The next step should remain small.
 
 Recommended next choice:
 
@@ -234,7 +247,7 @@ Current RC Runtime contract changed
 
 ```text
 StabilitySceneBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 Current /loop/step behavior
 = UNCHANGED
@@ -243,5 +256,5 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
