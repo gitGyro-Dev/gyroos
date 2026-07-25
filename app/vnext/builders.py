@@ -13,6 +13,7 @@ from .models import (
     LocalArticulation,
     ReadabilityContext,
     ReadableRelation,
+    SceneReadabilityRelation,
     SemanticRealizationBundle,
     StabilityObservation,
     StabilityScene,
@@ -372,6 +373,70 @@ class IncorporationRecordBuilder:
             update_reason=update_reason,
             provisional=provisional,
             reversible=reversible,
+            evidence_refs=list(evidence_refs or []),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class SceneReadabilityRelationBuilder:
+    """Relate one StabilityScene to one ReadabilityContext by explicit reference only.
+
+    The builder does not derive the context from the scene, update either record,
+    or infer whether the relation is authoritative.
+    """
+
+    def build(
+        self,
+        *,
+        scene: StabilityScene,
+        readability_context: ReadabilityContext,
+        relation_type: str,
+        provisional: bool = True,
+        authoritative: bool = False,
+        source_refs: list[str] | None = None,
+        evidence_refs: list[str] | None = None,
+        metadata: dict[str, object] | None = None,
+        scene_readability_relation_id: str | None = None,
+        expected_scene_ref: str | None = None,
+        expected_readability_context_ref: str | None = None,
+    ) -> SceneReadabilityRelation:
+        if scene.process_id != readability_context.process_id:
+            raise ValueError(
+                "StabilityScene and ReadabilityContext process_id values must match"
+            )
+        if scene.slice_ref != readability_context.slice_ref:
+            raise ValueError(
+                "StabilityScene and ReadabilityContext slice_ref values must match"
+            )
+        if (
+            expected_scene_ref is not None
+            and expected_scene_ref != scene.stability_scene_id
+        ):
+            raise ValueError(
+                "expected_scene_ref must match StabilityScene stability_scene_id"
+            )
+        if (
+            expected_readability_context_ref is not None
+            and expected_readability_context_ref
+            != readability_context.readability_context_id
+        ):
+            raise ValueError(
+                "expected_readability_context_ref must match ReadabilityContext"
+            )
+
+        return SceneReadabilityRelation(
+            scene_readability_relation_id=(
+                scene_readability_relation_id
+                or new_vnext_id("scene_readability_relation")
+            ),
+            process_id=scene.process_id,
+            slice_ref=scene.slice_ref,
+            stability_scene_ref=scene.stability_scene_id,
+            readability_context_ref=readability_context.readability_context_id,
+            relation_type=relation_type,
+            provisional=provisional,
+            authoritative=authoritative,
+            source_refs=list(source_refs or []),
             evidence_refs=list(evidence_refs or []),
             metadata=deepcopy(metadata or {}),
         )
