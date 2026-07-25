@@ -26,6 +26,7 @@ from .repository_errors import (
 from .resource_limits import ResourceLimitMiddleware
 from .runtime import ProcessExecutor, ReferenceError
 from .security import require_runtime_bearer
+from .security_headers import SecurityHeadersMiddleware
 from .settings import settings
 
 configure_logging(settings)
@@ -37,6 +38,7 @@ app = FastAPI(
 )
 app.add_middleware(ResourceLimitMiddleware, runtime_settings=settings)
 app.add_middleware(RequestDiagnosticsMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 protected = APIRouter(dependencies=[Depends(require_runtime_bearer)])
 executor = ProcessExecutor(store)
 
