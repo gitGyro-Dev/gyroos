@@ -319,3 +319,20 @@ class SceneReadabilityRelation(VNextModel):
     evidence_refs: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ReadabilityRelationBundle(VNextModel):
+    """Reference-only grouping for Incorporated Readability records.
+
+    The bundle does not select a current context, authoritative relation, or
+    canonical update chain. It only records one explicit process/slice grouping.
+    """
+
+    readability_relation_bundle_id: str
+    process_id: str
+    slice_ref: str
+    readability_context_refs: list[str] = Field(default_factory=list)
+    incorporation_record_refs: list[str] = Field(default_factory=list)
+    scene_readability_relation_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
