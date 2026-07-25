@@ -165,13 +165,6 @@ class BoundaryEvaluation(VNextModel):
 
 
 class SemanticRealizationBundle(VNextModel):
-    """Reference-only grouping of isolated vNext semantic records.
-
-    The bundle is not a canonical Process result, persistence transaction, or
-    evaluation engine. It only records that the referenced objects belong to
-    one explicit process and slice scope.
-    """
-
     semantic_bundle_id: str
     process_id: str
     slice_ref: str
@@ -222,8 +215,6 @@ class BoundaryEvaluationSpec(VNextModel):
 
 
 class SemanticAssemblyRequest(VNextModel):
-    """Explicit input specification for isolated semantic assembly only."""
-
     process_id: str
     slice_ref: str
     articulation: LocalArticulation
@@ -241,8 +232,6 @@ class SemanticAssemblyRequest(VNextModel):
 
 
 class SemanticAssemblyResult(VNextModel):
-    """Complete in-memory output of one isolated semantic assembly operation."""
-
     scene: StabilityScene
     observations: list[StabilityObservation] = Field(default_factory=list)
     differences: list[DifferenceObject] = Field(default_factory=list)
@@ -251,12 +240,6 @@ class SemanticAssemblyResult(VNextModel):
 
 
 class ReadabilityContext(VNextModel):
-    """Explicit readability state available at one runtime point.
-
-    This is not raw history storage, model training state, or a complete Context
-    object. It records which items are currently available as readable inputs.
-    """
-
     readability_context_id: str
     process_id: str
     slice_ref: str
@@ -270,12 +253,6 @@ class ReadabilityContext(VNextModel):
 
 
 class IncorporationRecord(VNextModel):
-    """Explicit record of a readability-context update.
-
-    The record states what was incorporated or rejected. It does not perform
-    learning, conflict resolution, rollback, or context replacement itself.
-    """
-
     incorporation_record_id: str
     process_id: str
     slice_ref: str
@@ -294,19 +271,11 @@ class IncorporationRecord(VNextModel):
     def validate_incorporation_content(self) -> "IncorporationRecord":
         overlap = set(self.incorporated_item_refs) & set(self.rejected_item_refs)
         if overlap:
-            raise ValueError(
-                "the same item cannot be both incorporated and rejected"
-            )
+            raise ValueError("the same item cannot be both incorporated and rejected")
         return self
 
 
 class SceneReadabilityRelation(VNextModel):
-    """Reference-only relation between one StabilityScene and one readability context.
-
-    The relation does not imply ownership, derivation, mandatory dependency, or
-    automatic synchronization between the scene and the context.
-    """
-
     scene_readability_relation_id: str
     process_id: str
     slice_ref: str
@@ -322,12 +291,6 @@ class SceneReadabilityRelation(VNextModel):
 
 
 class ReadabilityRelationBundle(VNextModel):
-    """Reference-only grouping for Incorporated Readability records.
-
-    The bundle does not select a current context, authoritative relation, or
-    canonical update chain. It only records one explicit process/slice grouping.
-    """
-
     readability_relation_bundle_id: str
     process_id: str
     slice_ref: str
@@ -373,8 +336,6 @@ class SceneReadabilityRelationSpec(VNextModel):
 
 
 class IncorporatedReadabilityAssemblyRequest(VNextModel):
-    """Explicit input specification for isolated readability assembly only."""
-
     process_id: str
     slice_ref: str
     scene: StabilityScene
@@ -386,8 +347,6 @@ class IncorporatedReadabilityAssemblyRequest(VNextModel):
 
 
 class IncorporatedReadabilityAssemblyResult(VNextModel):
-    """Complete in-memory output of one isolated readability assembly operation."""
-
     scene: StabilityScene
     contexts: list[ReadabilityContext] = Field(default_factory=list)
     incorporations: list[IncorporationRecord] = Field(default_factory=list)
@@ -396,12 +355,7 @@ class IncorporatedReadabilityAssemblyResult(VNextModel):
 
 
 class ContinuityReadabilityContext(VNextModel):
-    """Explicit scope for reading a possible relation across two slice references.
-
-    This model does not assert continuity, calculate a score, establish identity,
-    or create a Trajectory. It only records the explicit references available for
-    one continuity-readability statement.
-    """
+    """Explicit scope for reading a possible relation across two slice references."""
 
     continuity_readability_context_id: str
     process_id: str
@@ -418,11 +372,7 @@ class ContinuityReadabilityContext(VNextModel):
 
 
 class ContinuityRelationRecord(VNextModel):
-    """One explicit continuity-readability relation statement.
-
-    The record does not guarantee continuity, select continuation behavior, map an
-    OperatorResponse, prove Identity continuity, or function as a Trajectory edge.
-    """
+    """One explicit continuity-readability relation statement."""
 
     continuity_relation_id: str
     process_id: str
@@ -438,3 +388,59 @@ class ContinuityRelationRecord(VNextModel):
     evidence_refs: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ContinuityRelationBundle(VNextModel):
+    """Reference-only grouping of one continuity context and its relation records."""
+
+    continuity_relation_bundle_id: str
+    process_id: str
+    continuity_readability_context_ref: str
+    continuity_relation_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ContinuityReadabilityContextSpec(VNextModel):
+    source_slice_ref: str
+    target_slice_ref: str
+    orientation_ref: str | None = None
+    context_refs: list[str] = Field(default_factory=list)
+    readability_context_refs: list[str] = Field(default_factory=list)
+    source_record_refs: list[str] = Field(default_factory=list)
+    target_record_refs: list[str] = Field(default_factory=list)
+    provisional: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    continuity_readability_context_id: str | None = None
+
+
+class ContinuityRelationSpec(VNextModel):
+    source_ref: str
+    target_ref: str
+    relation_type: str
+    readable: bool
+    continuity_state: str | None = None
+    provisional: bool = True
+    authoritative: bool = False
+    source_refs: list[str] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    continuity_relation_id: str | None = None
+
+
+class ContinuityReadabilityAssemblyRequest(VNextModel):
+    """Explicit input specification for isolated continuity readability assembly."""
+
+    process_id: str
+    context: ContinuityReadabilityContextSpec
+    relations: list[ContinuityRelationSpec] = Field(default_factory=list)
+    bundle_metadata: dict[str, Any] = Field(default_factory=dict)
+    continuity_relation_bundle_id: str | None = None
+
+
+class ContinuityReadabilityAssemblyResult(VNextModel):
+    """Complete in-memory output of one isolated continuity assembly operation."""
+
+    context: ContinuityReadabilityContext
+    relations: list[ContinuityRelationRecord] = Field(default_factory=list)
+    bundle: ContinuityRelationBundle
