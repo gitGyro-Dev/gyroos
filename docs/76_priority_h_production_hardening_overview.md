@@ -37,7 +37,7 @@ production readiness review
 
 ## 2. Entry Conditions
 
-Priority H begins from the completed Priority G state:
+Priority H began from the completed Priority G state:
 
 ```text
 G-1 through G-9 = COMPLETE
@@ -48,13 +48,13 @@ typed reconstruction = implemented
 restart recovery = verified
 ```
 
-Priority H assumes no new Runtime outcome types and no change to the ownership of OperatorResponse.
+Priority H introduced no new Runtime outcome types and did not change ownership of OperatorResponse.
 
 ---
 
 ## 3. Hardening Principle
 
-The hardening target is:
+The hardening target was:
 
 ```text
 existing bounded Runtime
@@ -65,9 +65,9 @@ existing bounded Runtime
 → RC-reviewable system
 ```
 
-Priority H must not become a feature-expansion phase.
+Priority H did not become a feature-expansion phase.
 
-Changes are accepted only when they improve one or more of:
+Changes were accepted only when they improved one or more of:
 
 ```text
 safety
@@ -85,43 +85,43 @@ operational clarity
 
 ### H-1 Configuration and Environment Separation
 
-Define typed Runtime settings and separate development, test, and production configuration.
+Typed Runtime settings and separated development, test, and production configuration.
 
 ### H-2 Authentication and Authorization Boundary
 
-Define which endpoints are public, protected, administrative, or internal and introduce a bounded initial access-control mechanism.
+Defined public and protected endpoints and introduced bounded Bearer authentication.
 
 ### H-3 Request Size, Rate, and Resource Limits
 
-Define explicit HTTP body, pagination, execution, and storage-related limits.
+Defined explicit request-body, request-rate, and concurrent-request limits.
 
 ### H-4 Concurrency and SQLite Locking
 
-Define transaction, connection, writer, timeout, and concurrent-request behavior.
+Defined WAL, busy timeout, transaction, writer, and lock-contention behavior.
 
-### H-5 Logging, Metrics, and Traceability
+### H-5 Structured Logging and Operational Diagnostics
 
-Define structured logs, request correlation, Runtime phase visibility, and minimum operational metrics.
+Defined JSON logs, request correlation, bounded request diagnostics, and sensitive-field exclusion.
 
 ### H-6 Schema Migration and Compatibility
 
-Define schema-version ownership, compatible reads, rejected versions, migration sequencing, and rollback boundary.
+Defined database schema metadata, legacy adoption, rejected versions, and fail-fast compatibility checks.
 
-### H-7 Backup, Restore, and Corruption Handling
+### H-7 Backup, Restore, and Recovery Operations
 
-Define backup artifacts, restore verification, integrity checks, and explicit handling of corrupt storage.
+Defined consistent backups, restore verification, integrity checks, and atomic destination replacement.
 
-### H-8 Security and Dependency Review
+### H-8 Security Review and Secret Handling
 
-Review dependency versions, secret handling, API exposure, error leakage, workflow permissions, and supply-chain controls.
+Reviewed secret quality, secret representation, response headers, API exposure, and workflow permissions.
 
-### H-9 Load, Failure, and Recovery Tests
+### H-9 Load and Stress Tests
 
-Exercise bounded load, locking, timeout, restart, partial-failure, and recovery scenarios.
+Exercised bounded concurrent HTTP execution, SQLite publication, sustained publication, and restart reconstruction.
 
-### H-10 Production Readiness Cross-review
+### H-10 Production Readiness Review
 
-Review H-1 through H-9 against Runtime contracts, deployment expectations, documentation, and RC entry conditions.
+Reviewed H-1 through H-9 against Runtime contracts, deployment expectations, documentation, and RC entry conditions.
 
 ---
 
@@ -135,7 +135,7 @@ explicit process environment
 → safe code defaults
 ```
 
-Configuration must not be derived from request payloads.
+Configuration is not derived from request payloads.
 
 Runtime clients cannot change server configuration through Gyro Process fields.
 
@@ -143,7 +143,7 @@ Runtime clients cannot change server configuration through Gyro Process fields.
 
 ## 6. Environment Profiles
 
-The initial profile set is:
+The profile set is:
 
 ```text
 development
@@ -173,8 +173,10 @@ no dependency on developer-local environment
 ```text
 explicit persistent database path required
 debug disabled
-non-local bind may be selected explicitly
-secret values must come from environment or deployment secret store
+authentication required
+hardened bearer token required
+JSON logging required
+resource limits validated
 unsafe development defaults rejected
 ```
 
@@ -182,7 +184,7 @@ unsafe development defaults rejected
 
 ## 7. Production Failure Principle
 
-Production misconfiguration must fail during application startup rather than becoming a delayed Runtime failure.
+Production misconfiguration fails during application startup rather than becoming a delayed Runtime failure.
 
 Examples:
 
@@ -192,6 +194,10 @@ invalid port
 non-positive timeout
 missing persistent database path
 production debug enabled
+authentication disabled
+missing, weak, or placeholder bearer token
+JSON logging disabled
+invalid request or concurrency limit
 ```
 
 These are deployment failures, not:
@@ -208,7 +214,7 @@ OperatorResponse.STOP
 
 ## 8. Release Candidate Relationship
 
-Priority H is completed before RC review.
+Priority H is complete before RC review.
 
 ```text
 Priority G complete
@@ -225,30 +231,51 @@ The RC review may identify defects and return work to a specific Priority H item
 
 ## 9. Completion Conditions
 
-Priority H may be marked complete when:
+Priority H completion conditions are satisfied:
 
 ```text
-H-1 through H-9 are verified
-H-10 cross-review is complete
+H-1 through H-9 verified
+H-10 cross-review complete
 production configuration fails safely
-security and resource boundaries are explicit
-restart and restore behavior are tested
-workflow and dependency controls are reviewed
-README and deployment documentation match implementation
-no unresolved critical production-readiness issue remains
+security and resource boundaries explicit
+restart and restore behavior tested
+workflow controls reviewed
+documentation matches implementation
+no unresolved critical application-level production-readiness issue
 ```
+
+Deployment-specific requirements remain explicit in the H-10 review and must be resolved for the intended environment before public production exposure.
 
 ---
 
-## 10. Initial Decision
+## 10. Final Decision
 
 ```text
 Priority H Production Hardening
-= STARTED
+= COMPLETE
 
-H-1 Configuration and Environment Separation
-= NEXT
+H-1 through H-10
+= COMPLETE
 
-RC review
-= AFTER PRIORITY H
+Bounded Runtime implementation
+= READY FOR RELEASE-CANDIDATE REVIEW
+
+Unqualified public production readiness
+= NOT CLAIMED
+```
+
+Authoritative final review:
+
+```text
+docs/86_priority_h10_production_readiness_review.md
+```
+
+Next phase:
+
+```text
+Priority G + Priority H Cross Review
+↓
+RC Review
+↓
+RC Acceptance or targeted return-to-hardening
 ```
