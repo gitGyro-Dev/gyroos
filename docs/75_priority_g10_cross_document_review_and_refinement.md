@@ -149,6 +149,7 @@ parent_process_ref
 ```
 
 `relation_ref` preserves `Structure.current_mode.relation_ref`.
+
 `source_ref` remains the Slice input source.
 
 ---
@@ -203,7 +204,7 @@ Empty and missing state remains explicit absence rather than VOID, DEFER, STOP, 
 
 ## 8. Test and Workflow Alignment
 
-The GitHub Actions workflow executes:
+At Priority G completion, the GitHub Actions workflow executed:
 
 ```text
 tests/test_bounded_api.py
@@ -212,7 +213,7 @@ tests/test_sqlite_repository.py
 tests/test_restart_recovery.py
 ```
 
-The latest G-9 verification run completed successfully:
+The G-9 verification run completed successfully:
 
 ```text
 run_id = 30080831829
@@ -220,7 +221,7 @@ job_id = 89441803281
 conclusion = success
 ```
 
-The workflow also generates, verifies, and uploads Priority F PoC result artifacts.
+Priority H subsequently extended the same workflow with production-hardening, recovery, security, and load tests. The complete G + H workflow is reviewed separately in the Priority G + H Cross Review.
 
 ---
 
@@ -246,11 +247,13 @@ relation_ref
 
 G-9 was updated from implementation-pending to verified complete with workflow evidence.
 
+Priority H completion later updated README again so the repository entry point now describes both the persistent Runtime boundary and production hardening.
+
 ---
 
-## 10. Known Deferred Work
+## 10. Priority G Deferred Work and Priority H Disposition
 
-The following remain outside the bounded Priority G prototype:
+At Priority G completion, the following were intentionally deferred:
 
 ```text
 cursor tokens stable under concurrent insertion
@@ -266,7 +269,49 @@ observability and operational metrics
 production deployment configuration
 ```
 
-These are not silently treated as completed Priority G capabilities.
+Priority H disposition:
+
+```text
+WAL configuration and lock lifecycle
+→ implemented and tested in H-4 / H-9
+
+bounded concurrent SQLite writers
+→ implemented and tested in H-4 / H-9
+
+schema compatibility boundary
+→ implemented in H-6
+
+backup and restore tooling
+→ implemented in H-7
+
+corrupt or incompatible backup rejection
+→ implemented in H-7
+
+production authentication boundary
+→ implemented in H-2 / H-8
+
+rate and resource limiting
+→ implemented in H-3
+
+structured operational diagnostics
+→ implemented in H-5
+
+production configuration profiles and fail-fast
+→ implemented in H-1 / H-8
+```
+
+Still deferred after Priority H:
+
+```text
+cursor tokens stable under concurrent insertion
+indexed normalized trajectory relation columns
+migration beyond schema version 1
+multi-host or distributed writer coordination
+external metrics and tracing
+public production deployment declarations and SLOs
+```
+
+These remaining items are either future repository evolution or deployment-specific work. They do not invalidate the bounded single-host SQLite RC scope.
 
 ---
 
@@ -292,38 +337,42 @@ Restart and idempotency alignment
 = VERIFIED
 
 README / implementation surface alignment
-= REFINED
+= VERIFIED AFTER PRIORITY H SYNCHRONIZATION
 
-G-1 through G-9
+G-1 through G-10
 = COMPLETE
 ```
 
-G-10 implementation status:
+Priority G completion status:
 
 ```text
 Priority G Cross-document Review and Refinement
-= IMPLEMENTED
-
-GitHub Actions execution verification after README/docs-only refinement
-= PENDING
+= COMPLETE
 ```
 
-No Runtime behavior was changed by the G-10 README and review-document updates.
+No Runtime behavior was changed by this document reconciliation.
 
 ---
 
-## 12. Next Decision Point
+## 12. Relationship to Priority H and RC Review
 
-Priority G implementation work is functionally complete through G-9.
+Priority G established the bounded persistent Runtime contract.
 
-The next project-cycle decision should choose one of:
+Priority H hardened that contract without changing its canonical semantics.
 
 ```text
-close Priority G and prepare release candidate review
+Priority G
+→ persistent Runtime and observation surfaces
 
-or
-
-open a new priority for production hardening and operationalization
+Priority H
+→ configuration, admission, concurrency, observability,
+  compatibility, recovery, security, and load hardening
 ```
 
-Production hardening should be tracked separately from the bounded Priority G prototype so completed contracts are not blurred by future operational work.
+The next decision point is:
+
+```text
+Priority G + Priority H Cross Review
+→ RC Review
+→ RC Acceptance or targeted return-to-hardening
+```
