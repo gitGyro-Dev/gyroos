@@ -298,3 +298,24 @@ class IncorporationRecord(VNextModel):
                 "the same item cannot be both incorporated and rejected"
             )
         return self
+
+
+class SceneReadabilityRelation(VNextModel):
+    """Reference-only relation between one StabilityScene and one readability context.
+
+    The relation does not imply ownership, derivation, mandatory dependency, or
+    automatic synchronization between the scene and the context.
+    """
+
+    scene_readability_relation_id: str
+    process_id: str
+    slice_ref: str
+    stability_scene_ref: str
+    readability_context_ref: str
+    relation_type: str
+    provisional: bool = True
+    authoritative: bool = False
+    source_refs: list[str] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
