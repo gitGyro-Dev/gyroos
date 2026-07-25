@@ -121,9 +121,9 @@ class IncorporatedReadabilityAssemblyService:
         bundle = self._bundle_builder.build(
             process_id=request.process_id,
             slice_ref=request.slice_ref,
-            contexts=contexts,
+            readability_contexts=contexts,
             incorporation_records=incorporations,
-            scene_relations=scene_relations,
+            scene_readability_relations=scene_relations,
             metadata=request.bundle_metadata,
             readability_relation_bundle_id=(
                 request.readability_relation_bundle_id
