@@ -319,22 +319,22 @@ Current RC Runtime contract changed
 
 ```text
 TrajectoryNode
-= IMPLEMENTED AS ISOLATED REFERENCE MODEL
+= VERIFIED AS ISOLATED REFERENCE MODEL
 
 TrajectoryEdge
-= IMPLEMENTED AS ISOLATED RELATION MODEL
+= VERIFIED AS ISOLATED RELATION MODEL
 
 TrajectoryGraph
-= IMPLEMENTED AS ISOLATED REFERENCE GRAPH MODEL
+= VERIFIED AS ISOLATED REFERENCE GRAPH MODEL
 
 TrajectoryNodeBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 TrajectoryEdgeBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 TrajectoryGraphBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 Current /loop/step behavior
 = UNCHANGED
@@ -343,27 +343,36 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+```
+
+Verified workflow runs:
+
+```text
+30157610207
+30157665694
+30157692054
+30157707287
 ```
 
 ---
 
 ## 12. Next Decision
 
-After workflow verification, review whether the next minimal step should be:
+Proceed to:
 
 ```text
 A. Trajectory Assembly Service
 ```
 
-that coordinates explicit node, edge, and graph builders without inference or persistence;
+that coordinates explicit node, edge, and graph builders without inference or persistence.
 
-or:
+Keep the later taxonomy review separate:
 
 ```text
 B. Trajectory relation taxonomy review
 ```
 
-that constrains `record_type`, `node_role`, and `edge_type` only after confirming that caller-supplied text is no longer sufficient.
+`record_type`, `node_role`, and `edge_type` remain caller-supplied text until that review.
 
-Do not connect the Trajectory Layer to `/loop/step` or SQLite before that review.
+Do not connect the Trajectory Layer to `/loop/step` or SQLite.
