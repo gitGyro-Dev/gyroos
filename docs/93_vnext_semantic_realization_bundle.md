@@ -198,7 +198,15 @@ BoundaryEvaluation without its DifferenceObject is rejected
 nested metadata is copied
 ```
 
-The existing workflow now executes the bundle tests with the accepted G/H regression suite and earlier vNext tests.
+The existing workflow executes the bundle tests with the accepted G/H regression suite and earlier vNext tests.
+
+Successful GitHub Actions verification:
+
+```text
+Run ID: 30148843830
+Job: test-and-run-poc
+Conclusion: success
+```
 
 ---
 
@@ -225,7 +233,7 @@ The accepted release-candidate Runtime behavior remains unchanged.
 
 ## 10. Next Decision
 
-After workflow verification, the isolated first-step model set will include:
+The isolated first-step model set now includes:
 
 ```text
 StabilityScene
@@ -285,10 +293,10 @@ BoundaryEvaluationBuilder
 = VERIFIED AS ISOLATED PURE BUILDER
 
 SemanticRealizationBundle
-= IMPLEMENTED AS ISOLATED REFERENCE MODEL
+= VERIFIED AS ISOLATED REFERENCE MODEL
 
 SemanticRealizationBundleBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 Current /loop/step behavior
 = UNCHANGED
@@ -297,5 +305,5 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
