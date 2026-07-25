@@ -77,6 +77,8 @@ class ContinuationCondition(VNextModel):
 
 
 class StabilityScene(VNextModel):
+    """Runtime representation of K_n; not a scalar Stability score."""
+
     stability_scene_id: str
     process_id: str
     slice_ref: str
@@ -90,6 +92,8 @@ class StabilityScene(VNextModel):
 
 
 class StabilityObservation(VNextModel):
+    """Optional observation of a StabilityScene; it does not replace the scene."""
+
     stability_observation_id: str
     stability_scene_ref: str
     score: float | None = Field(default=None, ge=0.0, le=1.0)
@@ -102,6 +106,8 @@ class StabilityObservation(VNextModel):
 
 
 class DifferenceObject(VNextModel):
+    """Slice-relative Difference without assuming distance, error, or scalar form."""
+
     difference_id: str
     process_id: str
     slice_ref: str
@@ -125,6 +131,8 @@ class DifferenceObject(VNextModel):
 
 
 class BoundaryEvaluation(VNextModel):
+    """Evaluation of whether Difference is readable and usable as a Boundary."""
+
     boundary_evaluation_id: str
     process_id: str
     slice_ref: str
@@ -143,13 +151,22 @@ class BoundaryEvaluation(VNextModel):
     @model_validator(mode="after")
     def validate_readability_consistency(self) -> "BoundaryEvaluation":
         if self.usable_distinction and not self.readable_as_distinction:
-            raise ValueError("usable Boundary distinction requires readable_as_distinction=true")
-        if self.readability_state == BoundaryReadabilityState.USABLE_BOUNDARY and not self.usable_distinction:
-            raise ValueError("USABLE_BOUNDARY state requires usable_distinction=true")
+            raise ValueError(
+                "usable Boundary distinction requires readable_as_distinction=true"
+            )
+        if (
+            self.readability_state == BoundaryReadabilityState.USABLE_BOUNDARY
+            and not self.usable_distinction
+        ):
+            raise ValueError(
+                "USABLE_BOUNDARY state requires usable_distinction=true"
+            )
         return self
 
 
 class SemanticRealizationBundle(VNextModel):
+    """Reference-only grouping of isolated vNext semantic records."""
+
     semantic_bundle_id: str
     process_id: str
     slice_ref: str
@@ -422,8 +439,6 @@ class ContinuityReadabilityAssemblyResult(VNextModel):
 
 
 class TrajectoryNode(VNextModel):
-    """Reference-only graph node for one explicit existing record."""
-
     trajectory_node_id: str
     process_id: str
     record_ref: str
@@ -436,8 +451,6 @@ class TrajectoryNode(VNextModel):
 
 
 class TrajectoryEdge(VNextModel):
-    """Explicit graph relation between two TrajectoryNode references."""
-
     trajectory_edge_id: str
     process_id: str
     source_node_ref: str
@@ -453,8 +466,6 @@ class TrajectoryEdge(VNextModel):
 
 
 class TrajectoryGraph(VNextModel):
-    """Reference-only grouping of explicit TrajectoryNode and TrajectoryEdge records."""
-
     trajectory_graph_id: str
     process_id: str
     trajectory_node_refs: list[str] = Field(default_factory=list)
@@ -464,3 +475,47 @@ class TrajectoryGraph(VNextModel):
     provisional: bool = True
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class TrajectoryNodeSpec(VNextModel):
+    record_ref: str
+    record_type: str
+    slice_ref: str | None = None
+    node_role: str | None = None
+    provisional: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    trajectory_node_id: str | None = None
+
+
+class TrajectoryEdgeSpec(VNextModel):
+    source_node_ref: str
+    target_node_ref: str
+    edge_type: str
+    relation_ref: str | None = None
+    readable: bool = True
+    provisional: bool = True
+    authoritative: bool = False
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    trajectory_edge_id: str | None = None
+
+
+class TrajectoryAssemblyRequest(VNextModel):
+    """Explicit input specification for isolated Trajectory assembly only."""
+
+    process_id: str
+    nodes: list[TrajectoryNodeSpec] = Field(default_factory=list)
+    edges: list[TrajectoryEdgeSpec] = Field(default_factory=list)
+    root_node_refs: list[str] = Field(default_factory=list)
+    terminal_node_refs: list[str] = Field(default_factory=list)
+    provisional: bool = True
+    graph_metadata: dict[str, Any] = Field(default_factory=dict)
+    trajectory_graph_id: str | None = None
+
+
+class TrajectoryAssemblyResult(VNextModel):
+    """Complete in-memory output of one isolated Trajectory assembly operation."""
+
+    nodes: list[TrajectoryNode] = Field(default_factory=list)
+    edges: list[TrajectoryEdge] = Field(default_factory=list)
+    graph: TrajectoryGraph
