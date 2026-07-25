@@ -228,7 +228,16 @@ optional expected context refs are validated
 mutable inputs and nested metadata are copied
 ```
 
-The existing Priority F workflow now executes this test with the accepted Priority G/H regression suite and all earlier vNext tests.
+The existing Priority F workflow executes this test with the accepted Priority G/H regression suite and all earlier vNext tests.
+
+Verification evidence:
+
+```text
+GitHub Actions run 30150037704 = success
+GitHub Actions run 30150071531 = success
+GitHub Actions run 30150092777 = success
+GitHub Actions run 30150114429 = success
+```
 
 ---
 
@@ -286,16 +295,16 @@ Current RC Runtime contract changed
 
 ```text
 ReadabilityContext
-= IMPLEMENTED AS ISOLATED MODEL
+= VERIFIED AS ISOLATED MODEL
 
 IncorporationRecord
-= IMPLEMENTED AS ISOLATED UPDATE RECORD
+= VERIFIED AS ISOLATED UPDATE RECORD
 
 ReadabilityContextBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 IncorporationRecordBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 Current /loop/step behavior
 = UNCHANGED
@@ -304,16 +313,16 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
 
 ---
 
 ## 10. Next Decision
 
-After workflow verification, the next step should be a responsibility review before connecting Incorporated Readability to semantic assembly.
+The next step is a responsibility review before connecting Incorporated Readability to semantic assembly.
 
-Recommended next review:
+Recommended review:
 
 ```text
 ReadabilityContext
