@@ -4,7 +4,10 @@ from copy import deepcopy
 from uuid import uuid4
 
 from .models import (
+    BoundaryEvaluation,
+    BoundaryReadabilityState,
     ContinuationCondition,
+    DifferenceObject,
     LocalArticulation,
     ReadableRelation,
     StabilityObservation,
@@ -98,6 +101,64 @@ class StabilityObservationBuilder:
             score=score,
             classification=classification,
             confidence=confidence,
+            policy_ref=policy_ref,
+            evidence_refs=list(evidence_refs or []),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class BoundaryEvaluationBuilder:
+    """Construct a BoundaryEvaluation from explicit evaluation values only.
+
+    The builder does not inspect or compare Difference representation, apply a
+    threshold, select a policy, or infer whether a Boundary exists.
+    """
+
+    def build(
+        self,
+        *,
+        difference: DifferenceObject,
+        readability_state: BoundaryReadabilityState,
+        readable_as_distinction: bool,
+        usable_distinction: bool,
+        provisional: bool = True,
+        orientation_ref: str | None = None,
+        context_refs: list[str] | None = None,
+        policy_ref: str | None = None,
+        evidence_refs: list[str] | None = None,
+        metadata: dict[str, object] | None = None,
+        boundary_evaluation_id: str | None = None,
+        expected_difference_ref: str | None = None,
+    ) -> BoundaryEvaluation:
+        if (
+            expected_difference_ref is not None
+            and expected_difference_ref != difference.difference_id
+        ):
+            raise ValueError(
+                "expected_difference_ref must match DifferenceObject difference_id"
+            )
+
+        return BoundaryEvaluation(
+            boundary_evaluation_id=(
+                boundary_evaluation_id or new_vnext_id("boundary_evaluation")
+            ),
+            process_id=difference.process_id,
+            slice_ref=difference.slice_ref,
+            difference_ref=difference.difference_id,
+            orientation_ref=(
+                orientation_ref
+                if orientation_ref is not None
+                else difference.orientation_ref
+            ),
+            context_refs=(
+                list(context_refs)
+                if context_refs is not None
+                else list(difference.context_refs)
+            ),
+            readability_state=readability_state,
+            readable_as_distinction=readable_as_distinction,
+            usable_distinction=usable_distinction,
+            provisional=provisional,
             policy_ref=policy_ref,
             evidence_refs=list(evidence_refs or []),
             metadata=deepcopy(metadata or {}),
