@@ -8,6 +8,7 @@ from .models import (
     BoundaryReadabilityState,
     ContinuationCondition,
     DifferenceObject,
+    DifferenceRepresentationType,
     LocalArticulation,
     ReadableRelation,
     SemanticRealizationBundle,
@@ -104,6 +105,47 @@ class StabilityObservationBuilder:
             confidence=confidence,
             policy_ref=policy_ref,
             evidence_refs=list(evidence_refs or []),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class DifferenceObjectBuilder:
+    """Construct a DifferenceObject from explicit representation input only.
+
+    The builder does not extract, compare, normalize, score, or evaluate
+    Difference. It preserves the caller-supplied representation and scope.
+    """
+
+    def build(
+        self,
+        *,
+        process_id: str,
+        slice_ref: str,
+        representation_type: DifferenceRepresentationType,
+        representation: object,
+        orientation_ref: str | None = None,
+        context_refs: list[str] | None = None,
+        defined: bool = True,
+        comparable: bool | None = None,
+        evaluative: bool = False,
+        slice_relative: bool = True,
+        source_refs: list[str] | None = None,
+        metadata: dict[str, object] | None = None,
+        difference_id: str | None = None,
+    ) -> DifferenceObject:
+        return DifferenceObject(
+            difference_id=difference_id or new_vnext_id("difference"),
+            process_id=process_id,
+            slice_ref=slice_ref,
+            orientation_ref=orientation_ref,
+            context_refs=list(context_refs or []),
+            representation_type=representation_type,
+            representation=deepcopy(representation),
+            defined=defined,
+            comparable=comparable,
+            evaluative=evaluative,
+            slice_relative=slice_relative,
+            source_refs=list(source_refs or []),
             metadata=deepcopy(metadata or {}),
         )
 
