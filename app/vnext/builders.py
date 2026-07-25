@@ -9,7 +9,9 @@ from .models import (
     ContinuationCondition,
     DifferenceObject,
     DifferenceRepresentationType,
+    IncorporationRecord,
     LocalArticulation,
+    ReadabilityContext,
     ReadableRelation,
     SemanticRealizationBundle,
     StabilityObservation,
@@ -276,5 +278,100 @@ class SemanticRealizationBundleBuilder:
             boundary_evaluation_refs=[
                 item.boundary_evaluation_id for item in boundary_items
             ],
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class ReadabilityContextBuilder:
+    """Construct an explicit readability context without deriving readability."""
+
+    def build(
+        self,
+        *,
+        process_id: str,
+        slice_ref: str,
+        readable_item_refs: list[str] | None = None,
+        unresolved_item_refs: list[str] | None = None,
+        excluded_item_refs: list[str] | None = None,
+        source_context_refs: list[str] | None = None,
+        provisional: bool = True,
+        metadata: dict[str, object] | None = None,
+        readability_context_id: str | None = None,
+    ) -> ReadabilityContext:
+        return ReadabilityContext(
+            readability_context_id=(
+                readability_context_id or new_vnext_id("readability_context")
+            ),
+            process_id=process_id,
+            slice_ref=slice_ref,
+            readable_item_refs=list(readable_item_refs or []),
+            unresolved_item_refs=list(unresolved_item_refs or []),
+            excluded_item_refs=list(excluded_item_refs or []),
+            source_context_refs=list(source_context_refs or []),
+            provisional=provisional,
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class IncorporationRecordBuilder:
+    """Record an explicit readability-context update without executing it."""
+
+    def build(
+        self,
+        *,
+        before_context: ReadabilityContext,
+        after_context: ReadabilityContext,
+        incorporated_item_refs: list[str] | None = None,
+        rejected_item_refs: list[str] | None = None,
+        update_reason: str,
+        provisional: bool = True,
+        reversible: bool = True,
+        evidence_refs: list[str] | None = None,
+        metadata: dict[str, object] | None = None,
+        incorporation_record_id: str | None = None,
+        expected_before_context_ref: str | None = None,
+        expected_after_context_ref: str | None = None,
+    ) -> IncorporationRecord:
+        if before_context.process_id != after_context.process_id:
+            raise ValueError(
+                "before and after ReadabilityContext process_id values must match"
+            )
+        if before_context.slice_ref != after_context.slice_ref:
+            raise ValueError(
+                "before and after ReadabilityContext slice_ref values must match"
+            )
+        if before_context.readability_context_id == after_context.readability_context_id:
+            raise ValueError(
+                "before and after ReadabilityContext references must be distinct"
+            )
+        if (
+            expected_before_context_ref is not None
+            and expected_before_context_ref != before_context.readability_context_id
+        ):
+            raise ValueError(
+                "expected_before_context_ref must match before ReadabilityContext"
+            )
+        if (
+            expected_after_context_ref is not None
+            and expected_after_context_ref != after_context.readability_context_id
+        ):
+            raise ValueError(
+                "expected_after_context_ref must match after ReadabilityContext"
+            )
+
+        return IncorporationRecord(
+            incorporation_record_id=(
+                incorporation_record_id or new_vnext_id("incorporation_record")
+            ),
+            process_id=before_context.process_id,
+            slice_ref=before_context.slice_ref,
+            before_context_ref=before_context.readability_context_id,
+            after_context_ref=after_context.readability_context_id,
+            incorporated_item_refs=list(incorporated_item_refs or []),
+            rejected_item_refs=list(rejected_item_refs or []),
+            update_reason=update_reason,
+            provisional=provisional,
+            reversible=reversible,
+            evidence_refs=list(evidence_refs or []),
             metadata=deepcopy(metadata or {}),
         )
