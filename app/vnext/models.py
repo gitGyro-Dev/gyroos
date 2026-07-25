@@ -181,3 +181,70 @@ class SemanticRealizationBundle(VNextModel):
     boundary_evaluation_refs: list[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class StabilityObservationSpec(VNextModel):
+    score: float | None = Field(default=None, ge=0.0, le=1.0)
+    classification: str | None = None
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    policy_ref: str | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    stability_observation_id: str | None = None
+
+
+class DifferenceSpec(VNextModel):
+    representation_type: DifferenceRepresentationType
+    representation: Any
+    orientation_ref: str | None = None
+    context_refs: list[str] = Field(default_factory=list)
+    defined: bool = True
+    comparable: bool | None = None
+    evaluative: bool = False
+    slice_relative: bool = True
+    source_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    difference_id: str | None = None
+
+
+class BoundaryEvaluationSpec(VNextModel):
+    difference_ref: str
+    readability_state: BoundaryReadabilityState
+    readable_as_distinction: bool
+    usable_distinction: bool
+    provisional: bool = True
+    orientation_ref: str | None = None
+    context_refs: list[str] | None = None
+    policy_ref: str | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    boundary_evaluation_id: str | None = None
+
+
+class SemanticAssemblyRequest(VNextModel):
+    """Explicit input specification for isolated semantic assembly only."""
+
+    process_id: str
+    slice_ref: str
+    articulation: LocalArticulation
+    readable_relations: list[ReadableRelation] = Field(default_factory=list)
+    unresolved_local_items: list[UnresolvedLocalItem] = Field(default_factory=list)
+    continuation_conditions: list[ContinuationCondition] = Field(default_factory=list)
+    scene_evidence_refs: list[str] = Field(default_factory=list)
+    scene_metadata: dict[str, Any] = Field(default_factory=dict)
+    stability_scene_id: str | None = None
+    observations: list[StabilityObservationSpec] = Field(default_factory=list)
+    differences: list[DifferenceSpec] = Field(default_factory=list)
+    boundary_evaluations: list[BoundaryEvaluationSpec] = Field(default_factory=list)
+    bundle_metadata: dict[str, Any] = Field(default_factory=dict)
+    semantic_bundle_id: str | None = None
+
+
+class SemanticAssemblyResult(VNextModel):
+    """Complete in-memory output of one isolated semantic assembly operation."""
+
+    scene: StabilityScene
+    observations: list[StabilityObservation] = Field(default_factory=list)
+    differences: list[DifferenceObject] = Field(default_factory=list)
+    boundary_evaluations: list[BoundaryEvaluation] = Field(default_factory=list)
+    bundle: SemanticRealizationBundle
