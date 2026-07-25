@@ -229,52 +229,62 @@ class SQLiteStore:
             }
             legacy_schema_present = bool(existing_tables & _REQUIRED_TABLES)
 
-            connection.executescript(
-                """
-                CREATE TABLE IF NOT EXISTS runtime_records (
-                    record_id TEXT PRIMARY KEY,
-                    record_type TEXT NOT NULL,
-                    process_id TEXT,
-                    loop_id TEXT,
-                    canonical_payload TEXT NOT NULL,
-                    canonical_digest TEXT NOT NULL,
-                    schema_version TEXT NOT NULL,
-                    runtime_version TEXT NOT NULL,
-                    publication_id TEXT NOT NULL,
-                    publication_order INTEGER NOT NULL,
-                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
+            if legacy_schema_present:
+                self._validate_legacy_schema(connection)
+                connection.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS schema_metadata (
+                        metadata_key TEXT PRIMARY KEY,
+                        metadata_value TEXT NOT NULL,
+                        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    )
+                    """
+                )
+            else:
+                connection.executescript(
+                    """
+                    CREATE TABLE runtime_records (
+                        record_id TEXT PRIMARY KEY,
+                        record_type TEXT NOT NULL,
+                        process_id TEXT,
+                        loop_id TEXT,
+                        canonical_payload TEXT NOT NULL,
+                        canonical_digest TEXT NOT NULL,
+                        schema_version TEXT NOT NULL,
+                        runtime_version TEXT NOT NULL,
+                        publication_id TEXT NOT NULL,
+                        publication_order INTEGER NOT NULL,
+                        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    );
 
-                CREATE TABLE IF NOT EXISTS current_scope (
-                    loop_id TEXT PRIMARY KEY,
-                    process_id TEXT NOT NULL,
-                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
+                    CREATE TABLE current_scope (
+                        loop_id TEXT PRIMARY KEY,
+                        process_id TEXT NOT NULL,
+                        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    );
 
-                CREATE TABLE IF NOT EXISTS idempotency_entries (
-                    loop_id TEXT NOT NULL,
-                    idempotency_key TEXT NOT NULL,
-                    request_digest TEXT NOT NULL,
-                    process_id TEXT NOT NULL,
-                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY(loop_id, idempotency_key)
-                );
+                    CREATE TABLE idempotency_entries (
+                        loop_id TEXT NOT NULL,
+                        idempotency_key TEXT NOT NULL,
+                        request_digest TEXT NOT NULL,
+                        process_id TEXT NOT NULL,
+                        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY(loop_id, idempotency_key)
+                    );
 
-                CREATE TABLE IF NOT EXISTS schema_metadata (
-                    metadata_key TEXT PRIMARY KEY,
-                    metadata_value TEXT NOT NULL,
-                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
-                """
-            )
+                    CREATE TABLE schema_metadata (
+                        metadata_key TEXT PRIMARY KEY,
+                        metadata_value TEXT NOT NULL,
+                        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """
+                )
 
             row = connection.execute(
                 "SELECT metadata_value FROM schema_metadata WHERE metadata_key = ?",
                 (_SCHEMA_METADATA_KEY,),
             ).fetchone()
             if row is None:
-                if legacy_schema_present:
-                    self._validate_legacy_schema(connection)
                 connection.execute(
                     """
                     INSERT INTO schema_metadata(metadata_key, metadata_value)
@@ -622,7 +632,9 @@ class SQLiteStore:
             if "idempotency_entries" in message:
                 raise IdempotencyConflict(message) from exc
             raise RecordIdentityCollision(message) from exc
-        except sqlite3.DatabaseError as exc:
+        except sqlite3.OperationalError as exc:
             if _is_busy_error(exc):
                 raise RepositoryBusyError(str(exc)) from exc
+            raise RepositoryIntegrityError(str(exc)) from exc
+        except sqlite3.DatabaseError as exc:
             raise RepositoryIntegrityError(str(exc)) from exc
