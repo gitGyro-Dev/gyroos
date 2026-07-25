@@ -260,6 +260,13 @@ Priority H regression tests
 all earlier vNext semantic and readability tests
 ```
 
+Verified workflow runs:
+
+```text
+30151364173 = success
+30151382562 = success
+```
+
 ---
 
 ## 11. Isolation Boundary
@@ -324,13 +331,13 @@ ReadabilityRelationBundleBuilder
 = VERIFIED AS ISOLATED PURE BUILDER
 
 IncorporatedReadabilityAssemblyRequest
-= IMPLEMENTED AS ISOLATED INPUT MODEL
+= VERIFIED AS ISOLATED INPUT MODEL
 
 IncorporatedReadabilityAssemblyService
-= IMPLEMENTED AS ISOLATED ORCHESTRATION FACADE
+= VERIFIED AS ISOLATED ORCHESTRATION FACADE
 
 IncorporatedReadabilityAssemblyResult
-= IMPLEMENTED AS ISOLATED IN-MEMORY RESULT
+= VERIFIED AS ISOLATED IN-MEMORY RESULT
 
 SemanticAssemblyService
 = UNCHANGED
@@ -342,14 +349,14 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
 ```
 
 ---
 
 ## 14. Next Decision
 
-After workflow verification, perform:
+Perform:
 
 ```text
 Incorporated Readability Assembly Review
