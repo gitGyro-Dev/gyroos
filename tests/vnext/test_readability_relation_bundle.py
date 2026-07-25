@@ -9,7 +9,7 @@ from app.vnext.builders import (
     SceneReadabilityRelationBuilder,
     StabilitySceneBuilder,
 )
-from app.vnext.models import LocalArticulation
+from app.vnext.models import LocalArticulation, ReadabilityRelationBundle
 
 
 def make_scene(*, process_id: str = "process-1", slice_ref: str = "slice-1"):
@@ -71,9 +71,9 @@ def test_bundle_stores_references_only() -> None:
     assert bundle.readability_context_refs == ["context-before", "context-after"]
     assert bundle.incorporation_record_refs == ["incorporation-1"]
     assert bundle.scene_readability_relation_refs == ["scene-relation-1"]
-    assert "readability_contexts" not in bundle.model_fields
-    assert "current_context_ref" not in bundle.model_fields
-    assert "authoritative_relation_ref" not in bundle.model_fields
+    assert "readability_contexts" not in ReadabilityRelationBundle.model_fields
+    assert "current_context_ref" not in ReadabilityRelationBundle.model_fields
+    assert "authoritative_relation_ref" not in ReadabilityRelationBundle.model_fields
 
 
 def test_empty_bundle_is_allowed() -> None:
@@ -150,8 +150,8 @@ def test_bundle_does_not_select_current_or_authoritative_records() -> None:
     )
 
     assert bundle.readability_context_refs == ["context-first", "context-second"]
-    assert "current_context_ref" not in bundle.model_fields
-    assert "authoritative_relation_ref" not in bundle.model_fields
+    assert "current_context_ref" not in ReadabilityRelationBundle.model_fields
+    assert "authoritative_relation_ref" not in ReadabilityRelationBundle.model_fields
 
 
 def test_nested_metadata_is_copied() -> None:
