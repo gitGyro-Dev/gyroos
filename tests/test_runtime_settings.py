@@ -7,6 +7,8 @@ import pytest
 from app.settings import LogLevel, RuntimeEnvironment, RuntimeSettings
 from app.sqlite_repository import SQLiteStore
 
+PRODUCTION_TOKEN = "gyroos-production-token-0123456789abcdef"
+
 
 def clear_runtime_env(monkeypatch: pytest.MonkeyPatch) -> None:
     for name in (
@@ -72,7 +74,7 @@ def test_production_requires_explicit_persistent_database(
 ) -> None:
     clear_runtime_env(monkeypatch)
     monkeypatch.setenv("GYROOS_ENV", "production")
-    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", "production-secret")
+    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", PRODUCTION_TOKEN)
 
     with pytest.raises(ValueError, match="GYROOS_DATABASE_PATH is required"):
         RuntimeSettings.from_env()
@@ -82,7 +84,7 @@ def test_production_rejects_debug_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     clear_runtime_env(monkeypatch)
     monkeypatch.setenv("GYROOS_ENV", "production")
     monkeypatch.setenv("GYROOS_DATABASE_PATH", "/var/lib/gyroos/runtime.db")
-    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", "production-secret")
+    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", PRODUCTION_TOKEN)
     monkeypatch.setenv("GYROOS_DEBUG", "true")
 
     with pytest.raises(ValueError, match="GYROOS_DEBUG must be disabled"):
@@ -107,7 +109,7 @@ def test_production_rejects_disabled_authentication(
     monkeypatch.setenv("GYROOS_DATABASE_PATH", "/var/lib/gyroos/runtime.db")
     monkeypatch.setenv("GYROOS_DEBUG", "false")
     monkeypatch.setenv("GYROOS_AUTH_REQUIRED", "false")
-    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", "production-secret")
+    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", PRODUCTION_TOKEN)
 
     with pytest.raises(ValueError, match="GYROOS_AUTH_REQUIRED must be enabled"):
         RuntimeSettings.from_env()
@@ -120,7 +122,7 @@ def test_production_rejects_non_json_logging(
     monkeypatch.setenv("GYROOS_ENV", "production")
     monkeypatch.setenv("GYROOS_DATABASE_PATH", "/var/lib/gyroos/runtime.db")
     monkeypatch.setenv("GYROOS_DEBUG", "false")
-    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", "production-secret")
+    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", PRODUCTION_TOKEN)
     monkeypatch.setenv("GYROOS_JSON_LOGGING", "false")
 
     with pytest.raises(ValueError, match="GYROOS_JSON_LOGGING must be enabled"):
@@ -137,7 +139,7 @@ def test_production_accepts_explicit_safe_configuration(
     monkeypatch.setenv("GYROOS_PORT", "8080")
     monkeypatch.setenv("GYROOS_DEBUG", "false")
     monkeypatch.setenv("GYROOS_SQLITE_TIMEOUT_SECONDS", "12.5")
-    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", "production-secret")
+    monkeypatch.setenv("GYROOS_API_BEARER_TOKEN", PRODUCTION_TOKEN)
     monkeypatch.setenv("GYROOS_MAX_REQUEST_BODY_BYTES", "524288")
     monkeypatch.setenv("GYROOS_RATE_LIMIT_REQUESTS", "60")
     monkeypatch.setenv("GYROOS_RATE_LIMIT_WINDOW_SECONDS", "30")
@@ -154,7 +156,7 @@ def test_production_accepts_explicit_safe_configuration(
     assert settings.debug is False
     assert settings.sqlite_timeout_seconds == 12.5
     assert settings.authentication_required is True
-    assert settings.api_bearer_token == "production-secret"
+    assert settings.api_bearer_token == PRODUCTION_TOKEN
     assert settings.max_request_body_bytes == 524288
     assert settings.rate_limit_requests == 60
     assert settings.rate_limit_window_seconds == 30
