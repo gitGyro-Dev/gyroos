@@ -199,12 +199,19 @@ relation representation is not converted to a number
 nested mutable inputs are copied
 ```
 
-The existing workflow now executes this test with:
+The existing workflow executes this test with:
 
 ```text
 Priority G regression tests
 Priority H regression tests
 earlier vNext semantic model and builder tests
+```
+
+Verified workflow run:
+
+```text
+Run ID: 30149125771
+Conclusion: success
 ```
 
 ---
@@ -232,7 +239,7 @@ The accepted release-candidate Runtime behavior remains unchanged.
 
 ## 10. Next Decision
 
-After workflow verification, all initial isolated vNext record types will have explicit pure construction boundaries:
+All initial isolated vNext record types now have explicit pure construction boundaries:
 
 ```text
 StabilityScene
@@ -251,27 +258,16 @@ SemanticRealizationBundle
 → SemanticRealizationBundleBuilder
 ```
 
-The next step should remain small.
-
-Recommended next action:
+The next step remains isolated:
 
 ```text
-review the full isolated construction pipeline
+explicit semantic inputs
+→ SemanticAssemblyRequest
+→ SemanticAssemblyService
+→ SemanticRealizationBundle
 ```
 
-That review should decide whether to:
-
-```text
-add one pure orchestration facade for explicit inputs
-```
-
-or:
-
-```text
-begin Incorporated Readability model design
-```
-
-Do not connect vNext records to `/loop/step` or SQLite until that decision is complete.
+The assembly layer must only coordinate existing builders. It must not infer Stability, extract Difference, evaluate Boundary, select OperatorResponse, or persist records.
 
 ---
 
@@ -306,7 +302,7 @@ Current RC Runtime contract changed
 
 ```text
 DifferenceObjectBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 StabilitySceneBuilder
 = VERIFIED
@@ -327,5 +323,5 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= SUCCESS
 ```
