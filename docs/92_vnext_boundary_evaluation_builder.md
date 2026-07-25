@@ -214,7 +214,15 @@ BoundaryEvaluation model consistency validation remains active
 mutable context, evidence, and nested metadata inputs are copied
 ```
 
-The existing workflow now executes this test with the accepted G/H regression suite and earlier vNext tests.
+The existing workflow executes this test with the accepted G/H regression suite and earlier vNext tests.
+
+Successful verification evidence:
+
+```text
+Run ID: 30148514733
+Job: test-and-run-poc
+Conclusion: success
+```
 
 ---
 
@@ -240,7 +248,7 @@ The accepted release-candidate Runtime behavior remains unchanged.
 
 ## 11. Next Decision
 
-After workflow verification, the original three-concept first step will have isolated typed models and pure builders for:
+The original three-concept first step now has isolated typed models and pure builders for:
 
 ```text
 StabilityScene
@@ -251,14 +259,10 @@ BoundaryEvaluation
 
 The next decision should remain small.
 
-Recommended choices:
+Selected next step:
 
 ```text
-A. Add a pure DifferenceObjectBuilder from explicit representation input
-
-or
-
-B. Add an isolated vNext realization bundle that groups existing objects by reference without evaluation
+Add an isolated vNext realization bundle that groups existing objects by reference without evaluation.
 ```
 
 Do not connect these components to `/loop/step` or SQLite until the isolated model/builder responsibility review is complete.
@@ -296,7 +300,7 @@ Current RC Runtime contract changed
 
 ```text
 BoundaryEvaluationBuilder
-= IMPLEMENTED AS ISOLATED PURE BUILDER
+= VERIFIED AS ISOLATED PURE BUILDER
 
 StabilityObservationBuilder
 = VERIFIED AS ISOLATED PURE BUILDER
@@ -311,5 +315,5 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= COMPLETE
 ```
