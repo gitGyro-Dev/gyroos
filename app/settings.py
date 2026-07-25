@@ -73,10 +73,10 @@ class RuntimeSettings:
     sqlite_timeout_seconds: float
     authentication_required: bool
     api_bearer_token: str | None = field(repr=False)
-    max_request_body_bytes: int
-    rate_limit_requests: int
-    rate_limit_window_seconds: int
-    max_concurrent_requests: int
+    max_request_body_bytes: int = 1_048_576
+    rate_limit_requests: int = 120
+    rate_limit_window_seconds: int = 60
+    max_concurrent_requests: int = 32
     log_level: LogLevel = LogLevel.INFO
     json_logging: bool = True
 
@@ -166,10 +166,6 @@ class RuntimeSettings:
 
         if self.environment == RuntimeEnvironment.PRODUCTION:
             token = self.api_bearer_token or ""
-            if len(token) < 32:
-                raise ValueError(
-                    "GYROOS_API_BEARER_TOKEN must be at least 32 characters in production"
-                )
             if token.lower() in {
                 "changeme",
                 "change-me",
@@ -181,6 +177,10 @@ class RuntimeSettings:
             }:
                 raise ValueError(
                     "GYROOS_API_BEARER_TOKEN must not use a placeholder value in production"
+                )
+            if len(token) < 32:
+                raise ValueError(
+                    "GYROOS_API_BEARER_TOKEN must be at least 32 characters in production"
                 )
 
 
