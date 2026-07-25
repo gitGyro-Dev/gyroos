@@ -165,6 +165,14 @@ post-load idempotency consistency
 
 The workflow executes the H-9 load and stress test file with the existing production-hardening suite.
 
+Verified GitHub Actions run:
+
+```text
+Run ID: 30146453552
+Job: test-and-run-poc
+Conclusion: success
+```
+
 ---
 
 ## 8. Non-goals and Deferred Work
@@ -214,7 +222,7 @@ Load-test observations do not become canonical Runtime records or Gyro Logic def
 
 ```text
 H-9 Load and Stress Tests
-= IMPLEMENTED
+= COMPLETE
 
 Concurrent HTTP load test
 = IMPLEMENTED
@@ -226,13 +234,6 @@ Sustained publication and restart test
 = IMPLEMENTED
 
 GitHub Actions execution verification
-= PENDING
-```
-
-After the updated workflow passes, H-9 may be marked:
-
-```text
-H-9
 = COMPLETE
 ```
 
