@@ -273,7 +273,9 @@ class IncorporationRecord(VNextModel):
     def validate_incorporation_content(self) -> "IncorporationRecord":
         overlap = set(self.incorporated_item_refs) & set(self.rejected_item_refs)
         if overlap:
-            raise ValueError("the same item cannot be both incorporated and rejected")
+            raise ValueError(
+                "the same item cannot be both incorporated and rejected"
+            )
         return self
 
 
@@ -519,3 +521,78 @@ class TrajectoryAssemblyResult(VNextModel):
     nodes: list[TrajectoryNode] = Field(default_factory=list)
     edges: list[TrajectoryEdge] = Field(default_factory=list)
     graph: TrajectoryGraph
+
+
+class RuntimeSnapshot(VNextModel):
+    """Opaque read-only snapshot of one existing Runtime result payload."""
+
+    runtime_snapshot_id: str
+    process_id: str
+    slice_ref: str
+    runtime_contract: str
+    payload: dict[str, Any]
+    captured_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class RuntimeProjectionReference(VNextModel):
+    """Explicit reference relation between a Runtime snapshot and one vNext record."""
+
+    projection_reference_id: str
+    process_id: str
+    runtime_snapshot_ref: str
+    record_ref: str
+    record_type: str
+    relation_type: str
+    provisional: bool = True
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ReadOnlyRuntimeProjection(VNextModel):
+    """Reference-only grouping for one Runtime snapshot projection."""
+
+    runtime_projection_id: str
+    process_id: str
+    runtime_snapshot_ref: str
+    projection_reference_refs: list[str] = Field(default_factory=list)
+    provisional: bool = True
+    created_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class RuntimeSnapshotSpec(VNextModel):
+    slice_ref: str
+    runtime_contract: str
+    payload: dict[str, Any]
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    runtime_snapshot_id: str | None = None
+
+
+class RuntimeProjectionReferenceSpec(VNextModel):
+    record_ref: str
+    record_type: str
+    relation_type: str
+    provisional: bool = True
+    evidence_refs: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    projection_reference_id: str | None = None
+
+
+class ReadOnlyRuntimeProjectionRequest(VNextModel):
+    """Explicit input specification for isolated read-only Runtime projection."""
+
+    process_id: str
+    snapshot: RuntimeSnapshotSpec
+    references: list[RuntimeProjectionReferenceSpec] = Field(default_factory=list)
+    provisional: bool = True
+    projection_metadata: dict[str, Any] = Field(default_factory=dict)
+    runtime_projection_id: str | None = None
+
+
+class ReadOnlyRuntimeProjectionResult(VNextModel):
+    """Complete in-memory output of one isolated Runtime projection operation."""
+
+    snapshot: RuntimeSnapshot
+    references: list[RuntimeProjectionReference] = Field(default_factory=list)
+    projection: ReadOnlyRuntimeProjection
