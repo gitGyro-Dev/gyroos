@@ -25,7 +25,7 @@ Decision:
 
 ```text
 Request-local review bundle meaning
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Reference Boundary
@@ -38,7 +38,7 @@ Decision:
 
 ```text
 Reference-only grouping boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 4. Digest Boundary
@@ -51,7 +51,7 @@ Decision:
 
 ```text
 Ordered deterministic digest boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 5. Assembly Boundary
@@ -62,7 +62,7 @@ Decision:
 
 ```text
 Bounded review bundle assembly
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 6. Endpoint Boundary
@@ -79,7 +79,7 @@ Decision:
 
 ```text
 Optional endpoint isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 7. Error Boundary
@@ -92,7 +92,7 @@ Decision:
 
 ```text
 Review bundle error non-mapping
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 8. Runtime and Persistence Isolation
@@ -118,10 +118,10 @@ Decision:
 
 ```text
 Runtime isolation
-= ACCEPTED
+= VERIFIED
 
 Persistence isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 9. Test and Workflow State
@@ -144,22 +144,32 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all I1-I3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30189381045
+30189390931
+30189414562
+30189429492
+30189464226
+30189475320
+30189499121
+```
 
 ## 10. Final Decision
 
 ```text
 I inspection comparison review bundle review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 I1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 I2 review bundle assembly service
-= ACCEPTED
+= VERIFIED
 
 I3 optional review bundle creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Comparison retrieval
 = NOT APPROVED
@@ -192,5 +202,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate I
+= COMPLETE
 ```
