@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 
 from app.security import require_runtime_bearer
-
 from .consumer_compatibility import (
     ExperimentalConsumerCompatibilityRequest,
     ExperimentalConsumerCompatibilityResult,
@@ -29,6 +28,14 @@ from .inspection_batch_manifest import (
 from .inspection_batch_manifest_service import (
     ExperimentalInspectionBatchError,
     ExperimentalInspectionBatchService,
+)
+from .inspection_comparison_review_bundle import (
+    ExperimentalComparisonReviewBundleRequest,
+    ExperimentalComparisonReviewBundleResult,
+)
+from .inspection_comparison_review_bundle_service import (
+    ExperimentalComparisonReviewBundleError,
+    ExperimentalComparisonReviewBundleService,
 )
 from .inspection_manifest_comparison import (
     ExperimentalManifestComparisonRequest,
@@ -57,6 +64,7 @@ compatibility_service = ExperimentalConsumerCompatibilityService()
 inspection_receipt_service = ExperimentalInspectionReceiptService()
 inspection_batch_service = ExperimentalInspectionBatchService()
 manifest_comparison_service = ExperimentalManifestComparisonService()
+comparison_review_bundle_service = ExperimentalComparisonReviewBundleService()
 
 
 def experimental_error(
@@ -213,4 +221,24 @@ def create_experimental_inspection_manifest_comparison(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_MANIFEST_COMPARISON_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-review-bundles",
+    response_model=ExperimentalComparisonReviewBundleResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_review_bundle(
+    request: ExperimentalComparisonReviewBundleRequest,
+):
+    try:
+        return comparison_review_bundle_service.create_bundle(request)
+    except ExperimentalComparisonReviewBundleError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_COMPARISON_REVIEW_BUNDLE_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_REVIEW_BUNDLE_CREATE",
         )
