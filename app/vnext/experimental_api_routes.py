@@ -5,6 +5,14 @@ from fastapi.responses import JSONResponse
 
 from app.security import require_runtime_bearer
 
+from .consumer_compatibility import (
+    ExperimentalConsumerCompatibilityRequest,
+    ExperimentalConsumerCompatibilityResult,
+)
+from .consumer_compatibility_service import (
+    ExperimentalCompatibilityError,
+    ExperimentalConsumerCompatibilityService,
+)
 from .experimental_api import (
     ExperimentalApiError,
     ExperimentalRecordCreateRequest,
@@ -21,6 +29,7 @@ router = APIRouter(
     tags=["vNext Experimental"],
     dependencies=[Depends(require_runtime_bearer)],
 )
+compatibility_service = ExperimentalConsumerCompatibilityService()
 
 
 def experimental_error(
@@ -99,3 +108,22 @@ def delete_experimental_record(
             phase="EXPERIMENTAL_RECORD_DELETE",
         )
     return None
+
+
+@router.post(
+    "/compatibility/check",
+    response_model=ExperimentalConsumerCompatibilityResult,
+)
+def check_experimental_consumer_compatibility(
+    request: ExperimentalConsumerCompatibilityRequest,
+):
+    try:
+        return compatibility_service.check(request)
+    except ExperimentalCompatibilityError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_COMPATIBILITY_INVALID_VERSION",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPATIBILITY_CHECK",
+        )
