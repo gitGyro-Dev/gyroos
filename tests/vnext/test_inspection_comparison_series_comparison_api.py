@@ -65,9 +65,12 @@ def test_response_has_no_runtime_authentication_or_semantic_outputs(monkeypatch)
     assert "difference_object" not in report
 
 
-def test_comparison_retrieval_routes_are_absent(monkeypatch) -> None:
-    monkeypatch.setenv("GYRO_RUNTIME_TOKEN", "test-token")
+def test_comparison_retrieval_routes_are_absent() -> None:
+    registered_methods_by_path = {
+        route.path: set(route.methods or set())
+        for route in app.routes
+        if hasattr(route, "path")
+    }
 
-    assert client.get(f"{PATH}/series-comparison-001", headers=HEADERS).status_code == 404
-    assert client.get(PATH, headers=HEADERS).status_code == 405
-    assert client.delete(f"{PATH}/series-comparison-001", headers=HEADERS).status_code == 404
+    assert registered_methods_by_path[PATH] == {"POST"}
+    assert f"{PATH}/{{series_comparison_id}}" not in registered_methods_by_path
