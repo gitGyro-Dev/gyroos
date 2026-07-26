@@ -146,22 +146,34 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all K1-K3 tests.
 
-Final workflow verification remains pending.
+Verified successful GitHub Actions runs:
+
+```text
+30190302999
+30190319922
+30190347543
+30190363156
+30190402557
+30190416545
+30190436523
+```
+
+Each run completed the bounded Runtime and production hardening tests, PoC artifact generation, artifact-count verification, and artifact upload successfully.
 
 ## 10. Final Decision
 
 ```text
 K inspection review bundle comparison set review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 K1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 K2 comparison set assembly service
-= ACCEPTED
+= VERIFIED
 
 K3 optional comparison set creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 J comparison retrieval
 = NOT APPROVED
@@ -194,5 +206,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate K
+= COMPLETE
 ```
