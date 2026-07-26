@@ -153,22 +153,40 @@ absence of Runtime and authentication outputs
 
 The Priority F workflow includes all F1-F3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow run:
+
+```text
+run_id = 30188135235
+job = test-and-run-poc
+conclusion = success
+```
+
+Verified successful steps:
+
+```text
+Check out repository
+Set up Python
+Install dependencies
+Run bounded Runtime and production hardening tests
+Generate PoC result artifacts
+Verify PoC result artifact count
+Upload PoC result artifacts
+```
 
 ## 10. Final Decision
 
 ```text
 F inspection receipt review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 F1 receipt descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 F2 receipt assembly service
-= ACCEPTED
+= VERIFIED
 
 F3 optional receipt creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Typed reconstruction
 = NOT APPROVED
@@ -195,5 +213,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate F
+= COMPLETE
 ```
