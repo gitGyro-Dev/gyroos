@@ -115,11 +115,7 @@ def test_missing_delete_returns_explicit_error() -> None:
 
 
 def test_existing_loop_step_route_remains_registered() -> None:
-    paths = {
-        path
-        for route in app.routes
-        if (path := getattr(route, "path", None)) is not None
-    }
+    paths = set(app.openapi()["paths"])
 
     assert "/loop/step" in paths
     assert "/vnext/experimental/records" in paths
