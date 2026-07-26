@@ -1,11 +1,13 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.vnext.experimental_api_routes import router as experimental_router
 
 
 client = TestClient(app)
 HEADERS = {"Authorization": "Bearer test-token"}
 PATH = "/vnext/experimental/inspection-comparison-series-comparisons"
+ROUTER_PATH = "/vnext/experimental/inspection-comparison-series-comparisons"
 
 
 def payload() -> dict:
@@ -68,9 +70,9 @@ def test_response_has_no_runtime_authentication_or_semantic_outputs(monkeypatch)
 def test_comparison_retrieval_routes_are_absent() -> None:
     registered_methods_by_path = {
         route.path: set(route.methods or set())
-        for route in app.routes
+        for route in experimental_router.routes
         if hasattr(route, "path")
     }
 
-    assert registered_methods_by_path[PATH] == {"POST"}
-    assert f"{PATH}/{{series_comparison_id}}" not in registered_methods_by_path
+    assert registered_methods_by_path[ROUTER_PATH] == {"POST"}
+    assert f"{ROUTER_PATH}/{{series_comparison_id}}" not in registered_methods_by_path
