@@ -231,7 +231,7 @@ no Runtime or vNext semantic inference
 nested metadata deep-copy
 ```
 
-The Priority F workflow now executes this test with all accepted Runtime and earlier vNext regression tests.
+The Priority F workflow executes this test with all accepted Runtime and earlier vNext regression tests.
 
 ---
 
@@ -287,25 +287,25 @@ Current RC Runtime contract changed
 
 ```text
 RuntimeSnapshot
-= IMPLEMENTED AS OPAQUE READ-ONLY MODEL
+= VERIFIED AS OPAQUE READ-ONLY MODEL
 
 RuntimeProjectionReference
-= IMPLEMENTED AS EXPLICIT REFERENCE MODEL
+= VERIFIED AS EXPLICIT REFERENCE MODEL
 
 ReadOnlyRuntimeProjection
-= IMPLEMENTED AS REFERENCE-ONLY PROJECTION MODEL
+= VERIFIED AS REFERENCE-ONLY PROJECTION MODEL
 
 RuntimeSnapshotBuilder
-= IMPLEMENTED AS PURE BUILDER
+= VERIFIED AS PURE BUILDER
 
 RuntimeProjectionReferenceBuilder
-= IMPLEMENTED AS PURE BUILDER
+= VERIFIED AS PURE BUILDER
 
 ReadOnlyRuntimeProjectionBuilder
-= IMPLEMENTED AS PURE BUILDER
+= VERIFIED AS PURE BUILDER
 
 ReadOnlyRuntimeProjectionService
-= IMPLEMENTED AS ISOLATED ORCHESTRATION FACADE
+= VERIFIED AS ISOLATED ORCHESTRATION FACADE
 
 Current /loop/step behavior
 = UNCHANGED
@@ -314,14 +314,24 @@ Current SQLite schema
 = UNCHANGED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+```
+
+Verified workflow runs:
+
+```text
+30181268340
+30181330227
+30181338642
+30181359792
+30181381737
 ```
 
 ---
 
 ## 12. Review Gate
 
-After workflow verification, perform:
+Proceed to:
 
 ```text
 Read-only Runtime Projection Review
