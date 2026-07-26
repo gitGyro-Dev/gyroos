@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.vnext.experimental_api_provider import experimental_repository_provider
 from app.vnext.experimental_repository import InMemoryExperimentalRecordRepository
+from app.vnext.models import ExperimentalRecordEnvelope
 
 
 client = TestClient(app)
@@ -74,17 +75,16 @@ def test_list_filters_by_process_and_record_type() -> None:
 
 
 def test_list_limit_is_bounded_by_experimental_settings() -> None:
+    repository = experimental_repository_provider.get_repository()
     for index in range(105):
-        response = client.post(
-            "/vnext/experimental/records",
-            json={
-                "record_id": f"record-{index:03d}",
-                "process_id": "process-001",
-                "record_type": "OpaqueRecord",
-                "payload": {},
-            },
+        repository.save(
+            ExperimentalRecordEnvelope(
+                record_id=f"record-{index:03d}",
+                process_id="process-001",
+                record_type="OpaqueRecord",
+                payload={},
+            )
         )
-        assert response.status_code == 201
 
     response = client.get("/vnext/experimental/records", params={"limit": 1000})
 
@@ -115,7 +115,11 @@ def test_missing_delete_returns_explicit_error() -> None:
 
 
 def test_existing_loop_step_route_remains_registered() -> None:
-    paths = {route.path for route in app.routes}
+    paths = {
+        path
+        for route in app.routes
+        if (path := getattr(route, "path", None)) is not None
+    }
 
     assert "/loop/step" in paths
     assert "/vnext/experimental/records" in paths
