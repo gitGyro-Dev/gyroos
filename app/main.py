@@ -28,6 +28,7 @@ from .runtime import ProcessExecutor, ReferenceError
 from .security import require_runtime_bearer
 from .security_headers import SecurityHeadersMiddleware
 from .settings import settings
+from .vnext.experimental_api_routes import router as experimental_api_router
 
 configure_logging(settings)
 app = FastAPI(
@@ -318,3 +319,4 @@ def get_memory_record(record_id: str):
 
 
 app.include_router(protected)
+app.include_router(experimental_api_router)
