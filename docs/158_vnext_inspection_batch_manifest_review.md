@@ -25,7 +25,7 @@ Decision:
 
 ```text
 Request-local manifest meaning
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Reference Boundary
@@ -38,7 +38,7 @@ Decision:
 
 ```text
 Reference-only grouping boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 4. Digest Boundary
@@ -51,7 +51,7 @@ Decision:
 
 ```text
 Ordered deterministic digest boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 5. Assembly Boundary
@@ -62,7 +62,7 @@ Decision:
 
 ```text
 Bounded manifest assembly
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 6. Endpoint Boundary
@@ -79,7 +79,7 @@ Decision:
 
 ```text
 Optional endpoint isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 7. Error Boundary
@@ -92,7 +92,7 @@ Decision:
 
 ```text
 Manifest error non-mapping
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 8. Runtime and Persistence Isolation
@@ -116,10 +116,10 @@ Decision:
 
 ```text
 Runtime isolation
-= ACCEPTED
+= VERIFIED
 
 Persistence isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 9. Test and Workflow State
@@ -142,22 +142,32 @@ absence of Runtime and authentication outputs
 
 The Priority F workflow includes all G1-G3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30188392027
+30188399642
+30188420487
+30188431447
+30188458907
+30188470699
+30188485651
+```
 
 ## 10. Final Decision
 
 ```text
 G inspection batch manifest review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 G1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 G2 manifest assembly service
-= ACCEPTED
+= VERIFIED
 
 G3 optional manifest creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Receipt persistence
 = NOT APPROVED
@@ -184,5 +194,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate G
+= COMPLETE
 ```
