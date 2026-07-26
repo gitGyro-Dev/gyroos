@@ -200,7 +200,7 @@ GyroAuth isolation
 
 ## 10. Test and Workflow State
 
-Tests have been added for:
+Tests cover:
 
 ```text
 settings
@@ -215,7 +215,19 @@ semantic non-inference
 
 The Priority F workflow includes all three JSON artifact repository test files.
 
-Final workflow run verification remains pending.
+Verified workflow runs:
+
+```text
+30182845074
+30182854537
+30182888521
+30182895754
+30182929757
+30182945490
+30182957027
+```
+
+All supplied runs completed successfully.
 
 ---
 
@@ -223,22 +235,24 @@ Final workflow run verification remains pending.
 
 ```text
 B4 JSON artifact repository review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 B4.1 errors / settings
-= ACCEPTED
+= VERIFIED
 
 B4.2 path policy
-= ACCEPTED
+= VERIFIED
 
 B4.3 JSON artifact repository
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
 ```
 
-Do not proceed to SQLite experimental tables, public API exposure, or GyroAuth consumption until workflow verification is complete and the next integration gate is explicitly selected.
+B4 is complete as an isolated experimental artifact repository boundary.
+
+Do not proceed to SQLite experimental tables, public API exposure, or GyroAuth consumption without selecting the next integration gate explicitly.
