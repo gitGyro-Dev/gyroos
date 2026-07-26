@@ -88,20 +88,41 @@ absence of authentication fields
 
 The Priority F workflow includes all D1-D3 tests.
 
+Verified successful workflow runs:
+
+```text
+30185373042
+30185381599
+30185395305
+30185405336
+30185417018
+30185429521
+30185446736
+```
+
+Each run completed the full Priority F sequence successfully:
+
+```text
+bounded Runtime and production hardening tests
+PoC artifact generation
+PoC artifact count verification
+PoC artifact upload
+```
+
 ## 9. Final Decision
 
 ```text
 D GyroAuth consumption boundary review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 D1 models and settings
-= ACCEPTED
+= VERIFIED
 
 D2 adapter and inspection service
-= ACCEPTED
+= VERIFIED
 
 D3 optional read-only HTTP transport
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Repository ownership
 = GYROOS
@@ -122,5 +143,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate D
+= COMPLETE
 ```
