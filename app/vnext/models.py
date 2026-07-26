@@ -596,3 +596,20 @@ class ReadOnlyRuntimeProjectionResult(VNextModel):
     snapshot: RuntimeSnapshot
     references: list[RuntimeProjectionReference] = Field(default_factory=list)
     projection: ReadOnlyRuntimeProjection
+
+
+class ExperimentalRecordEnvelope(VNextModel):
+    """Opaque experimental persistence envelope for one vNext record payload.
+
+    The envelope does not establish canonical authority, reconstruct a typed
+    record, select a current record, or define ordering semantics.
+    """
+
+    record_id: str
+    process_id: str
+    record_type: str
+    payload: dict[str, Any]
+    source_ref: str | None = None
+    provisional: bool = True
+    stored_at: datetime = Field(default_factory=utc_now)
+    metadata: dict[str, Any] = Field(default_factory=dict)
