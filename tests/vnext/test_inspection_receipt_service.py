@@ -66,10 +66,10 @@ def test_service_creates_request_local_receipt_with_digests() -> None:
     assert result.receipt_created is True
     assert len(result.receipt.payload_digest or "") == 64
     assert len(result.receipt.metadata_digest or "") == 64
-    assert result.receipt.warnings == [
+    assert result.receipt.warnings == (
         "minor_version_mismatch",
         "caller_warning",
-    ]
+    )
     assert "payload" not in type(result.receipt).model_fields
     assert "source_metadata" not in type(result.receipt).model_fields
 
