@@ -1,8 +1,16 @@
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
+from threading import RLock
 from uuid import uuid4
+
+from pydantic import ValidationError
+
+from .experimental_repository import ExperimentalRecordRepository
+from .models import ExperimentalRecordEnvelope
 
 
 class ExperimentalRepositoryError(Exception):
@@ -91,3 +99,124 @@ class JsonArtifactPathPolicy:
             raise InvalidArtifactRecordIdError(
                 "artifact path must remain within repository root"
             ) from exc
+
+
+class JsonArtifactExperimentalRecordRepository(ExperimentalRecordRepository):
+    """One-record-per-file JSON repository for opaque experimental envelopes."""
+
+    def __init__(
+        self,
+        settings: JsonArtifactRepositorySettings,
+        path_policy: JsonArtifactPathPolicy | None = None,
+    ) -> None:
+        self._settings = settings
+        self._paths = path_policy or JsonArtifactPathPolicy(settings)
+        self._lock = RLock()
+
+    def save(self, envelope: ExperimentalRecordEnvelope) -> ExperimentalRecordEnvelope:
+        artifact = self._paths.artifact_path(envelope.record_id)
+        temporary = self._paths.temporary_path(envelope.record_id)
+        try:
+            serialized = json.dumps(
+                envelope.model_dump(mode="json"),
+                ensure_ascii=False,
+                indent=self._settings.indent,
+                sort_keys=True,
+            )
+        except (TypeError, ValueError) as exc:
+            raise ArtifactSerializationError(
+                f"failed to serialize experimental record {envelope.record_id}"
+            ) from exc
+
+        with self._lock:
+            try:
+                self._paths.root.mkdir(parents=True, exist_ok=True)
+                with temporary.open("w", encoding=self._settings.encoding, newline="\n") as handle:
+                    handle.write(serialized)
+                    handle.write("\n")
+                    handle.flush()
+                    if self._settings.fsync_on_save:
+                        os.fsync(handle.fileno())
+                os.replace(temporary, artifact)
+            except OSError as exc:
+                raise ArtifactStorageError(
+                    f"failed to save experimental record {envelope.record_id}"
+                ) from exc
+            finally:
+                try:
+                    temporary.unlink(missing_ok=True)
+                except OSError:
+                    pass
+        return envelope.model_copy(deep=True)
+
+    def get(self, record_id: str) -> ExperimentalRecordEnvelope | None:
+        artifact = self._paths.artifact_path(record_id)
+        with self._lock:
+            if not artifact.exists():
+                return None
+            return self._read_artifact(artifact)
+
+    def list(
+        self,
+        *,
+        process_id: str | None = None,
+        record_type: str | None = None,
+    ) -> list[ExperimentalRecordEnvelope]:
+        with self._lock:
+            if not self._paths.root.exists():
+                return []
+            artifacts = list(self._paths.root.glob(f"*{self._settings.suffix}"))
+            envelopes = [self._read_artifact(path) for path in artifacts if path.is_file()]
+
+        return [
+            envelope.model_copy(deep=True)
+            for envelope in envelopes
+            if (process_id is None or envelope.process_id == process_id)
+            and (record_type is None or envelope.record_type == record_type)
+        ]
+
+    def delete(self, record_id: str) -> bool:
+        artifact = self._paths.artifact_path(record_id)
+        with self._lock:
+            try:
+                artifact.unlink()
+                return True
+            except FileNotFoundError:
+                return False
+            except OSError as exc:
+                raise ArtifactStorageError(
+                    f"failed to delete experimental record {record_id}"
+                ) from exc
+
+    def _read_artifact(self, artifact: Path) -> ExperimentalRecordEnvelope:
+        try:
+            text = artifact.read_text(encoding=self._settings.encoding)
+        except UnicodeError as exc:
+            raise ArtifactDeserializationError(
+                f"failed to decode JSON artifact {artifact.name}"
+            ) from exc
+        except OSError as exc:
+            raise ArtifactStorageError(
+                f"failed to read JSON artifact {artifact.name}"
+            ) from exc
+
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError as exc:
+            raise ArtifactDeserializationError(
+                f"failed to parse JSON artifact {artifact.name}"
+            ) from exc
+
+        try:
+            envelope = ExperimentalRecordEnvelope.model_validate(data)
+        except ValidationError as exc:
+            raise ArtifactValidationError(
+                f"invalid experimental envelope in {artifact.name}"
+            ) from exc
+
+        expected_path = self._paths.artifact_path(envelope.record_id)
+        if expected_path != artifact.resolve(strict=False):
+            raise ArtifactValidationError(
+                f"artifact filename does not match envelope record_id in {artifact.name}"
+            )
+        return envelope.model_copy(deep=True)
