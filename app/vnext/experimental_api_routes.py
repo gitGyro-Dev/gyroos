@@ -30,6 +30,14 @@ from .inspection_batch_manifest_service import (
     ExperimentalInspectionBatchError,
     ExperimentalInspectionBatchService,
 )
+from .inspection_manifest_comparison import (
+    ExperimentalManifestComparisonRequest,
+    ExperimentalManifestComparisonResult,
+)
+from .inspection_manifest_comparison_service import (
+    ExperimentalManifestComparisonError,
+    ExperimentalManifestComparisonService,
+)
 from .inspection_receipt import (
     ExperimentalInspectionReceiptRequest,
     ExperimentalInspectionReceiptResult,
@@ -48,6 +56,7 @@ router = APIRouter(
 compatibility_service = ExperimentalConsumerCompatibilityService()
 inspection_receipt_service = ExperimentalInspectionReceiptService()
 inspection_batch_service = ExperimentalInspectionBatchService()
+manifest_comparison_service = ExperimentalManifestComparisonService()
 
 
 def experimental_error(
@@ -184,4 +193,24 @@ def create_experimental_inspection_batch_manifest(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_INSPECTION_BATCH_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-manifest-comparisons",
+    response_model=ExperimentalManifestComparisonResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_manifest_comparison(
+    request: ExperimentalManifestComparisonRequest,
+):
+    try:
+        return manifest_comparison_service.compare(request)
+    except ExperimentalManifestComparisonError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_MANIFEST_COMPARISON_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_MANIFEST_COMPARISON_CREATE",
         )
