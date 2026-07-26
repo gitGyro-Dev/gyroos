@@ -19,8 +19,9 @@ from app.vnext.inspection_receipt_service import (
 
 def descriptor(version: str = "1.0.0", record_type: str = "TrajectoryGraph"):
     return ExperimentalContractDescriptor(
-        api_namespace="/vnext/experimental",
-        contract_version=version,
+        source_api_namespace="/vnext/experimental",
+        source_contract_version=version,
+        consumer_contract_version=version,
         record_type=record_type,
     )
 
@@ -34,7 +35,8 @@ def compatibility(
         disposition=disposition,
         source_contract_version="1.0.0",
         consumer_contract_version="1.0.0",
-        warnings=("minor_version_mismatch",) if compatible else (),
+        record_type="TrajectoryGraph",
+        warnings=["minor_version_mismatch"] if compatible else [],
         rejection_reason=None if compatible else "unsupported_major_version",
     )
 
@@ -50,8 +52,8 @@ def request(**overrides):
         "compatibility_result": compatibility(),
         "payload": {"nodes": []},
         "source_metadata": {"source": "api"},
-        "source_refs": ("record-001",),
-        "warnings": ("caller_warning",),
+        "source_refs": ["record-001"],
+        "warnings": ["caller_warning"],
         "receipt_metadata": {"purpose": "inspection"},
     }
     values.update(overrides)
@@ -64,12 +66,12 @@ def test_service_creates_request_local_receipt_with_digests() -> None:
     assert result.receipt_created is True
     assert len(result.receipt.payload_digest or "") == 64
     assert len(result.receipt.metadata_digest or "") == 64
-    assert result.receipt.warnings == (
+    assert result.receipt.warnings == [
         "minor_version_mismatch",
         "caller_warning",
-    )
-    assert "payload" not in result.receipt.model_fields
-    assert "source_metadata" not in result.receipt.model_fields
+    ]
+    assert "payload" not in type(result.receipt).model_fields
+    assert "source_metadata" not in type(result.receipt).model_fields
 
 
 def test_service_allows_incompatible_attempt_receipt_by_default() -> None:
@@ -129,12 +131,12 @@ def test_service_enforces_receipt_resource_limits() -> None:
     )
 
     with pytest.raises(ExperimentalReceiptResourceLimitError):
-        service.create_receipt(request(source_refs=("a", "b")))
+        service.create_receipt(request(source_refs=["a", "b"]))
 
 
 def test_receipt_result_does_not_define_runtime_or_authentication_outputs() -> None:
     receipt = ExperimentalInspectionReceiptService().create_receipt(request()).receipt
-    fields = receipt.model_fields
+    fields = type(receipt).model_fields
 
     assert "auth_state" not in fields
     assert "auth_score" not in fields
