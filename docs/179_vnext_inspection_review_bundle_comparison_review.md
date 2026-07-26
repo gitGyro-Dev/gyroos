@@ -149,22 +149,32 @@ absence of Runtime, authentication, semantic trend, risk, and DifferenceObject o
 
 The Priority F workflow includes all J1-J3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30189883176
+30189894155
+30189919682
+30189934369
+30189971470
+30189983938
+30190003892
+```
 
 ## 10. Final Decision
 
 ```text
 J inspection review bundle comparison review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 J1 comparison descriptor and settings
-= ACCEPTED
+= VERIFIED
 
 J2 comparison service
-= ACCEPTED
+= VERIFIED
 
 J3 optional comparison endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Review bundle retrieval
 = NOT APPROVED
@@ -197,5 +207,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate J
+= COMPLETE
 ```
