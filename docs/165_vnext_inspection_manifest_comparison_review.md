@@ -25,7 +25,7 @@ Decision:
 
 ```text
 Request-local comparison meaning
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Reference Boundary
@@ -38,7 +38,7 @@ Decision:
 
 ```text
 Reference-only comparison boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 4. Membership Difference Boundary
@@ -49,7 +49,7 @@ Decision:
 
 ```text
 Deterministic membership comparison
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 5. Digest Boundary
@@ -62,7 +62,7 @@ Decision:
 
 ```text
 Declared digest comparison boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 6. Difference Meaning Boundary
@@ -79,7 +79,7 @@ Decision:
 
 ```text
 Difference non-mapping boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 7. Endpoint Boundary
@@ -96,7 +96,7 @@ Decision:
 
 ```text
 Optional endpoint isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 8. Runtime and Persistence Isolation
@@ -121,10 +121,10 @@ Decision:
 
 ```text
 Runtime isolation
-= ACCEPTED
+= VERIFIED
 
 Persistence isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 9. Test and Workflow State
@@ -147,22 +147,34 @@ absence of Runtime, authentication, semantic, and security outputs
 
 The Priority F workflow includes all H1-H3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30188834286
+30188845834
+30188869985
+30188885701
+30188923388
+30188935492
+30188963696
+```
+
+Each run completed the bounded Runtime and production hardening test step, PoC artifact generation, artifact count verification, and artifact upload successfully.
 
 ## 10. Final Decision
 
 ```text
 H inspection manifest comparison review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 H1 comparison descriptor and settings
-= ACCEPTED
+= VERIFIED
 
 H2 comparison service
-= ACCEPTED
+= VERIFIED
 
 H3 optional comparison endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Manifest retrieval
 = NOT APPROVED
@@ -192,5 +204,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate H
+= COMPLETE
 ```
