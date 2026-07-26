@@ -14,28 +14,31 @@ def payload(compatible: bool = True) -> dict:
         "source_process_id": "process-001",
         "source_record_type": "TrajectoryGraph",
         "source_contract": {
-            "api_namespace": "/vnext/experimental",
-            "contract_version": "1.0.0",
-            "record_type": "TrajectoryGraph"
+            "source_api_namespace": "/vnext/experimental",
+            "source_contract_version": "1.0.0",
+            "consumer_contract_version": "1.0.0",
+            "record_type": "TrajectoryGraph",
         },
         "consumer_contract": {
-            "api_namespace": "/vnext/experimental",
-            "contract_version": "1.0.0",
-            "record_type": "TrajectoryGraph"
+            "source_api_namespace": "/vnext/experimental",
+            "source_contract_version": "1.0.0",
+            "consumer_contract_version": "1.0.0",
+            "record_type": "TrajectoryGraph",
         },
         "compatibility_result": {
             "compatible_for_inspection": compatible,
             "disposition": disposition,
             "source_contract_version": "1.0.0",
             "consumer_contract_version": "1.0.0",
+            "record_type": "TrajectoryGraph",
             "warnings": [],
-            "rejection_reason": None if compatible else "unsupported_major_version"
+            "rejection_reason": None if compatible else "unsupported_major_version",
         },
         "payload": {"nodes": []},
         "source_metadata": {"source": "api"},
         "source_refs": ["record-001"],
         "warnings": [],
-        "receipt_metadata": {"purpose": "inspection"}
+        "receipt_metadata": {"purpose": "inspection"},
     }
 
 
