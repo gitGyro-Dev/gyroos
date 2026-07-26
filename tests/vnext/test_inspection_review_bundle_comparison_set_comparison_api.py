@@ -76,6 +76,6 @@ def test_comparison_response_has_no_runtime_authentication_or_semantic_outputs(
 def test_comparison_retrieval_routes_are_absent(monkeypatch) -> None:
     monkeypatch.setenv("GYRO_RUNTIME_TOKEN", "test-token")
 
-    assert client.get(f"{PATH}/set-comparison-001", headers=HEADERS).status_code == 405
+    assert client.get(f"{PATH}/set-comparison-001", headers=HEADERS).status_code == 404
     assert client.get(PATH, headers=HEADERS).status_code == 405
-    assert client.delete(f"{PATH}/set-comparison-001", headers=HEADERS).status_code == 405
+    assert client.delete(f"{PATH}/set-comparison-001", headers=HEADERS).status_code == 404
