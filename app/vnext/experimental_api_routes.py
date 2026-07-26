@@ -65,6 +65,14 @@ from .inspection_review_bundle_comparison_set import (
     ExperimentalReviewBundleComparisonSetRequest,
     ExperimentalReviewBundleComparisonSetResult,
 )
+from .inspection_review_bundle_comparison_set_comparison import (
+    ExperimentalComparisonSetComparisonRequest,
+    ExperimentalComparisonSetComparisonResult,
+)
+from .inspection_review_bundle_comparison_set_comparison_service import (
+    ExperimentalComparisonSetComparisonError,
+    ExperimentalComparisonSetComparisonService,
+)
 from .inspection_review_bundle_comparison_set_service import (
     ExperimentalReviewBundleComparisonSetError,
     ExperimentalReviewBundleComparisonSetService,
@@ -83,6 +91,7 @@ manifest_comparison_service = ExperimentalManifestComparisonService()
 comparison_review_bundle_service = ExperimentalComparisonReviewBundleService()
 review_bundle_comparison_service = ExperimentalReviewBundleComparisonService()
 review_bundle_comparison_set_service = ExperimentalReviewBundleComparisonSetService()
+comparison_set_comparison_service = ExperimentalComparisonSetComparisonService()
 
 
 def experimental_error(
@@ -299,4 +308,24 @@ def create_experimental_inspection_review_bundle_comparison_set(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_SET_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-review-bundle-comparison-set-comparisons",
+    response_model=ExperimentalComparisonSetComparisonResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_review_bundle_comparison_set_comparison(
+    request: ExperimentalComparisonSetComparisonRequest,
+):
+    try:
+        return comparison_set_comparison_service.compare(request)
+    except ExperimentalComparisonSetComparisonError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_COMPARISON_SET_COMPARISON_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_SET_COMPARISON_CREATE",
         )
