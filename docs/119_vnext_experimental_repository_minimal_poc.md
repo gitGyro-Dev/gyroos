@@ -208,7 +208,7 @@ delete success/failure
 absence of canonical/current/version/order fields
 ```
 
-The Priority F workflow now executes this test with all accepted Runtime and vNext regression tests.
+The Priority F workflow executes this test with all accepted Runtime and vNext regression tests.
 
 ---
 
@@ -264,13 +264,13 @@ Public API changed
 
 ```text
 ExperimentalRecordEnvelope
-= IMPLEMENTED AS OPAQUE EXPERIMENTAL ENVELOPE
+= VERIFIED AS OPAQUE EXPERIMENTAL ENVELOPE
 
 ExperimentalRecordRepository
-= IMPLEMENTED AS MINIMAL ABSTRACT CONTRACT
+= VERIFIED AS MINIMAL ABSTRACT CONTRACT
 
 InMemoryExperimentalRecordRepository
-= IMPLEMENTED AS ISOLATED EPHEMERAL REPOSITORY
+= VERIFIED AS ISOLATED EPHEMERAL REPOSITORY
 
 Current SQLite schema
 = UNCHANGED
@@ -279,14 +279,23 @@ Typed reconstruction registry
 = NOT IMPLEMENTED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+```
+
+Verified workflow runs:
+
+```text
+30181950498
+30181963740
+30181978771
+30182000923
 ```
 
 ---
 
 ## 12. Review Gate
 
-After workflow verification, perform:
+Proceed to:
 
 ```text
 Experimental Repository Review
