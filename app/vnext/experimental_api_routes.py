@@ -37,6 +37,14 @@ from .inspection_comparison_review_bundle_service import (
     ExperimentalComparisonReviewBundleError,
     ExperimentalComparisonReviewBundleService,
 )
+from .inspection_comparison_set_comparison_series import (
+    ExperimentalComparisonSetComparisonSeriesRequest,
+    ExperimentalComparisonSetComparisonSeriesResult,
+)
+from .inspection_comparison_set_comparison_series_service import (
+    ExperimentalComparisonSetComparisonSeriesError,
+    ExperimentalComparisonSetComparisonSeriesService,
+)
 from .inspection_manifest_comparison import (
     ExperimentalManifestComparisonRequest,
     ExperimentalManifestComparisonResult,
@@ -92,6 +100,9 @@ comparison_review_bundle_service = ExperimentalComparisonReviewBundleService()
 review_bundle_comparison_service = ExperimentalReviewBundleComparisonService()
 review_bundle_comparison_set_service = ExperimentalReviewBundleComparisonSetService()
 comparison_set_comparison_service = ExperimentalComparisonSetComparisonService()
+comparison_set_comparison_series_service = (
+    ExperimentalComparisonSetComparisonSeriesService()
+)
 
 
 def experimental_error(
@@ -328,4 +339,24 @@ def create_experimental_inspection_review_bundle_comparison_set_comparison(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_SET_COMPARISON_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-set-comparison-series",
+    response_model=ExperimentalComparisonSetComparisonSeriesResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_set_comparison_series(
+    request: ExperimentalComparisonSetComparisonSeriesRequest,
+):
+    try:
+        return comparison_set_comparison_series_service.create_series(request)
+    except ExperimentalComparisonSetComparisonSeriesError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_COMPARISON_SET_COMPARISON_SERIES_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_SET_COMPARISON_SERIES_CREATE",
         )
