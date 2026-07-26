@@ -15,8 +15,9 @@ from app.vnext.inspection_receipt import (
 
 def make_descriptor(version: str = "1.0.0") -> ExperimentalContractDescriptor:
     return ExperimentalContractDescriptor(
-        api_namespace="/vnext/experimental",
-        contract_version=version,
+        source_api_namespace="/vnext/experimental",
+        source_contract_version=version,
+        consumer_contract_version=version,
         record_type="TrajectoryGraph",
     )
 
@@ -27,7 +28,8 @@ def make_compatibility_result() -> ExperimentalConsumerCompatibilityResult:
         disposition=CompatibilityDisposition.COMPATIBLE,
         source_contract_version="1.0.0",
         consumer_contract_version="1.0.0",
-        warnings=(),
+        record_type="TrajectoryGraph",
+        warnings=[],
         rejection_reason=None,
     )
 
