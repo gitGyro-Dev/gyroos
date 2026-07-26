@@ -22,6 +22,14 @@ from .experimental_api import (
 )
 from .experimental_api_provider import get_experimental_repository
 from .experimental_repository import ExperimentalRecordRepository
+from .inspection_receipt import (
+    ExperimentalInspectionReceiptRequest,
+    ExperimentalInspectionReceiptResult,
+)
+from .inspection_receipt_service import (
+    ExperimentalInspectionReceiptError,
+    ExperimentalInspectionReceiptService,
+)
 
 
 router = APIRouter(
@@ -30,6 +38,7 @@ router = APIRouter(
     dependencies=[Depends(require_runtime_bearer)],
 )
 compatibility_service = ExperimentalConsumerCompatibilityService()
+inspection_receipt_service = ExperimentalInspectionReceiptService()
 
 
 def experimental_error(
@@ -126,4 +135,24 @@ def check_experimental_consumer_compatibility(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPATIBILITY_CHECK",
+        )
+
+
+@router.post(
+    "/inspection-receipts",
+    response_model=ExperimentalInspectionReceiptResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_receipt(
+    request: ExperimentalInspectionReceiptRequest,
+):
+    try:
+        return inspection_receipt_service.create_receipt(request)
+    except ExperimentalInspectionReceiptError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_INSPECTION_RECEIPT_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_INSPECTION_RECEIPT_CREATE",
         )
