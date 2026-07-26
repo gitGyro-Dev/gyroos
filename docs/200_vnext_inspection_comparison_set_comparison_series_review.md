@@ -148,22 +148,34 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all M1-M3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30192378527
+30192392415
+30192422551
+30192438167
+30192486823
+30192503461
+30192530061
+```
+
+Each run completed the bounded test suite, PoC artifact generation, artifact count verification, and artifact upload successfully.
 
 ## 10. Final Decision
 
 ```text
 M inspection comparison-set comparison series review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 M1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 M2 comparison series assembly service
-= ACCEPTED
+= VERIFIED
 
 M3 optional comparison series creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 L comparison retrieval
 = NOT APPROVED
@@ -196,5 +208,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate M
+= COMPLETE
 ```
