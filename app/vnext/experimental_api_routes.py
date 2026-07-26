@@ -53,6 +53,14 @@ from .inspection_receipt_service import (
     ExperimentalInspectionReceiptError,
     ExperimentalInspectionReceiptService,
 )
+from .inspection_review_bundle_comparison import (
+    ExperimentalReviewBundleComparisonRequest,
+    ExperimentalReviewBundleComparisonResult,
+)
+from .inspection_review_bundle_comparison_service import (
+    ExperimentalReviewBundleComparisonError,
+    ExperimentalReviewBundleComparisonService,
+)
 
 
 router = APIRouter(
@@ -65,6 +73,7 @@ inspection_receipt_service = ExperimentalInspectionReceiptService()
 inspection_batch_service = ExperimentalInspectionBatchService()
 manifest_comparison_service = ExperimentalManifestComparisonService()
 comparison_review_bundle_service = ExperimentalComparisonReviewBundleService()
+review_bundle_comparison_service = ExperimentalReviewBundleComparisonService()
 
 
 def experimental_error(
@@ -241,4 +250,24 @@ def create_experimental_inspection_comparison_review_bundle(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_REVIEW_BUNDLE_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-review-bundle-comparisons",
+    response_model=ExperimentalReviewBundleComparisonResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_review_bundle_comparison(
+    request: ExperimentalReviewBundleComparisonRequest,
+):
+    try:
+        return review_bundle_comparison_service.compare(request)
+    except ExperimentalReviewBundleComparisonError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_CREATE",
         )
