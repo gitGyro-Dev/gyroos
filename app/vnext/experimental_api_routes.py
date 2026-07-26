@@ -61,6 +61,14 @@ from .inspection_review_bundle_comparison_service import (
     ExperimentalReviewBundleComparisonError,
     ExperimentalReviewBundleComparisonService,
 )
+from .inspection_review_bundle_comparison_set import (
+    ExperimentalReviewBundleComparisonSetRequest,
+    ExperimentalReviewBundleComparisonSetResult,
+)
+from .inspection_review_bundle_comparison_set_service import (
+    ExperimentalReviewBundleComparisonSetError,
+    ExperimentalReviewBundleComparisonSetService,
+)
 
 
 router = APIRouter(
@@ -74,6 +82,7 @@ inspection_batch_service = ExperimentalInspectionBatchService()
 manifest_comparison_service = ExperimentalManifestComparisonService()
 comparison_review_bundle_service = ExperimentalComparisonReviewBundleService()
 review_bundle_comparison_service = ExperimentalReviewBundleComparisonService()
+review_bundle_comparison_set_service = ExperimentalReviewBundleComparisonSetService()
 
 
 def experimental_error(
@@ -270,4 +279,24 @@ def create_experimental_inspection_review_bundle_comparison(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-review-bundle-comparison-sets",
+    response_model=ExperimentalReviewBundleComparisonSetResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_review_bundle_comparison_set(
+    request: ExperimentalReviewBundleComparisonSetRequest,
+):
+    try:
+        return review_bundle_comparison_set_service.create_set(request)
+    except ExperimentalReviewBundleComparisonSetError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_SET_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_SET_CREATE",
         )
