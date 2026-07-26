@@ -22,6 +22,14 @@ from .experimental_api import (
 )
 from .experimental_api_provider import get_experimental_repository
 from .experimental_repository import ExperimentalRecordRepository
+from .inspection_batch_manifest import (
+    ExperimentalInspectionBatchRequest,
+    ExperimentalInspectionBatchResult,
+)
+from .inspection_batch_manifest_service import (
+    ExperimentalInspectionBatchError,
+    ExperimentalInspectionBatchService,
+)
 from .inspection_receipt import (
     ExperimentalInspectionReceiptRequest,
     ExperimentalInspectionReceiptResult,
@@ -39,6 +47,7 @@ router = APIRouter(
 )
 compatibility_service = ExperimentalConsumerCompatibilityService()
 inspection_receipt_service = ExperimentalInspectionReceiptService()
+inspection_batch_service = ExperimentalInspectionBatchService()
 
 
 def experimental_error(
@@ -155,4 +164,24 @@ def create_experimental_inspection_receipt(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_INSPECTION_RECEIPT_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-batch-manifests",
+    response_model=ExperimentalInspectionBatchResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_batch_manifest(
+    request: ExperimentalInspectionBatchRequest,
+):
+    try:
+        return inspection_batch_service.create_manifest(request)
+    except ExperimentalInspectionBatchError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_INSPECTION_BATCH_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_INSPECTION_BATCH_CREATE",
         )
