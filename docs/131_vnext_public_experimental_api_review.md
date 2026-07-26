@@ -209,7 +209,7 @@ Persistence isolation
 
 ---
 
-## 10. Test and Workflow State
+## 10. Test and Workflow Verification
 
 Tests cover:
 
@@ -224,9 +224,30 @@ canonical field rejection
 existing /loop/step registration
 ```
 
-The Priority F workflow includes all C1-C3 tests.
+Verified workflow run:
 
-Final workflow run verification remains pending.
+```text
+30183913810 = success
+```
+
+The run completed:
+
+```text
+bounded Runtime and production hardening tests
+PoC artifact generation
+PoC artifact count verification
+artifact upload
+```
+
+Decision:
+
+```text
+Regression verification
+= ACCEPTED
+
+GitHub Actions verification
+= VERIFIED
+```
 
 ---
 
@@ -234,22 +255,37 @@ Final workflow run verification remains pending.
 
 ```text
 C public experimental API review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 C1 settings and public models
-= ACCEPTED
+= VERIFIED
 
 C2 repository provider boundary
-= ACCEPTED
+= VERIFIED
 
 C3 experimental record routes
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
+
+Initial repository backend
+= IN-MEMORY
+
+Current /loop/step
+= UNCHANGED
 
 Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate C
+= COMPLETE
 ```
 
-Do not proceed to assembly endpoints, JSON backend public selection, or GyroAuth consumption until workflow verification succeeds and the next integration gate is explicitly selected.
+The next integration gate may now be considered:
+
+```text
+D. GyroAuth consumption boundary
+```
+
+Do not expose assembly endpoints, select the JSON artifact backend publicly, or convert GyroOS records into GyroAuth authentication decisions without a separate D review and explicit mapping contract.
