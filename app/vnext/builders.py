@@ -14,9 +14,12 @@ from .models import (
     DifferenceRepresentationType,
     IncorporationRecord,
     LocalArticulation,
+    ReadOnlyRuntimeProjection,
     ReadabilityContext,
     ReadabilityRelationBundle,
     ReadableRelation,
+    RuntimeProjectionReference,
+    RuntimeSnapshot,
     SceneReadabilityRelation,
     SemanticRealizationBundle,
     StabilityObservation,
@@ -477,6 +480,77 @@ class TrajectoryGraphBuilder:
             trajectory_edge_refs=[item.trajectory_edge_id for item in edge_items],
             root_node_refs=root_refs,
             terminal_node_refs=terminal_refs,
+            provisional=provisional,
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class RuntimeSnapshotBuilder:
+    """Copy one existing Runtime result payload without interpreting it."""
+
+    def build(self, *, process_id: str, slice_ref: str, runtime_contract: str,
+              payload: dict[str, object], metadata: dict[str, object] | None = None,
+              runtime_snapshot_id: str | None = None) -> RuntimeSnapshot:
+        return RuntimeSnapshot(
+            runtime_snapshot_id=runtime_snapshot_id or new_vnext_id("runtime_snapshot"),
+            process_id=process_id,
+            slice_ref=slice_ref,
+            runtime_contract=runtime_contract,
+            payload=deepcopy(payload),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class RuntimeProjectionReferenceBuilder:
+    """Relate one Runtime snapshot to one explicit vNext record reference."""
+
+    def build(self, *, snapshot: RuntimeSnapshot, record_ref: str, record_type: str,
+              relation_type: str, provisional: bool = True,
+              evidence_refs: list[str] | None = None,
+              metadata: dict[str, object] | None = None,
+              projection_reference_id: str | None = None,
+              expected_snapshot_ref: str | None = None,
+              expected_process_id: str | None = None) -> RuntimeProjectionReference:
+        if expected_snapshot_ref is not None and expected_snapshot_ref != snapshot.runtime_snapshot_id:
+            raise ValueError("expected_snapshot_ref must match RuntimeSnapshot")
+        if expected_process_id is not None and expected_process_id != snapshot.process_id:
+            raise ValueError("expected_process_id must match RuntimeSnapshot process_id")
+        return RuntimeProjectionReference(
+            projection_reference_id=projection_reference_id or new_vnext_id("runtime_projection_reference"),
+            process_id=snapshot.process_id,
+            runtime_snapshot_ref=snapshot.runtime_snapshot_id,
+            record_ref=record_ref,
+            record_type=record_type,
+            relation_type=relation_type,
+            provisional=provisional,
+            evidence_refs=list(evidence_refs or []),
+            metadata=deepcopy(metadata or {}),
+        )
+
+
+class ReadOnlyRuntimeProjectionBuilder:
+    """Group one snapshot and explicit projection references without interpretation."""
+
+    def build(self, *, snapshot: RuntimeSnapshot,
+              references: list[RuntimeProjectionReference] | None = None,
+              provisional: bool = True,
+              metadata: dict[str, object] | None = None,
+              runtime_projection_id: str | None = None) -> ReadOnlyRuntimeProjection:
+        reference_items = references or []
+        reference_ids: set[str] = set()
+        for reference in reference_items:
+            if reference.process_id != snapshot.process_id:
+                raise ValueError("RuntimeProjectionReference process_id must match snapshot process_id")
+            if reference.runtime_snapshot_ref != snapshot.runtime_snapshot_id:
+                raise ValueError("RuntimeProjectionReference must reference the projected RuntimeSnapshot")
+            if reference.projection_reference_id in reference_ids:
+                raise ValueError("RuntimeProjectionReference IDs must be unique within one projection")
+            reference_ids.add(reference.projection_reference_id)
+        return ReadOnlyRuntimeProjection(
+            runtime_projection_id=runtime_projection_id or new_vnext_id("runtime_projection"),
+            process_id=snapshot.process_id,
+            runtime_snapshot_ref=snapshot.runtime_snapshot_id,
+            projection_reference_refs=[item.projection_reference_id for item in reference_items],
             provisional=provisional,
             metadata=deepcopy(metadata or {}),
         )
