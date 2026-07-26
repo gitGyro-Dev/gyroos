@@ -24,7 +24,7 @@ Decision:
 
 ```text
 Inspection-only compatibility meaning
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Contract Descriptor Boundary
@@ -42,7 +42,7 @@ Decision:
 
 ```text
 Syntactic descriptor boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 4. Version Policy Boundary
@@ -55,7 +55,7 @@ Decision:
 
 ```text
 Version policy boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 5. Record Type Boundary
@@ -66,7 +66,7 @@ Decision:
 
 ```text
 Opaque record type boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 6. Endpoint Boundary
@@ -81,7 +81,7 @@ Decision:
 
 ```text
 Optional endpoint isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 7. Error Boundary
@@ -103,7 +103,7 @@ Decision:
 
 ```text
 Compatibility error non-mapping
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 8. Runtime and Persistence Isolation
@@ -125,13 +125,13 @@ Decision:
 
 ```text
 Runtime isolation
-= ACCEPTED
+= VERIFIED
 
 Persistence isolation
-= ACCEPTED
+= VERIFIED
 ```
 
-## 9. Test and Workflow State
+## 9. Test and Workflow Verification
 
 Tests cover:
 
@@ -151,22 +151,41 @@ absence of authentication and semantic outputs
 
 The Priority F workflow includes all E1-E3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30186534705
+30186552545
+30186584299
+30186598073
+30186672424
+30186687041
+30186707099
+```
+
+Each run completed:
+
+```text
+bounded Runtime and production hardening tests
+PoC artifact generation
+PoC artifact count verification
+PoC artifact upload
+```
 
 ## 10. Final Decision
 
 ```text
 E consumer contract compatibility review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 E1 contract descriptor and settings
-= ACCEPTED
+= VERIFIED
 
 E2 compatibility policy and service
-= ACCEPTED
+= VERIFIED
 
 E3 optional compatibility endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Automatic migration
 = NOT APPROVED
@@ -190,5 +209,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate E
+= COMPLETE
 ```
