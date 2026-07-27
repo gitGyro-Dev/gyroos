@@ -154,22 +154,31 @@ absence of Runtime, authentication, semantic trend, risk, and DifferenceObject o
 
 The Priority F workflow includes all P1-P3 tests.
 
-Final workflow verification remains pending.
+Verified workflow:
+
+```text
+run 30247842294
+job test-and-run-poc = success
+bounded Runtime and production hardening tests = success
+PoC result artifact generation = success
+PoC artifact count verification = success
+PoC artifact upload = success
+```
 
 ## 10. Final Decision
 
 ```text
 P inspection comparison collection comparison review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 P1 comparison descriptor and settings
-= ACCEPTED
+= VERIFIED
 
 P2 comparison service
-= ACCEPTED
+= VERIFIED
 
 P3 optional comparison endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Comparison collection retrieval
 = NOT APPROVED
@@ -202,5 +211,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate P
+= COMPLETE
 ```
