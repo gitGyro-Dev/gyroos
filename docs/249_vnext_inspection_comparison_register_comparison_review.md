@@ -25,7 +25,7 @@ Decision:
 
 ```text
 Request-local comparison register comparison meaning
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Reference Boundary
@@ -38,7 +38,7 @@ Decision:
 
 ```text
 Reference-only comparison boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 4. Membership Difference Boundary
@@ -49,7 +49,7 @@ Decision:
 
 ```text
 Deterministic membership comparison
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 5. Digest Boundary
@@ -62,7 +62,7 @@ Decision:
 
 ```text
 Declared digest comparison boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 6. Difference Meaning Boundary
@@ -79,7 +79,7 @@ Decision:
 
 ```text
 Difference non-mapping boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 7. Endpoint Boundary
@@ -96,7 +96,7 @@ Decision:
 
 ```text
 Optional endpoint isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 8. Runtime and Persistence Isolation
@@ -133,10 +133,10 @@ Decision:
 
 ```text
 Runtime isolation
-= ACCEPTED
+= VERIFIED
 
 Persistence isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 9. Test and Workflow State
@@ -158,22 +158,34 @@ absence of Runtime, authentication, semantic trend, risk, and DifferenceObject o
 
 The Priority F workflow includes all T1-T3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30254317111
+30254351990
+30254432931
+30254479251
+30254659787
+30254701628
+30254773391
+```
+
+Each run completed the bounded Runtime and production hardening tests, generated PoC result artifacts, verified artifact count, and uploaded the artifacts.
 
 ## 10. Final Decision
 
 ```text
 T inspection comparison register comparison review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 T1 comparison descriptor and settings
-= ACCEPTED
+= VERIFIED
 
 T2 comparison service
-= ACCEPTED
+= VERIFIED
 
 T3 optional comparison endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Comparison register retrieval
 = NOT APPROVED
@@ -206,5 +218,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate T
+= COMPLETE
 ```
