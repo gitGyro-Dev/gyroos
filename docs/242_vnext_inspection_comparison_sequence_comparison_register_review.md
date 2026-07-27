@@ -25,7 +25,7 @@ Decision:
 
 ```text
 Request-local comparison register meaning
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Reference Boundary
@@ -38,7 +38,7 @@ Decision:
 
 ```text
 Reference-only register boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 4. Digest Boundary
@@ -51,7 +51,7 @@ Decision:
 
 ```text
 Ordered deterministic digest boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 5. Assembly Boundary
@@ -62,7 +62,7 @@ Decision:
 
 ```text
 Bounded comparison register assembly
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 6. Endpoint Boundary
@@ -79,7 +79,7 @@ Decision:
 
 ```text
 Optional endpoint isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 7. Error Boundary
@@ -92,7 +92,7 @@ Decision:
 
 ```text
 Comparison register error non-mapping
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 8. Runtime and Persistence Isolation
@@ -128,10 +128,10 @@ Decision:
 
 ```text
 Runtime isolation
-= ACCEPTED
+= VERIFIED
 
 Persistence isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 9. Test and Workflow State
@@ -153,22 +153,32 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all S1-S3 tests.
 
-Final workflow verification remains pending.
+Verified successful runs:
+
+```text
+30252688136
+30252718569
+30252795194
+30252834100
+30253006732
+30253041113
+30253111753
+```
 
 ## 10. Final Decision
 
 ```text
 S inspection comparison-sequence comparison register review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 S1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 S2 comparison register assembly service
-= ACCEPTED
+= VERIFIED
 
 S3 optional comparison register creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 R comparison retrieval
 = NOT APPROVED
@@ -201,5 +211,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate S
+= COMPLETE
 ```
