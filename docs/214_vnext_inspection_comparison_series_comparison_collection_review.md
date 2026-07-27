@@ -150,22 +150,42 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all O1-O3 tests.
 
-Final workflow verification remains pending.
+Verified GitHub Actions run:
+
+```text
+30246513770 = success
+```
+
+Successful workflow steps:
+
+```text
+Run bounded Runtime and production hardening tests
+Generate PoC result artifacts
+Verify PoC result artifact count
+Upload PoC result artifacts
+```
+
+Decision:
+
+```text
+GitHub Actions verification
+= VERIFIED
+```
 
 ## 10. Final Decision
 
 ```text
 O inspection comparison-series comparison collection review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 O1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 O2 comparison collection assembly service
-= ACCEPTED
+= VERIFIED
 
 O3 optional comparison collection creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 N comparison retrieval
 = NOT APPROVED
@@ -198,5 +218,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate O
+= COMPLETE
 ```
