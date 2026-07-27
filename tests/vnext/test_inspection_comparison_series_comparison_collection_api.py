@@ -2,6 +2,12 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.vnext.experimental_api_routes import router as experimental_router
+from app.vnext.inspection_comparison_series_comparison_collection import (
+    ExperimentalComparisonSeriesComparisonCollectionRequest,
+)
+from app.vnext.inspection_comparison_series_comparison_collection_service import (
+    ExperimentalComparisonSeriesComparisonCollectionService,
+)
 
 
 client = TestClient(app)
@@ -65,10 +71,10 @@ def test_create_collection_rejects_duplicate_reference(monkeypatch) -> None:
     )
 
 
-def test_response_has_no_runtime_authentication_or_semantic_outputs(monkeypatch) -> None:
-    monkeypatch.setenv("GYRO_RUNTIME_TOKEN", "test-token")
-    response = client.post(PATH, headers=HEADERS, json=payload())
-    manifest = response.json()["manifest"]
+def test_response_has_no_runtime_authentication_or_semantic_outputs() -> None:
+    request = ExperimentalComparisonSeriesComparisonCollectionRequest.model_validate(payload())
+    result = ExperimentalComparisonSeriesComparisonCollectionService().create_collection(request)
+    manifest = result.manifest.model_dump(mode="json")
 
     assert "auth_state" not in manifest
     assert "risk_level" not in manifest
