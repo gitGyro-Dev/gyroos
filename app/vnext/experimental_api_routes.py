@@ -57,6 +57,14 @@ from .inspection_comparison_sequence_comparison import (
     ExperimentalComparisonSequenceComparisonRequest,
     ExperimentalComparisonSequenceComparisonResult,
 )
+from .inspection_comparison_sequence_comparison_register import (
+    ExperimentalComparisonSequenceComparisonRegisterRequest,
+    ExperimentalComparisonSequenceComparisonRegisterResult,
+)
+from .inspection_comparison_sequence_comparison_register_service import (
+    ExperimentalComparisonSequenceComparisonRegisterError,
+    ExperimentalComparisonSequenceComparisonRegisterService,
+)
 from .inspection_comparison_sequence_comparison_service import (
     ExperimentalComparisonSequenceComparisonError,
     ExperimentalComparisonSequenceComparisonService,
@@ -152,6 +160,9 @@ comparison_collection_comparison_sequence_service = (
     ExperimentalComparisonCollectionComparisonSequenceService()
 )
 comparison_sequence_comparison_service = ExperimentalComparisonSequenceComparisonService()
+comparison_sequence_comparison_register_service = (
+    ExperimentalComparisonSequenceComparisonRegisterService()
+)
 
 
 def experimental_error(
@@ -514,4 +525,27 @@ def create_experimental_inspection_comparison_sequence_comparison(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_SEQUENCE_COMPARISON_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-sequence-comparison-registers",
+    response_model=ExperimentalComparisonSequenceComparisonRegisterResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_sequence_comparison_register(
+    request: ExperimentalComparisonSequenceComparisonRegisterRequest,
+):
+    try:
+        return comparison_sequence_comparison_register_service.create_register(request)
+    except ExperimentalComparisonSequenceComparisonRegisterError as exc:
+        return experimental_error(
+            422,
+            code=(
+                "GYRO_VNEXT_EXPERIMENTAL_COMPARISON_SEQUENCE_"
+                "COMPARISON_REGISTER_INVALID"
+            ),
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_SEQUENCE_COMPARISON_REGISTER_CREATE",
         )
