@@ -29,6 +29,14 @@ from .inspection_batch_manifest_service import (
     ExperimentalInspectionBatchError,
     ExperimentalInspectionBatchService,
 )
+from .inspection_comparison_collection_comparison import (
+    ExperimentalComparisonCollectionComparisonRequest,
+    ExperimentalComparisonCollectionComparisonResult,
+)
+from .inspection_comparison_collection_comparison_service import (
+    ExperimentalComparisonCollectionComparisonError,
+    ExperimentalComparisonCollectionComparisonService,
+)
 from .inspection_comparison_review_bundle import (
     ExperimentalComparisonReviewBundleRequest,
     ExperimentalComparisonReviewBundleResult,
@@ -123,6 +131,7 @@ comparison_series_comparison_service = ExperimentalComparisonSeriesComparisonSer
 comparison_series_comparison_collection_service = (
     ExperimentalComparisonSeriesComparisonCollectionService()
 )
+comparison_collection_comparison_service = ExperimentalComparisonCollectionComparisonService()
 
 
 def experimental_error(
@@ -422,4 +431,24 @@ def create_experimental_inspection_comparison_series_comparison_collection(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_SERIES_COMPARISON_COLLECTION_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-collection-comparisons",
+    response_model=ExperimentalComparisonCollectionComparisonResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_collection_comparison(
+    request: ExperimentalComparisonCollectionComparisonRequest,
+):
+    try:
+        return comparison_collection_comparison_service.compare(request)
+    except ExperimentalComparisonCollectionComparisonError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_COMPARISON_COLLECTION_COMPARISON_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_COLLECTION_COMPARISON_CREATE",
         )
