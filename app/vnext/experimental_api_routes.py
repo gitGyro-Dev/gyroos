@@ -49,6 +49,14 @@ from .inspection_comparison_register_comparison import (
     ExperimentalComparisonRegisterComparisonRequest,
     ExperimentalComparisonRegisterComparisonResult,
 )
+from .inspection_comparison_register_comparison_ledger import (
+    ExperimentalComparisonRegisterComparisonLedgerRequest,
+    ExperimentalComparisonRegisterComparisonLedgerResult,
+)
+from .inspection_comparison_register_comparison_ledger_service import (
+    ExperimentalComparisonRegisterComparisonLedgerError,
+    ExperimentalComparisonRegisterComparisonLedgerService,
+)
 from .inspection_comparison_register_comparison_service import (
     ExperimentalComparisonRegisterComparisonError,
     ExperimentalComparisonRegisterComparisonService,
@@ -172,6 +180,9 @@ comparison_sequence_comparison_register_service = (
     ExperimentalComparisonSequenceComparisonRegisterService()
 )
 comparison_register_comparison_service = ExperimentalComparisonRegisterComparisonService()
+comparison_register_comparison_ledger_service = (
+    ExperimentalComparisonRegisterComparisonLedgerService()
+)
 
 
 def experimental_error(
@@ -577,4 +588,27 @@ def create_experimental_inspection_comparison_register_comparison(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_REGISTER_COMPARISON_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-register-comparison-ledgers",
+    response_model=ExperimentalComparisonRegisterComparisonLedgerResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_register_comparison_ledger(
+    request: ExperimentalComparisonRegisterComparisonLedgerRequest,
+):
+    try:
+        return comparison_register_comparison_ledger_service.create_ledger(request)
+    except ExperimentalComparisonRegisterComparisonLedgerError as exc:
+        return experimental_error(
+            422,
+            code=(
+                "GYRO_VNEXT_EXPERIMENTAL_COMPARISON_REGISTER_"
+                "COMPARISON_LEDGER_INVALID"
+            ),
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_REGISTER_COMPARISON_LEDGER_CREATE",
         )
