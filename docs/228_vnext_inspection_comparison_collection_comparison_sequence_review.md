@@ -151,22 +151,34 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all Q1-Q3 tests.
 
-Final workflow verification remains pending.
+Verified successful GitHub Actions runs:
+
+```text
+30250367855
+30250406385
+30250474473
+30250509455
+30250656681
+30250683336
+30250745972
+```
+
+Each run completed the bounded Runtime and production hardening tests, PoC artifact generation, artifact-count verification, and artifact upload successfully.
 
 ## 10. Final Decision
 
 ```text
 Q inspection comparison-collection comparison sequence review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 Q1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 Q2 comparison sequence assembly service
-= ACCEPTED
+= VERIFIED
 
 Q3 optional comparison sequence creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 P comparison retrieval
 = NOT APPROVED
@@ -199,5 +211,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate Q
+= COMPLETE
 ```
