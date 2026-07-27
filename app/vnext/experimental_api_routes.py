@@ -41,6 +41,14 @@ from .inspection_comparison_series_comparison import (
     ExperimentalComparisonSeriesComparisonRequest,
     ExperimentalComparisonSeriesComparisonResult,
 )
+from .inspection_comparison_series_comparison_collection import (
+    ExperimentalComparisonSeriesComparisonCollectionRequest,
+    ExperimentalComparisonSeriesComparisonCollectionResult,
+)
+from .inspection_comparison_series_comparison_collection_service import (
+    ExperimentalComparisonSeriesComparisonCollectionError,
+    ExperimentalComparisonSeriesComparisonCollectionService,
+)
 from .inspection_comparison_series_comparison_service import (
     ExperimentalComparisonSeriesComparisonError,
     ExperimentalComparisonSeriesComparisonService,
@@ -112,6 +120,9 @@ comparison_set_comparison_series_service = (
     ExperimentalComparisonSetComparisonSeriesService()
 )
 comparison_series_comparison_service = ExperimentalComparisonSeriesComparisonService()
+comparison_series_comparison_collection_service = (
+    ExperimentalComparisonSeriesComparisonCollectionService()
+)
 
 
 def experimental_error(
@@ -388,4 +399,27 @@ def create_experimental_inspection_comparison_series_comparison(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_SERIES_COMPARISON_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-series-comparison-collections",
+    response_model=ExperimentalComparisonSeriesComparisonCollectionResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_series_comparison_collection(
+    request: ExperimentalComparisonSeriesComparisonCollectionRequest,
+):
+    try:
+        return comparison_series_comparison_collection_service.create_collection(request)
+    except ExperimentalComparisonSeriesComparisonCollectionError as exc:
+        return experimental_error(
+            422,
+            code=(
+                "GYRO_VNEXT_EXPERIMENTAL_COMPARISON_SERIES_"
+                "COMPARISON_COLLECTION_INVALID"
+            ),
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_SERIES_COMPARISON_COLLECTION_CREATE",
         )
