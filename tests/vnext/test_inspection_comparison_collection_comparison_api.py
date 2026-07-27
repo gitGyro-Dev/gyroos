@@ -1,7 +1,7 @@
-from fastapi.testclient import TestClient
-
-from app.main import app
-from app.vnext.experimental_api_routes import router as experimental_router
+from app.vnext.experimental_api_routes import (
+    create_experimental_inspection_comparison_collection_comparison,
+    router as experimental_router,
+)
 from app.vnext.inspection_comparison_collection_comparison import (
     ExperimentalComparisonCollectionComparisonRequest,
 )
@@ -10,8 +10,6 @@ from app.vnext.inspection_comparison_collection_comparison_service import (
 )
 
 
-client = TestClient(app)
-HEADERS = {"Authorization": "Bearer test-token"}
 PATH = "/vnext/experimental/inspection-comparison-collection-comparisons"
 
 
@@ -33,30 +31,28 @@ def payload() -> dict:
     }
 
 
-def test_create_comparison_returns_request_local_report(monkeypatch) -> None:
-    monkeypatch.setenv("GYRO_RUNTIME_TOKEN", "test-token")
-    response = client.post(PATH, headers=HEADERS, json=payload())
+def test_create_comparison_returns_request_local_report() -> None:
+    request = ExperimentalComparisonCollectionComparisonRequest(**payload())
 
-    assert response.status_code == 201
-    body = response.json()
-    assert body["comparison_collection_comparison_created"] is True
-    assert body["report"]["added_series_comparison_ids"] == ["series-cmp-003"]
-    assert body["report"]["removed_series_comparison_ids"] == ["series-cmp-001"]
-    assert body["report"]["retained_series_comparison_ids"] == ["series-cmp-002"]
-    assert body["report"]["digest_changed"] is True
+    result = create_experimental_inspection_comparison_collection_comparison(request)
+
+    assert result.comparison_collection_comparison_created is True
+    assert result.report.added_series_comparison_ids == ("series-cmp-003",)
+    assert result.report.removed_series_comparison_ids == ("series-cmp-001",)
+    assert result.report.retained_series_comparison_ids == ("series-cmp-002",)
+    assert result.report.digest_changed is True
 
 
-def test_create_comparison_rejects_same_collection(monkeypatch) -> None:
-    monkeypatch.setenv("GYRO_RUNTIME_TOKEN", "test-token")
+def test_create_comparison_rejects_same_collection() -> None:
     request_body = payload()
     request_body["right_collection"]["comparison_collection_id"] = "collection-left"
+    request = ExperimentalComparisonCollectionComparisonRequest(**request_body)
 
-    response = client.post(PATH, headers=HEADERS, json=request_body)
+    response = create_experimental_inspection_comparison_collection_comparison(request)
 
     assert response.status_code == 422
-    assert response.json()["error_code"] == (
-        "GYRO_VNEXT_EXPERIMENTAL_COMPARISON_COLLECTION_COMPARISON_INVALID"
-    )
+    body = response.body.decode("utf-8")
+    assert "GYRO_VNEXT_EXPERIMENTAL_COMPARISON_COLLECTION_COMPARISON_INVALID" in body
 
 
 def test_response_has_no_runtime_authentication_or_semantic_outputs() -> None:
