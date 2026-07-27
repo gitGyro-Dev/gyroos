@@ -1,0 +1,152 @@
+from __future__ import annotations
+
+import json
+
+from .inspection_comparison_collection_comparison_sequence import (
+    ExperimentalComparisonCollectionComparisonSequenceManifest,
+    ExperimentalComparisonCollectionComparisonSequenceRequest,
+    ExperimentalComparisonCollectionComparisonSequenceResult,
+    ExperimentalComparisonCollectionComparisonSequenceSettings,
+    digest_comparison_references,
+    utc_now,
+)
+
+
+class ExperimentalComparisonCollectionComparisonSequenceError(ValueError):
+    pass
+
+
+class ExperimentalComparisonCollectionComparisonSequenceIdentityError(
+    ExperimentalComparisonCollectionComparisonSequenceError
+):
+    pass
+
+
+class ExperimentalComparisonCollectionComparisonSequenceDuplicateError(
+    ExperimentalComparisonCollectionComparisonSequenceError
+):
+    pass
+
+
+class ExperimentalComparisonCollectionComparisonSequenceResourceLimitError(
+    ExperimentalComparisonCollectionComparisonSequenceError
+):
+    pass
+
+
+class ExperimentalComparisonCollectionComparisonSequenceService:
+    def __init__(
+        self,
+        settings: ExperimentalComparisonCollectionComparisonSequenceSettings | None = None,
+    ) -> None:
+        self.settings = (
+            settings or ExperimentalComparisonCollectionComparisonSequenceSettings()
+        )
+
+    def create_sequence(
+        self,
+        request: ExperimentalComparisonCollectionComparisonSequenceRequest,
+    ) -> ExperimentalComparisonCollectionComparisonSequenceResult:
+        self._validate_request(request)
+
+        try:
+            references_digest = digest_comparison_references(
+                request.comparison_references,
+                request.digest_policy,
+            )
+        except ValueError as exc:
+            raise ExperimentalComparisonCollectionComparisonSequenceError(
+                str(exc)
+            ) from exc
+
+        manifest = ExperimentalComparisonCollectionComparisonSequenceManifest(
+            comparison_sequence_id=request.comparison_sequence_id,
+            comparison_references=request.comparison_references,
+            comparison_count=len(request.comparison_references),
+            comparison_references_digest=references_digest,
+            digest_policy=request.digest_policy,
+            created_at=request.created_at or utc_now(),
+            warnings=request.warnings,
+            source_refs=request.source_refs,
+            sequence_metadata=request.sequence_metadata,
+        )
+        return ExperimentalComparisonCollectionComparisonSequenceResult(
+            manifest=manifest
+        )
+
+    def _validate_request(
+        self,
+        request: ExperimentalComparisonCollectionComparisonSequenceRequest,
+    ) -> None:
+        self._validate_identifier(
+            request.comparison_sequence_id,
+            "comparison_sequence_id",
+        )
+
+        if not request.comparison_references:
+            raise ExperimentalComparisonCollectionComparisonSequenceIdentityError(
+                "comparison reference set must not be empty"
+            )
+
+        if len(request.comparison_references) > self.settings.max_comparison_count:
+            raise ExperimentalComparisonCollectionComparisonSequenceResourceLimitError(
+                "comparison reference count exceeds configured maximum"
+            )
+
+        seen_ids: set[str] = set()
+        for reference in request.comparison_references:
+            self._validate_identifier(
+                reference.collection_comparison_id,
+                "collection_comparison_id",
+            )
+            self._validate_identifier(
+                reference.left_comparison_collection_id,
+                "left_comparison_collection_id",
+            )
+            self._validate_identifier(
+                reference.right_comparison_collection_id,
+                "right_comparison_collection_id",
+            )
+            if reference.collection_comparison_id in seen_ids:
+                raise ExperimentalComparisonCollectionComparisonSequenceDuplicateError(
+                    "duplicate collection_comparison_id: "
+                    f"{reference.collection_comparison_id}"
+                )
+            seen_ids.add(reference.collection_comparison_id)
+
+        if len(request.warnings) > self.settings.max_warning_count:
+            raise ExperimentalComparisonCollectionComparisonSequenceResourceLimitError(
+                "warning count exceeds configured maximum"
+            )
+        if len(request.source_refs) > self.settings.max_source_ref_count:
+            raise ExperimentalComparisonCollectionComparisonSequenceResourceLimitError(
+                "source reference count exceeds configured maximum"
+            )
+
+        for warning in request.warnings:
+            self._validate_identifier(warning, "warning")
+        for source_ref in request.source_refs:
+            self._validate_identifier(source_ref, "source_ref")
+
+        metadata_bytes = len(
+            json.dumps(
+                request.sequence_metadata,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ).encode("utf-8")
+        )
+        if metadata_bytes > self.settings.max_metadata_bytes:
+            raise ExperimentalComparisonCollectionComparisonSequenceResourceLimitError(
+                "sequence metadata exceeds configured byte maximum"
+            )
+
+    def _validate_identifier(self, value: str, field_name: str) -> None:
+        if not value.strip():
+            raise ExperimentalComparisonCollectionComparisonSequenceIdentityError(
+                f"{field_name} must not be blank"
+            )
+        if len(value) > self.settings.max_identifier_length:
+            raise ExperimentalComparisonCollectionComparisonSequenceResourceLimitError(
+                f"{field_name} exceeds configured maximum length"
+            )
