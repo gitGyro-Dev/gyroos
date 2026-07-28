@@ -33,7 +33,7 @@ Gyro Logic
 
 without making GyroOS depend on GyroAuth.
 
-The implementation snapshot described in this paper is fixed by GitHub Release `v4.0.0` and archived on Zenodo as record `21641158` [1].
+The implementation snapshot described in this paper is fixed by GitHub Release `v4.0.0` and archived on Zenodo with DOI `10.5281/zenodo.21641266` [1].
 
 ## 2. Related Work and Positioning
 
@@ -297,8 +297,8 @@ This design does not claim exhaustive understanding or complete preservation of 
 
 - Software release: `GyroOS v4.0.0`
 - Source repository: `https://github.com/gitGyro-Dev/gyroos`
-- Archival record: `https://zenodo.org/records/21641158`
-- Zenodo record identifier: `21641158`
+- Archival DOI: `https://doi.org/10.5281/zenodo.21641266`
+- Zenodo record: `https://zenodo.org/records/21641158`
 
 ## Declarations
 
@@ -320,7 +320,7 @@ Generative AI and other AI-assisted tools were used for structural organization,
 
 ## References
 
-[1] S. Kawakami, "GyroOS v4.0.0: Bounded Runtime and Experimental Inspection Architecture," Zenodo, 2026. Record 21641158. https://zenodo.org/records/21641158
+[1] S. Kawakami, "GyroOS v4.0.0: Bounded Runtime and Experimental Inspection Architecture," Zenodo, 2026. https://doi.org/10.5281/zenodo.21641266
 
 [2] M. Fowler, "Event Sourcing," 2005. https://martinfowler.com/eaaDev/EventSourcing.html
 
