@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-
 from .inspection_comparison_register_comparison_ledger import (
     ExperimentalComparisonRegisterComparisonLedgerDigestPolicy,
     ExperimentalComparisonRegisterComparisonLedgerManifest,
@@ -11,6 +9,7 @@ from .inspection_comparison_register_comparison_ledger import (
     ExperimentalComparisonRegisterComparisonReference,
     utc_now,
 )
+from .inspection_validation import canonical_json_utf8_size
 
 
 class ExperimentalComparisonRegisterComparisonLedgerError(ValueError):
@@ -127,13 +126,7 @@ class ExperimentalComparisonRegisterComparisonLedgerService:
             self._validate_identifier(value, field_name)
 
     def _validate_metadata(self, metadata: dict[str, object]) -> None:
-        encoded = json.dumps(
-            metadata,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=False,
-        ).encode("utf-8")
-        if len(encoded) > self.settings.max_metadata_bytes:
+        if canonical_json_utf8_size(metadata) > self.settings.max_metadata_bytes:
             raise ExperimentalComparisonRegisterComparisonLedgerResourceLimitError(
                 "ledger_metadata exceeds configured byte limit"
             )
