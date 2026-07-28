@@ -1,5 +1,25 @@
 # GyroOS：Structure–Slice–Stability、Read-Only Projection、明示的Inspection ContractのためのBounded Runtime Architecture
 
+> **翻訳版作業コピー／未投稿**  
+> 本文書は、英語原版をJxivへ先行投稿し、スクリーニング後に公開された版を翻訳元として整合させるための作業コピーである。英語原版の公開前には、日本語版をJxivへ投稿しない。
+>
+> 英語原版公開後、以下を確定情報へ置換する。
+>
+> ```text
+> English original title: [PENDING]
+> Authors: [PENDING]
+> Jxiv DOI: [PENDING]
+> Public release year: [PENDING]
+> ```
+>
+> 最終投稿版の冒頭には、次の趣旨を明記する。
+>
+> 本稿は、Jxivで公開された英語原版「[English title]」（[authors], [year], DOI: [jxiv DOI]）の日本語翻訳版である。翻訳版の内容は英語原版に忠実であり、原版にないデータ、解釈、主張を追加していない。
+>
+> 翻訳補助または言語調整に生成AIを使用した場合は、実際の使用方法に即して次の趣旨を明記する。
+>
+> 本翻訳版の作成には生成AIを翻訳補助および言語調整に使用した。著者が英語原版との対応を全編確認し、翻訳の正確性および最終内容について全責任を負う。
+
 ## 要旨
 
 Gyro Logicは、不変の成立順序を`Structure → Slice → Stability`として定義する。この順序を有限な計算資源上へ実装する際には、Runtime continuityを一つの現在stateへ還元せず、canonical historyを書き換えず、下流の解釈が観測対象となるRuntime自体を変更しないarchitectureが必要になる。本稿は、GyroOS v4.0.0を、bounded execution、canonical Runtime ownership、read-only projection、non-canonical Inspection、外部consumer interpretationの5つを分離するbounded Runtime architectureとして提示する。1つのbounded requestは`/loop/step`を通じて1つのbounded Gyro Processを実行し、canonicalなProcess、Trajectory、current-scope、Memory recordはRuntimeが所有する。vNext projectionは明示的に与えられたRuntime outputをRuntime stateを変更せずに観測する。POST-onlyのInspection contract F–Wは、明示的参照を用いてrequest-localなartifactを構成する。GyroAuthはGyroOS実装境界の外側にあるconsumerとして位置付けられる。現実装はsingle-hostかつSQLite-backedであり、vNext Inspection contractはexperimentalである。本稿の貢献はGyro Logicの完全な数理形式化ではなく、execution、persistence、projection、inspection、consumptionを分離することで、有限資源上でも不変Coreを保持できる実装境界を示すことにある。
@@ -223,27 +243,27 @@ GyroOSはGyroAuthから独立している
 
 ### 9.1 Trajectory Continuityのために何を保持するか
 
-有限資源上のcontinuityは、未定義な情報全体を保持することを要求しない。後続observerが、一つの可変なlatest stateからcontinuityを再構成しなくてもよいだけの、明示的Runtime relationを保持する必要がある。GyroOS v4.0.0では、bounded Process record、current-scope reference、Trajectory relation、Memory record、canonical artifactとderived artifactの区別を保持する。
+有限資源上のcontinuityは、未定義な情報全体を保持することを要求しない。後続observerが、一つの可変なlatest stateからcontinuityを再構成しなくてもよいだけの、明示的なRuntime relationを保持することが必要である。GyroOS v4.0.0では、bounded Process record、current-scope reference、Trajectory relation、Memory record、およびcanonical artifactとderived artifactの区別を保持する。
 
 ### 9.2 Canonical Ownershipが必要な理由
 
-canonical ownershipがなければ、projectionやinspectionが、調べる対象であるRuntime evidence自体を上書きし得る。canonical ownershipをRuntime boundaryへ固定することで、一つのderived interpretationをauthoritative stateにせず、複数のderived viewを許容できる。
+canonical ownershipがなければ、projectionやinspectionが、調査対象であるRuntime evidenceそのものを書き換え得る。Runtime boundaryにcanonical ownershipを固定することで、複数のderived viewを許容しながら、特定のderived interpretationをauthoritative stateへ昇格させずに済む。
 
 ### 9.3 ProjectionをNon-Canonicalに保つ理由
 
-projectionは、利用可能なRuntime outputを選択し、整理するために有用である。その選択自体が一つのSliceである。projection resultをcanonical historyとして扱うと、sourceとviewの区別が失われる。
+projectionは、利用可能なRuntime outputの一部を選び、整理するから有用である。そのselectionは、利用可能なRuntime outputに対する一つのSliceである。projection resultをcanonical historyとして扱うと、sourceとviewの区別が失われる。
 
 ### 9.4 Explicit Referenceが必要な理由
 
-explicit referenceはhidden reconstructionを防ぐ。request-local Inspection artifactは、何が与えられ、何を参照したかを記録する。presumed latest objectを暗黙にqueryしたり、repository stateから不足relationを推定したりしない。
+explicit referenceはhidden reconstructionを防ぐ。request-local Inspection artifactは、何が与えられ、何を参照したかを記録する。presumed latest objectを暗黙にqueryしたり、repository stateから欠落relationを推定したりしない。
 
 ### 9.5 HierarchyをWで停止した理由
 
-F–W hierarchyは、Runtime mutationやsemantic aggregationを導入せず、多段のexplicit Inspection artifactを構成できることを示した。しかし、別のwrapperを追加することだけを目的にhierarchyを継続すると、新しいarchitecture principleを示さずにstructural complexityだけを増やす。v4.0.0ではexpansion phaseを閉じ、maintenanceおよびconsumer-driven evolutionへ移行する。
+F–W hierarchyは、Runtime mutationやsemantic aggregationを導入せずに、explicit Inspection artifactを多段階で構成できることを示した。しかし、別のwrapperを追加するだけでは、新しいarchitecture principleは成立しない。したがって、v4.0.0ではexpansion phaseを終了し、maintenanceおよびconsumer-driven evolutionへ移行する。
 
 ## 10. 制約
 
-GyroOS v4.0.0には、次の明示的制約がある。
+GyroOS v4.0.0には次の明示的制約がある。
 
 ```text
 single-host implementation
@@ -258,13 +278,13 @@ no risk aggregation
 no authentication aggregation inside GyroOS
 ```
 
-architecture figureはoverviewであり、詳細なendpoint、model、repository、operation documentationを置き換えるものではない。
+architecture figureはoverviewであり、詳細なendpoint、model、repository、operation documentationの代替ではない。
 
 ## 11. 結論
 
-GyroOS v4.0.0は、すべてのderived informationをRuntime stateとして扱わなくても、不変のGyro Logic Coreを有限な計算資源上へ実装できることを示す。その中心はarchitecture separationである。bounded executionは1つのProcess operationを所有する。canonical persistenceはRuntime recordとhistoryを所有する。read-only projectionは明示的Runtime outputを変更せずに整理する。Inspectionはexplicit referenceによってrequest-localかつnon-canonicalなartifactを生成する。GyroAuthなどの外部consumerは、それらのoutputをGyroOS境界の外側で解釈する。
+GyroOS v4.0.0は、すべてのderived informationをRuntime stateとして扱うことなく、不変のGyro Logic Coreを有限な計算資源上へ実装できることを示す。中心となる仕組みはarchitecture separationである。bounded executionは1回のProcess operationを所有する。canonical persistenceはRuntime recordとhistoryを所有する。read-only projectionは、明示的Runtime outputを変更せずに整理する。Inspectionは、explicit referenceを用いてrequest-localかつnon-canonicalなartifactを生成する。GyroAuthなどの外部consumerは、それらのoutputをGyroOS boundaryの外側で解釈する。
 
-本設計は、情報全体の完全理解や完全保存を主張しない。source、view、inspection、consumer decisionを一つのstateへcollapseせず、Runtime continuityを保持するための有限なimplementation disciplineを定義する。
+本設計は、完全な理解や情報全体の保存を主張しない。source、view、inspection、consumer decisionを一つのstateへ折り畳まずに、Runtime continuityを保持する有限実装規律を定義する。
 
 ## 図1
 
@@ -272,13 +292,13 @@ GyroOS v4.0.0は、すべてのderived informationをRuntime stateとして扱�
 
 **図1.** GyroOSのシステム構成とbounded information flow。Gyro LogicはStructure–Slice–Stabilityの不変順序を定義し、GyroOS Runtimeはbounded executionとcanonicalなRuntime記録を所有する。vNext projectionおよびInspection contractはread-onlyかつnon-canonicalに保たれ、GyroAuthは明示的consumerとしてGyroOS実装境界の外側に位置付けられる。
 
-## ソフトウェア・アーカイブ公開情報
+## SoftwareおよびArchive
 
-- Software release: `GyroOS v4.0.0`
-- Source repository: `https://github.com/gitGyro-Dev/gyroos`
-- Archival record: `https://zenodo.org/records/21641158`
-- Zenodo record identifier: `21641158`
+- Software Release：`GyroOS v4.0.0`
+- Source Repository：`https://github.com/gitGyro-Dev/gyroos`
+- Archive：`https://zenodo.org/records/21641158`
+- Zenodo Record Identifier：`21641158`
 
-## AI支援に関する記載
+## AI利用に関する著者声明
 
-生成AIツールを、原稿作成、実装支援、構造レビュー、言語調整のための研究開発支援として使用した。定義、architecture上の主張、実装境界、code、最終原稿内容については、著者が確認し、責任を負う。
+生成AIを、原稿作成支援、言語調整、構造レビュー、実装支援に使用した。著者は、定義、architecture上の主張、実装境界、code、figure、最終原稿内容を確認し、その全責任を負う。
