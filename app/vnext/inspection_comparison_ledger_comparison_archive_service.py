@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-
 from .inspection_comparison_ledger_comparison_archive import (
     ExperimentalComparisonLedgerComparisonArchiveManifest,
     ExperimentalComparisonLedgerComparisonArchiveRequest,
@@ -9,6 +7,7 @@ from .inspection_comparison_ledger_comparison_archive import (
     ExperimentalComparisonLedgerComparisonArchiveSettings,
     compute_comparison_ledger_comparison_archive_digest,
 )
+from .inspection_validation import canonical_json_utf8_size
 
 
 class ExperimentalComparisonLedgerComparisonArchiveError(ValueError):
@@ -114,13 +113,7 @@ class ExperimentalComparisonLedgerComparisonArchiveService:
             self._validate_identifier(value, label)
 
     def _validate_metadata(self, metadata: dict[str, object]) -> None:
-        encoded = json.dumps(
-            metadata,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        if len(encoded) > self.settings.max_metadata_bytes:
+        if canonical_json_utf8_size(metadata) > self.settings.max_metadata_bytes:
             raise ExperimentalComparisonLedgerComparisonArchiveResourceLimitError(
                 "metadata byte limit exceeded"
             )
