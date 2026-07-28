@@ -54,7 +54,7 @@ def test_create_comparison_rejects_same_set(monkeypatch) -> None:
 
     assert response.status_code == 422
     assert response.json()["error_code"] == (
-        "GYRO_VNEXT_EXPERIMENTAL_COMPARISON_SET_COMPARISON_INVALID"
+        "GYRO_VNEXT_EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_SET_COMPARISON_INVALID"
     )
 
 
