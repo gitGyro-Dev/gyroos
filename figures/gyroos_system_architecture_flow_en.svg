@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">GyroOS System Architecture and Flow</title>
+  <desc id="desc">Horizontal system architecture from Gyro Logic Core through GyroOS Runtime, vNext read-only projection, Inspection API, the F to W inspection hierarchy, and the GyroAuth consumer boundary.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#2f3b46"/>
+    </marker>
+    <marker id="arrowDash" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#66727d"/>
+    </marker>
+    <style>
+      .title{font:700 34px Arial,Helvetica,sans-serif;fill:#16202a}
+      .subtitle{font:400 17px Arial,Helvetica,sans-serif;fill:#55616d}
+      .section{font:700 20px Arial,Helvetica,sans-serif;fill:#16202a}
+      .boxTitle{font:700 17px Arial,Helvetica,sans-serif;fill:#16202a}
+      .body{font:400 14px Arial,Helvetica,sans-serif;fill:#394550}
+      .small{font:400 12px Arial,Helvetica,sans-serif;fill:#55616d}
+      .gate{font:700 14px Arial,Helvetica,sans-serif;fill:#16202a}
+      .gateSub{font:400 11px Arial,Helvetica,sans-serif;fill:#4f5b66}
+      .panel{fill:#ffffff;stroke:#6b7782;stroke-width:2}
+      .panelSoft{fill:#f7f9fb;stroke:#7b8792;stroke-width:2}
+      .panelDash{fill:#fbfcfd;stroke:#7b8792;stroke-width:2;stroke-dasharray:8 6}
+      .core{fill:#ffffff;stroke:#1f2a33;stroke-width:3}
+      .consumer{fill:#ffffff;stroke:#35424d;stroke-width:2.5}
+      .gateBox{fill:#ffffff;stroke:#87919a;stroke-width:1.5}
+      .arrow{stroke:#2f3b46;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+      .arrowDash{stroke:#66727d;stroke-width:2;stroke-dasharray:8 6;fill:none;marker-end:url(#arrowDash)}
+      .boundary{fill:#f4f6f8;stroke:#9aa3ab;stroke-width:1.4}
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#ffffff"/>
+  <text x="70" y="62" class="title">GyroOS System Architecture and Flow</text>
+  <text x="70" y="92" class="subtitle">From Gyro Logic principles to bounded Runtime execution, read-only projection, Inspection contracts, and external consumers</text>
+
+  <rect x="70" y="145" width="260" height="210" rx="18" class="core"/>
+  <text x="200" y="188" text-anchor="middle" class="section">Gyro Logic Core</text>
+  <text x="200" y="233" text-anchor="middle" class="boxTitle">Structure</text>
+  <path d="M200 246 V275" class="arrow"/>
+  <text x="200" y="307" text-anchor="middle" class="boxTitle">Slice</text>
+  <path d="M200 320 V349" class="arrow"/>
+  <text x="200" y="381" text-anchor="middle" class="boxTitle">Stability</text>
+  <text x="200" y="414" text-anchor="middle" class="small">Invariant order</text>
+
+  <rect x="375" y="125" width="410" height="330" rx="18" class="panelSoft"/>
+  <text x="580" y="164" text-anchor="middle" class="section">GyroOS Runtime</text>
+  <rect x="420" y="195" width="150" height="72" rx="12" class="panel"/>
+  <text x="495" y="225" text-anchor="middle" class="boxTitle">Runtime API</text>
+  <text x="495" y="248" text-anchor="middle" class="body">/loop/step</text>
+  <rect x="610" y="195" width="130" height="72" rx="12" class="panel"/>
+  <text x="675" y="225" text-anchor="middle" class="boxTitle">ProcessExecutor</text>
+  <path d="M570 231 H610" class="arrow"/>
+  <rect x="420" y="310" width="195" height="98" rx="12" class="panel"/>
+  <text x="517" y="339" text-anchor="middle" class="boxTitle">Runtime Records / History</text>
+  <text x="517" y="363" text-anchor="middle" class="body">Current Scope · Process</text>
+  <text x="517" y="385" text-anchor="middle" class="body">Memory · Trajectory</text>
+  <rect x="640" y="310" width="100" height="98" rx="12" class="panel"/>
+  <text x="690" y="338" text-anchor="middle" class="boxTitle">Operator</text>
+  <text x="690" y="359" text-anchor="middle" class="body">Response</text>
+  <text x="690" y="381" text-anchor="middle" class="small">Continue · Stop</text>
+  <text x="690" y="399" text-anchor="middle" class="small">Jump · Reslice</text>
+  <path d="M675 267 V310" class="arrow"/>
+  <path d="M610 359 H640" class="arrow"/>
+  <path d="M690 310 C690 285 650 283 650 267" class="arrow"/>
+
+  <rect x="830" y="125" width="365" height="330" rx="18" class="panelDash"/>
+  <text x="1012" y="164" text-anchor="middle" class="section">vNext Read-Only Projection</text>
+  <rect x="875" y="195" width="275" height="52" rx="10" class="panel"/>
+  <text x="1012" y="226" text-anchor="middle" class="boxTitle">Read-Only Runtime Projection</text>
+  <rect x="875" y="278" width="130" height="64" rx="10" class="panel"/>
+  <text x="940" y="305" text-anchor="middle" class="body">Stability Scene</text>
+  <text x="940" y="326" text-anchor="middle" class="small">Observation</text>
+  <rect x="1020" y="278" width="130" height="64" rx="10" class="panel"/>
+  <text x="1085" y="305" text-anchor="middle" class="body">Boundary</text>
+  <text x="1085" y="326" text-anchor="middle" class="small">Evaluation</text>
+  <rect x="875" y="373" width="275" height="52" rx="10" class="panel"/>
+  <text x="1012" y="396" text-anchor="middle" class="body">Semantic Assembly · Readability</text>
+  <text x="1012" y="416" text-anchor="middle" class="small">Trajectory views</text>
+  <path d="M1012 247 V278" class="arrow"/>
+  <path d="M1005 310 H1020" class="arrow"/>
+  <path d="M1085 342 V373" class="arrow"/>
+
+  <rect x="1240" y="125" width="305" height="330" rx="18" class="panel"/>
+  <text x="1392" y="164" text-anchor="middle" class="section">Inspection API</text>
+  <text x="1392" y="188" text-anchor="middle" class="small">/vnext/experimental</text>
+  <rect x="1282" y="214" width="220" height="82" rx="12" class="panelSoft"/>
+  <text x="1392" y="244" text-anchor="middle" class="boxTitle">Dedicated Inspection Router</text>
+  <text x="1392" y="269" text-anchor="middle" class="body">POST-only · request-local</text>
+  <text x="1392" y="288" text-anchor="middle" class="body">read-only · non-canonical</text>
+  <rect x="1282" y="330" width="102" height="82" rx="10" class="panel"/>
+  <text x="1333" y="358" text-anchor="middle" class="body">Error</text>
+  <text x="1333" y="378" text-anchor="middle" class="body">Response</text>
+  <text x="1333" y="397" text-anchor="middle" class="small">Helper</text>
+  <rect x="1400" y="330" width="102" height="82" rx="10" class="panel"/>
+  <text x="1451" y="358" text-anchor="middle" class="body">Validation</text>
+  <text x="1451" y="378" text-anchor="middle" class="body">Utility</text>
+  <text x="1451" y="397" text-anchor="middle" class="small">JSON UTF-8 size</text>
+  <path d="M1392 296 V330" class="arrow"/>
+
+  <rect x="1590" y="145" width="260" height="210" rx="18" class="consumer"/>
+  <text x="1720" y="188" text-anchor="middle" class="section">GyroAuth Consumer Boundary</text>
+  <rect x="1630" y="220" width="180" height="52" rx="10" class="panel"/>
+  <text x="1720" y="251" text-anchor="middle" class="body">Compatibility Boundary</text>
+  <rect x="1630" y="297" width="180" height="52" rx="10" class="panel"/>
+  <text x="1720" y="328" text-anchor="middle" class="body">GyroAuth / External Consumers</text>
+  <path d="M1720 272 V297" class="arrow"/>
+
+  <path d="M330 250 H375" class="arrow"/>
+  <path d="M615 359 C750 359 735 221 830 221" class="arrowDash"/>
+  <text x="722" y="300" text-anchor="middle" class="small">explicit read-only source</text>
+  <path d="M1195 399 H1240" class="arrowDash"/>
+  <text x="1217" y="386" text-anchor="middle" class="small">non-canonical projection</text>
+  <path d="M1545 255 H1590" class="arrowDash"/>
+  <text x="1568" y="242" text-anchor="middle" class="small">explicit outputs</text>
+
+  <rect x="70" y="500" width="1780" height="360" rx="18" class="panelSoft"/>
+  <text x="960" y="540" text-anchor="middle" class="section">Inspection Contract Hierarchy F–W</text>
+  <text x="960" y="566" text-anchor="middle" class="small">Arrows indicate explicit reference direction only — not chronology, semantic trend, risk, authentication state, or Runtime continuation</text>
+
+  <g transform="translate(105,610)">
+    <rect x="0" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="75" y="28" text-anchor="middle" class="gate">F Receipt</text><text x="75" y="50" text-anchor="middle" class="gateSub">inspection receipt</text>
+    <rect x="180" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="255" y="28" text-anchor="middle" class="gate">G Batch</text><text x="255" y="50" text-anchor="middle" class="gateSub">batch manifest</text>
+    <rect x="360" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="435" y="28" text-anchor="middle" class="gate">H Comparison</text><text x="435" y="50" text-anchor="middle" class="gateSub">manifest comparison</text>
+    <rect x="540" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="615" y="28" text-anchor="middle" class="gate">I Review Bundle</text><text x="615" y="50" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <rect x="720" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="795" y="28" text-anchor="middle" class="gate">J Bundle Compare</text><text x="795" y="50" text-anchor="middle" class="gateSub">comparison report</text>
+    <rect x="900" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="975" y="28" text-anchor="middle" class="gate">K Compare Set</text><text x="975" y="50" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <rect x="1080" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="1155" y="28" text-anchor="middle" class="gate">L Set Compare</text><text x="1155" y="50" text-anchor="middle" class="gateSub">comparison report</text>
+    <rect x="1260" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="1335" y="28" text-anchor="middle" class="gate">M Series</text><text x="1335" y="50" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <rect x="1440" y="0" width="150" height="72" rx="10" class="gateBox"/><text x="1515" y="28" text-anchor="middle" class="gate">N Series Compare</text><text x="1515" y="50" text-anchor="middle" class="gateSub">comparison report</text>
+    <path d="M150 36 H180 M330 36 H360 M510 36 H540 M690 36 H720 M870 36 H900 M1050 36 H1080 M1230 36 H1260 M1410 36 H1440" class="arrow"/>
+
+    <rect x="0" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="75" y="158" text-anchor="middle" class="gate">O Collection</text><text x="75" y="180" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <rect x="180" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="255" y="158" text-anchor="middle" class="gate">P Collection Compare</text><text x="255" y="180" text-anchor="middle" class="gateSub">comparison report</text>
+    <rect x="360" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="435" y="158" text-anchor="middle" class="gate">Q Sequence</text><text x="435" y="180" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <rect x="540" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="615" y="158" text-anchor="middle" class="gate">R Sequence Compare</text><text x="615" y="180" text-anchor="middle" class="gateSub">comparison report</text>
+    <rect x="720" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="795" y="158" text-anchor="middle" class="gate">S Register</text><text x="795" y="180" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <rect x="900" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="975" y="158" text-anchor="middle" class="gate">T Register Compare</text><text x="975" y="180" text-anchor="middle" class="gateSub">comparison report</text>
+    <rect x="1080" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="1155" y="158" text-anchor="middle" class="gate">U Ledger</text><text x="1155" y="180" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <rect x="1260" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="1335" y="158" text-anchor="middle" class="gate">V Ledger Compare</text><text x="1335" y="180" text-anchor="middle" class="gateSub">comparison report</text>
+    <rect x="1440" y="130" width="150" height="72" rx="10" class="gateBox"/><text x="1515" y="158" text-anchor="middle" class="gate">W Archive</text><text x="1515" y="180" text-anchor="middle" class="gateSub">grouping manifest</text>
+    <path d="M150 166 H180 M330 166 H360 M510 166 H540 M690 166 H720 M870 166 H900 M1050 166 H1080 M1230 166 H1260 M1410 166 H1440" class="arrow"/>
+    <path d="M1590 36 C1640 36 1640 166 1590 166" class="arrow"/>
+  </g>
+
+  <path d="M1392 455 V500" class="arrow"/>
+  <path d="M1650 812 C1750 812 1750 355 1720 355" class="arrowDash"/>
+  <text x="1755" y="594" text-anchor="middle" class="small" transform="rotate(-90 1755 594)">explicit references only</text>
+
+  <rect x="70" y="900" width="1780" height="120" rx="16" class="boundary"/>
+  <text x="100" y="934" class="section">Boundary rules</text>
+  <text x="100" y="970" class="body">request-local · read-only · non-canonical · explicit references only · no implicit retrieval · no Runtime mutation · no canonical persistence</text>
+  <text x="100" y="997" class="body">no semantic inference · no risk aggregation · no authentication aggregation · GyroOS does not depend on GyroAuth</text>
+</svg>
