@@ -29,7 +29,7 @@ Decision:
 
 ```text
 Checked-in explicit test groups
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Coverage Boundary
@@ -44,7 +44,7 @@ Decision:
 
 ```text
 Explicit auditable coverage
-= PRESERVED
+= VERIFIED
 ```
 
 ## 4. Workflow Boundary
@@ -67,10 +67,10 @@ Decision:
 
 ```text
 Priority F workflow readability
-= IMPROVED
+= VERIFIED
 
 Test-group change triggering
-= ENABLED
+= VERIFIED
 ```
 
 ## 5. Non-Goals
@@ -119,30 +119,54 @@ Contract isolation
 = VERIFIED
 ```
 
-## 7. Current Verification State
+## 7. GitHub Actions Verification
+
+Verified run:
+
+```text
+run_id: 30328656282
+job: test-and-run-poc
+status: completed
+conclusion: success
+```
+
+Verified successful steps:
+
+```text
+Run bounded Runtime and production hardening tests
+Generate PoC result artifacts
+Verify PoC result artifact count
+Upload PoC result artifacts
+```
+
+Decision:
+
+```text
+GitHub Actions verification
+= VERIFIED
+```
+
+## 8. Final Decision
 
 ```text
 Y2 checked-in test-group files
-= IMPLEMENTED
+= VERIFIED
 
 Priority F workflow migration
-= IMPLEMENTED
+= VERIFIED
 
-Local behavior equivalence
-= REVIEWED AT CONFIGURATION LEVEL
+Explicit auditable coverage
+= VERIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
 
 Y2
-= COMPLETE AT IMPLEMENTATION / REVIEW LEVEL
+= COMPLETE
 ```
 
-Y2 becomes VERIFIED only after a successful Priority F workflow run confirms the grouped invocation.
-
-## 8. Next Step
+## 9. Next Step
 
 ```text
-Confirm the Priority F GitHub Actions run.
-If successful, update Y2 to VERIFIED and proceed to Y3 Dedicated Inspection Router.
+Proceed to Y3 Dedicated Inspection Router.
 ```
