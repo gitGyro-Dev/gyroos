@@ -1,4 +1,5 @@
 tests/vnext/test_inspection_api_router_integration.py
+tests/vnext/test_inspection_validation.py
 tests/vnext/test_inspection_receipt_models.py
 tests/vnext/test_inspection_receipt_service.py
 tests/vnext/test_inspection_receipt_api.py
