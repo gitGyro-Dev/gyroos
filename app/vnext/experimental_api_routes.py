@@ -45,6 +45,14 @@ from .inspection_comparison_collection_comparison_service import (
     ExperimentalComparisonCollectionComparisonError,
     ExperimentalComparisonCollectionComparisonService,
 )
+from .inspection_comparison_ledger_comparison import (
+    ExperimentalComparisonLedgerComparisonRequest,
+    ExperimentalComparisonLedgerComparisonResult,
+)
+from .inspection_comparison_ledger_comparison_service import (
+    ExperimentalComparisonLedgerComparisonError,
+    ExperimentalComparisonLedgerComparisonService,
+)
 from .inspection_comparison_register_comparison import (
     ExperimentalComparisonRegisterComparisonRequest,
     ExperimentalComparisonRegisterComparisonResult,
@@ -183,6 +191,7 @@ comparison_register_comparison_service = ExperimentalComparisonRegisterCompariso
 comparison_register_comparison_ledger_service = (
     ExperimentalComparisonRegisterComparisonLedgerService()
 )
+comparison_ledger_comparison_service = ExperimentalComparisonLedgerComparisonService()
 
 
 def experimental_error(
@@ -611,4 +620,24 @@ def create_experimental_inspection_comparison_register_comparison_ledger(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_REGISTER_COMPARISON_LEDGER_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-ledger-comparisons",
+    response_model=ExperimentalComparisonLedgerComparisonResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_ledger_comparison(
+    request: ExperimentalComparisonLedgerComparisonRequest,
+):
+    try:
+        return comparison_ledger_comparison_service.compare(request)
+    except ExperimentalComparisonLedgerComparisonError as exc:
+        return experimental_error(
+            422,
+            code="GYRO_VNEXT_EXPERIMENTAL_COMPARISON_LEDGER_COMPARISON_INVALID",
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_LEDGER_COMPARISON_CREATE",
         )
