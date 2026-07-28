@@ -4,11 +4,18 @@
 
 This document defines the repository-level overview for the system architecture and flow diagrams added after completion of Inspection consolidation Gate Y.
 
-Primary diagrams:
+Primary source diagrams:
 
 ```text
 figures/gyroos_system_architecture_flow_en.md
 figures/gyroos_system_architecture_flow_jp.md
+```
+
+Publication-ready vector diagrams:
+
+```text
+figures/gyroos_system_architecture_flow_en.svg
+figures/gyroos_system_architecture_flow_jp.svg
 ```
 
 The diagrams provide one-page navigation across:
@@ -144,13 +151,110 @@ GyroOS does not import or depend on GyroAuth semantics
 inspection results do not become authentication decisions inside GyroOS
 ```
 
-## 8. Diagram Status
+## 8. SVG Layout and Rendering Policy
+
+The SVG figures use:
 
 ```text
-English system architecture diagram
+1920 × 1080 viewBox
+wide horizontal layout
+white background
+vector text and shapes
+low-saturation grayscale palette
+solid arrows for execution or reference direction
+dashed arrows for read-only, non-canonical, or external-boundary relations
+```
+
+The format is intended to remain readable in:
+
+```text
+GitHub README rendering
+GitHub Release notes
+PDF export
+Jxiv manuscript figures
+presentation slides
+printed grayscale copies
+```
+
+No external fonts, embedded raster images, scripts, or remote resources are required.
+
+## 9. Recommended README Use
+
+English README:
+
+```markdown
+![GyroOS System Architecture and Flow](figures/gyroos_system_architecture_flow_en.svg)
+```
+
+Japanese README:
+
+```markdown
+![GyroOS システム構成図・フロー図](figures/gyroos_system_architecture_flow_jp.svg)
+```
+
+For a smaller README display, use HTML with an explicit width while keeping the SVG file as the source:
+
+```html
+<img src="figures/gyroos_system_architecture_flow_en.svg" alt="GyroOS System Architecture and Flow" width="100%">
+```
+
+## 10. Recommended Publication Captions
+
+English:
+
+```text
+Figure X. GyroOS system architecture and bounded information flow. Gyro Logic defines the invariant Structure–Slice–Stability order. GyroOS Runtime owns bounded execution and canonical Runtime records. vNext projection and Inspection contracts remain read-only and non-canonical, while GyroAuth is positioned outside the GyroOS implementation boundary as an explicit consumer.
+```
+
+Japanese:
+
+```text
+図X. GyroOSのシステム構成とbounded information flow。Gyro LogicはStructure–Slice–Stabilityの不変順序を定義し、GyroOS Runtimeはbounded executionとcanonicalなRuntime記録を所有する。vNext projectionおよびInspection contractはread-onlyかつnon-canonicalに保たれ、GyroAuthは明示的consumerとしてGyroOS実装境界の外側に位置付けられる。
+```
+
+## 11. Jxiv and Release Preparation Notes
+
+For Jxiv submission:
+
+```text
+use the SVG as the master figure
+export PDF from the SVG when the manuscript toolchain requires PDF
+preserve the full white background
+keep the boundary-rule footer visible
+avoid cropping the F-W hierarchy or consumer boundary
+verify Japanese font substitution in the final PDF
+```
+
+For GitHub Release materials:
+
+```text
+link the SVG directly from release notes
+use the English figure as the default public overview
+link the Japanese figure immediately below it
+retain the Mermaid source files as editable architecture sources
+```
+
+The SVG is an architecture overview figure, not an API specification. Detailed contract documents remain normative.
+
+## 12. Diagram Status
+
+```text
+English Mermaid source diagram
 = CREATED
 
-Japanese system architecture diagram
+Japanese Mermaid source diagram
+= CREATED
+
+English publication-ready SVG
+= CREATED
+
+Japanese publication-ready SVG
+= CREATED
+
+README and release suitability
+= DOCUMENTED
+
+Jxiv figure preparation basis
 = CREATED
 
 Gate Y completion context
@@ -160,7 +264,7 @@ Runtime and layer isolation
 = PRESERVED
 ```
 
-## 9. Non-Goals
+## 13. Non-Goals
 
 These diagrams do not define:
 
@@ -175,13 +279,17 @@ new authentication calculation
 new GyroAuth implementation details
 ```
 
-## 10. Recommended Use
+## 14. Recommended Use
 
-Use the diagrams as:
+Use the SVG diagrams as:
 
 ```text
 repository architecture entry point
 review and onboarding material
-README-linked system overview
-basis for future SVG or publication-quality figures
+README system overview
+GitHub Release overview figure
+Jxiv manuscript architecture figure
+basis for PDF or PNG derivatives
 ```
+
+Use the Mermaid diagrams as the editable source-level representation when future architecture changes require revision.
