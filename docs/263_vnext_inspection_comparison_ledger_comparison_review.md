@@ -25,7 +25,7 @@ Decision:
 
 ```text
 Request-local comparison ledger comparison meaning
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 3. Reference Boundary
@@ -38,7 +38,7 @@ Decision:
 
 ```text
 Reference-only comparison boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 4. Membership Difference Boundary
@@ -49,7 +49,7 @@ Decision:
 
 ```text
 Deterministic membership comparison
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 5. Digest Boundary
@@ -62,7 +62,7 @@ Decision:
 
 ```text
 Declared digest comparison boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 6. Difference Meaning Boundary
@@ -79,7 +79,7 @@ Decision:
 
 ```text
 Difference non-mapping boundary
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 7. Endpoint Boundary
@@ -96,7 +96,7 @@ Decision:
 
 ```text
 Optional endpoint isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 8. Runtime and Persistence Isolation
@@ -135,10 +135,10 @@ Decision:
 
 ```text
 Runtime isolation
-= ACCEPTED
+= VERIFIED
 
 Persistence isolation
-= ACCEPTED
+= VERIFIED
 ```
 
 ## 9. Test and Workflow State
@@ -160,22 +160,34 @@ absence of Runtime, authentication, semantic trend, risk, and DifferenceObject o
 
 The Priority F workflow includes all V1-V3 tests.
 
-Final workflow verification remains pending.
+Verified successful GitHub Actions runs:
+
+```text
+30318340839
+30318380081
+30318445572
+30318476653
+30318626051
+30318651170
+30318699542
+```
+
+All listed runs completed successfully through bounded tests, PoC artifact generation, artifact count verification, and artifact upload.
 
 ## 10. Final Decision
 
 ```text
 V inspection comparison ledger comparison review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 V1 comparison descriptor and settings
-= ACCEPTED
+= VERIFIED
 
 V2 comparison service
-= ACCEPTED
+= VERIFIED
 
 V3 optional comparison endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 Comparison ledger retrieval
 = NOT APPROVED
@@ -208,5 +220,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate V
+= COMPLETE
 ```
