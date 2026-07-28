@@ -3,8 +3,12 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-client = TestClient(app)
 HEADERS = {"Authorization": "Bearer test-token"}
+PATH = "/vnext/experimental/inspection-comparison-ledger-comparison-archives"
+
+
+def make_client(host: str) -> TestClient:
+    return TestClient(app, client=(host, 50000))
 
 
 def payload() -> dict:
@@ -29,11 +33,8 @@ def payload() -> dict:
 
 
 def test_create_comparison_archive_endpoint() -> None:
-    response = client.post(
-        "/vnext/experimental/inspection-comparison-ledger-comparison-archives",
-        headers=HEADERS,
-        json=payload(),
-    )
+    client = make_client("w-archive-create")
+    response = client.post(PATH, headers=HEADERS, json=payload())
 
     assert response.status_code == 201
     body = response.json()
@@ -44,14 +45,11 @@ def test_create_comparison_archive_endpoint() -> None:
 
 
 def test_create_comparison_archive_rejects_duplicate_references() -> None:
+    client = make_client("w-archive-duplicate")
     body = payload()
     body["ledger_comparisons"].append(dict(body["ledger_comparisons"][0]))
 
-    response = client.post(
-        "/vnext/experimental/inspection-comparison-ledger-comparison-archives",
-        headers=HEADERS,
-        json=body,
-    )
+    response = client.post(PATH, headers=HEADERS, json=body)
 
     assert response.status_code == 422
     assert response.json()["error_code"] == (
@@ -60,23 +58,14 @@ def test_create_comparison_archive_rejects_duplicate_references() -> None:
 
 
 def test_comparison_archive_retrieval_routes_are_absent() -> None:
-    assert client.get(
-        "/vnext/experimental/inspection-comparison-ledger-comparison-archives/archive-1",
-        headers=HEADERS,
-    ).status_code == 404
-
-    assert client.get(
-        "/vnext/experimental/inspection-comparison-ledger-comparison-archives",
-        headers=HEADERS,
-    ).status_code == 405
+    client = make_client("w-archive-routes")
+    assert client.get(f"{PATH}/archive-1", headers=HEADERS).status_code == 404
+    assert client.get(PATH, headers=HEADERS).status_code == 405
 
 
 def test_comparison_archive_response_has_no_runtime_or_authentication_outputs() -> None:
-    response = client.post(
-        "/vnext/experimental/inspection-comparison-ledger-comparison-archives",
-        headers=HEADERS,
-        json=payload(),
-    )
+    client = make_client("w-archive-boundary")
+    response = client.post(PATH, headers=HEADERS, json=payload())
     text = response.text
 
     assert "operator_response" not in text
