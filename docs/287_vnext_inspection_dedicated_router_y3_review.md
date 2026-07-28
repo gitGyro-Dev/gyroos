@@ -16,19 +16,20 @@ Y3 separates the F-W inspection POST routes from the experimental record and com
 
 ## 2. Router Structure
 
-The parent router now owns:
+The parent router owns:
 
 ```text
 experimental record CRUD
 consumer compatibility check
-shared /vnext/experimental prefix
 shared bearer dependency
-inspection router inclusion
+explicit inspection route registration
+legacy route-function re-exports
 ```
 
 The dedicated inspection router owns:
 
 ```text
+/vnext/experimental inspection prefix
 F-W inspection POST endpoints
 inspection service instances
 inspection error translation calls
@@ -56,12 +57,15 @@ error phases
 bearer authentication boundary
 ```
 
-The parent router includes the inspection router under the existing prefix and dependencies.
+The dedicated router carries the complete inspection prefix, and its concrete routes are registered in the parent experimental router. Existing route-function imports remain available from the parent module.
 
 Decision:
 
 ```text
 Public inspection API contract
+= PRESERVED
+
+Legacy Python import compatibility
 = PRESERVED
 ```
 
@@ -81,10 +85,10 @@ Decision:
 
 ```text
 Route registration coverage
-= ADDED
+= VERIFIED
 
 Retrieval and mutation prohibition coverage
-= ADDED
+= VERIFIED
 ```
 
 ## 5. Error Helper Boundary
@@ -100,7 +104,34 @@ Shared error response helper
 = ACCEPTED AS A SMALL PURE API UTILITY
 ```
 
-## 6. Non-Goals
+## 6. GitHub Actions Verification
+
+Verified Priority F run:
+
+```text
+run_id: 30332780360
+job: test-and-run-poc
+status: completed
+conclusion: success
+```
+
+Verified successful steps include:
+
+```text
+Run bounded Runtime and production hardening tests
+Generate PoC result artifacts
+Verify PoC result artifact count
+Upload PoC result artifacts
+```
+
+Decision:
+
+```text
+Final Y3 workflow verification
+= VERIFIED
+```
+
+## 7. Non-Goals
 
 Y3 does not introduce:
 
@@ -118,7 +149,7 @@ Runtime integration
 canonical persistence
 ```
 
-## 7. Runtime and Layer Isolation
+## 8. Runtime and Layer Isolation
 
 Unchanged:
 
@@ -137,39 +168,38 @@ Decision:
 
 ```text
 Runtime isolation
-= VERIFIED AT IMPLEMENTATION REVIEW LEVEL
+= VERIFIED
 
 Layer isolation
-= VERIFIED AT IMPLEMENTATION REVIEW LEVEL
+= VERIFIED
 ```
 
-## 8. Current Verification State
+## 9. Final Verification State
 
 ```text
 Y3 dedicated inspection router
-= IMPLEMENTED
+= VERIFIED
 
 Parent router integration
-= IMPLEMENTED
+= VERIFIED
 
 Route boundary tests
-= IMPLEMENTED
+= VERIFIED
 
 Checked-in workflow coverage
-= UPDATED
+= VERIFIED
 
-GitHub Actions verification after final Y3 integration
-= PENDING
+GitHub Actions verification
+= VERIFIED
 
 Y3
-= COMPLETE AT IMPLEMENTATION / REVIEW LEVEL
+= COMPLETE
 ```
 
-Y3 becomes VERIFIED only after a successful Priority F workflow run confirms the final parent-router integration and route tests.
-
-## 9. Next Step
+## 10. Next Step
 
 ```text
-Confirm the Priority F GitHub Actions run produced by the final Y3 integration.
-If successful, update Y3 to VERIFIED and proceed to Y4 Small Validation Utility.
+Proceed to Y4 Small Validation Utility.
 ```
+
+Y4 must remain limited to small pure helpers that remove repeated low-level validation without introducing a generic inspection engine or weakening contract-specific types, limits, ordering, error identities, or meaning boundaries.
