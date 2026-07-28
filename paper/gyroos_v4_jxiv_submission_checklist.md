@@ -14,10 +14,26 @@ English full draft
 = CREATED
 
 Japanese full draft
-= CREATED
+= CREATED AS A FUTURE TRANSLATION VERSION
 ```
 
-## 2. Fixed Implementation Snapshot
+## 2. Submission Order
+
+The established Gyro Project submission workflow is:
+
+```text
+1. Submit the English manuscript as the original version.
+2. Complete jxiv screening and wait for public release.
+3. Fix the English jxiv bibliographic information and DOI.
+4. Prepare the Japanese manuscript as a faithful translation of the public English version.
+5. Submit the Japanese manuscript as a translation version under the jxiv translation workflow.
+```
+
+The English and Japanese manuscripts must not be submitted simultaneously.
+
+The Japanese version must not introduce new data, interpretation, claims, sections, limitations, or references that are absent from the public English original. Corrections that materially change the paper must first be handled through an English revision and then reflected faithfully in the Japanese translation.
+
+## 3. Fixed Implementation Snapshot
 
 ```text
 GitHub repository
@@ -35,7 +51,9 @@ Zenodo record identifier
 
 Before submission, confirm the final Zenodo DOI text shown on the record page and replace the record URL with DOI notation where appropriate.
 
-## 3. Primary Figures
+The Zenodo object is a versioned software archive, not a prior publication of the jxiv manuscript itself.
+
+## 4. Primary Figures
 
 English master:
 
@@ -60,7 +78,7 @@ Confirm Japanese glyph embedding in generated PDF.
 Do not rasterize at low resolution.
 ```
 
-## 4. Figure Captions
+## 5. Figure Captions
 
 English:
 
@@ -70,26 +88,43 @@ Japanese:
 
 > 図1. GyroOSのシステム構成とbounded information flow。Gyro LogicはStructure–Slice–Stabilityの不変順序を定義し、GyroOS Runtimeはbounded executionとcanonicalなRuntime記録を所有する。vNext projectionおよびInspection contractはread-onlyかつnon-canonicalに保たれ、GyroAuthは明示的consumerとしてGyroOS実装境界の外側に位置付けられる。
 
-## 5. Required Metadata Review
+## 6. Required Metadata Review
 
-Confirm before submission:
+Confirm before English submission:
 
 ```text
 final English title
-final Japanese title
+English abstract
 author name and affiliation
 corresponding email
 ORCID, if used
-keywords
+English keywords
 software Release URL
 Zenodo DOI
 license statement
 AI-assistance statement
-conflict-of-interest statement, if required
-funding statement, if required
+conflict-of-interest statement
+funding statement, if applicable
 ```
 
-## 6. Suggested Keywords
+Confirm before Japanese translation submission:
+
+```text
+public English jxiv title
+public English jxiv DOI and bibliographic information
+statement that the manuscript is a Japanese translation
+English original bibliographic citation
+Japanese title and abstract
+same author list as the English original
+same author order as the English original
+same affiliation scope as the English original
+translation-process disclosure
+AI or machine-translation disclosure, if used
+required jxiv translation cover sheet
+permission evidence requested by jxiv, if applicable
+```
+
+## 7. Suggested Keywords
 
 English:
 
@@ -117,7 +152,7 @@ Inspection contract
 Runtime architecture
 ```
 
-## 7. Claim Guardrails
+## 8. Claim Guardrails
 
 The final manuscript must not:
 
@@ -135,25 +170,64 @@ claim complete mathematical proof
 claim exhaustive information preservation
 ```
 
-## 8. English–Japanese Consistency Review
+## 9. English–Japanese Translation Consistency Review
 
-Verify that both manuscripts preserve the same:
+The Japanese manuscript must preserve the public English original's:
 
 ```text
 research question
 central claim
 scope
+section order
+figures and tables
+references
 limitations
 F–W interpretation
 GyroAuth boundary
 canonical / non-canonical distinction
 Release and Zenodo references
 AI-assistance disclosure
+conflict-of-interest disclosure
+funding disclosure
 ```
 
 Do not translate terminology in a way that changes layer ownership or theoretical definitions.
 
-## 9. Verification Evidence
+The following are prohibited in the Japanese translation unless first incorporated through an English revision:
+
+```text
+new claims
+new examples used as evidence
+new evaluation results
+new interpretation
+new limitations
+new references that change the scholarly position
+new diagrams or hierarchy levels
+```
+
+## 10. Japanese Translation Front Matter
+
+After the English version is publicly released, the Japanese PDF must state clearly at its beginning:
+
+```text
+This manuscript is a Japanese translation of the English original.
+English original title
+all authors
+jxiv DOI
+public release year
+```
+
+Japanese wording template:
+
+> 本稿は、Jxivで公開された英語原版「[English title]」（[authors], [year], DOI: [jxiv DOI]）の日本語翻訳版である。翻訳版の内容は英語原版に忠実であり、原版にないデータ、解釈、主張を追加していない。
+
+Translation-process disclosure template:
+
+> 本翻訳版の作成には生成AIを翻訳補助および言語調整に使用した。著者が英語原版との対応を全編確認し、翻訳の正確性および最終内容について全責任を負う。
+
+The final wording must reflect the actual tools and actual translation process used.
+
+## 11. Verification Evidence
 
 Repository evidence to review before final manuscript assembly:
 
@@ -170,7 +244,7 @@ release_candidates/gyroos/v4.0/completion_review.md
 
 If exact test counts or workflow run identifiers are included in the manuscript, re-check them against the final Release-linked commit and GitHub Actions records.
 
-## 10. Reference Review
+## 12. Reference Review
 
 The current full drafts are architecture and implementation manuscripts. Before submission, add and verify references for:
 
@@ -185,25 +259,32 @@ SQLite documentation only when implementation detail requires it
 
 External literature must be used to position the work, not to replace Gyro-specific definitions.
 
-## 11. Final Assembly
+The Japanese translation should use the same reference list as the public English original unless an English revision establishes a different list first.
 
-Recommended final sequence:
+## 13. Final Assembly
+
+Recommended sequence:
 
 ```text
 1. Confirm Zenodo DOI and software citation.
-2. Review English draft for claim precision.
-3. Align Japanese draft with accepted English structure.
-4. Add references and bibliography.
-5. Add exact author metadata.
-6. Convert Markdown to submission PDF.
-7. Verify figure rendering and Japanese glyphs.
-8. Perform layer-consistency review.
-9. Perform final language review.
-10. Submit English manuscript.
-11. Submit Japanese translation according to jxiv workflow.
+2. Complete scientific review of the English draft.
+3. Add Related Work and bibliography to the English draft.
+4. Add exact author metadata to the English draft.
+5. Convert the English manuscript to one submission PDF.
+6. Verify figure rendering and embedded fonts.
+7. Perform layer-consistency and final language review.
+8. Submit the English manuscript.
+9. Complete jxiv screening and wait for public release.
+10. Record the public English jxiv DOI and bibliographic information.
+11. Freeze the public English manuscript as the translation source.
+12. Align the Japanese manuscript faithfully to that source.
+13. Add translation front matter and translation-process disclosure.
+14. Prepare the required jxiv translation cover sheet and supporting evidence.
+15. Convert the Japanese translation to one submission PDF.
+16. Submit the Japanese manuscript as a translation version.
 ```
 
-## 12. Current Status
+## 14. Current Status
 
 ```text
 GitHub v4.0.0 Release
@@ -215,21 +296,30 @@ Zenodo integration
 English full draft
 = COMPLETE AT FIRST-DRAFT LEVEL
 
-Japanese full draft
-= COMPLETE AT FIRST-DRAFT LEVEL
-
-Primary figures
-= READY
+English scientific review
+= COMPLETE AT INITIAL REVIEW LEVEL
 
 References and bibliography
-= PENDING
+= DESIGNED / NOT YET INSERTED
 
-Author metadata
+English author metadata
 = PENDING FINAL INSERTION
 
-PDF assembly
+English PDF assembly
 = PENDING
 
-Final scientific and language review
-= PENDING
+English jxiv submission
+= NEXT PUBLICATION TARGET
+
+Japanese full draft
+= CREATED AS PRELIMINARY TRANSLATION WORKING COPY
+
+Japanese translation source
+= PENDING PUBLIC ENGLISH JXIV VERSION
+
+Japanese translation front matter
+= PENDING ENGLISH DOI
+
+Japanese jxiv translation submission
+= AFTER PUBLIC ENGLISH RELEASE
 ```
