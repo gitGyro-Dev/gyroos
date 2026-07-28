@@ -157,22 +157,22 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all W1-W3 tests.
 
-Final workflow verification remains pending.
+GitHub Actions run `30322014113` completed successfully. The `test-and-run-poc` job and every recorded step completed with `success`, including the bounded Runtime and production hardening tests, PoC artifact generation, artifact count verification, and artifact upload.
 
 ## 10. Final Decision
 
 ```text
 W inspection comparison-ledger comparison archive review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 W1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 W2 comparison archive assembly service
-= ACCEPTED
+= VERIFIED
 
 W3 optional comparison archive creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 V comparison retrieval
 = NOT APPROVED
@@ -205,5 +205,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate W
+= COMPLETE
 ```
