@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from app.vnext.experimental_api_routes import router
+from app.main import app
 
 
 def _route_methods() -> dict[str, set[str]]:
     return {
         route.path: set(route.methods or set())
-        for route in router.routes
+        for route in app.routes
+        if hasattr(route, "path")
     }
 
 
