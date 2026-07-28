@@ -6,34 +6,30 @@ title: "GyroOS: Execution Architecture for Slice-based, Deviation-aware, Stabili
 message: "If you use this software, please cite it as below."
 
 authors:
-
-* name: "Gyro Logic Lab"
+  - name: "Gyro Logic Lab"
 
 abstract: >
-GyroOS is an execution architecture that implements Gyro Logic as a dynamic, loop-based computational system.
-It operates on multiple slice-based representations, explicitly models deviation (Δ) between observations,
-and evaluates stability as tolerance under inconsistency.
-Rather than assuming a single correct representation, GyroOS continuously updates its observation strategy
-through a feedback loop between observation and evaluation.
-This framework enables computation under unavoidable deviation and supports adaptive systems,
-identity modeling, and deviation-aware applications.
+  GyroOS is an execution architecture that implements Gyro Logic as a dynamic, loop-based computational system.
+  It operates on multiple slice-based representations, explicitly models deviation (Δ) between observations,
+  and evaluates stability as tolerance under inconsistency.
+  Rather than assuming a single correct representation, GyroOS continuously updates its observation strategy
+  through a feedback loop between observation and evaluation.
+  This framework enables computation under unavoidable deviation and supports adaptive systems,
+  identity modeling, and deviation-aware applications.
 
 keywords:
-
-* gyro logic
-* stability
-* deviation
-* slice
-* dynamic systems
-* computation
-* identity
-* observation
-* loop system
+  - gyro logic
+  - stability
+  - deviation
+  - slice
+  - dynamic systems
+  - computation
+  - identity
+  - observation
+  - loop system
 
 license: CC-BY-4.0
-
 repository-code: https://github.com/gitGyro-Dev/gyroos
 url: https://github.com/gitGyro-Dev/gyroos
-
-version: "v3.1"
-date-released: 2026-04-21
+version: "v4.0.0"
+date-released: 2026-07-28
