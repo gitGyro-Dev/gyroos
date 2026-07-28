@@ -129,4 +129,6 @@ def check_experimental_consumer_compatibility(
         )
 
 
-router.include_router(inspection_router)
+# Preserve the parent router's existing route-table shape while keeping all
+# inspection route declarations isolated in inspection_api_routes.py.
+router.routes.extend(inspection_router.routes)
