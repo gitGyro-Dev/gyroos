@@ -56,6 +56,18 @@ GyroAuth は GyroOS を応用する。
 
 GyroOS は、実装都合によって Gyro Logic の定義を変更してはならない。
 
+### システム構成とフロー
+
+![GyroOS システム構成図・フロー図](figures/gyroos_system_architecture_flow_jp.svg)
+
+この図は、Gyro Logicの不変CoreからGyroOS Runtime、vNext read-only projection、POSTのみのInspection API、明示的参照によるF〜W hierarchy、外部のGyroAuth consumer boundaryまでを一枚で示す。
+
+公開用マスター図版：
+
+- 日本語SVG：`figures/gyroos_system_architecture_flow_jp.svg`
+- 英語SVG：`figures/gyroos_system_architecture_flow_en.svg`
+- 構成図の説明・キャプション案：`docs/292_gyroos_system_architecture_flow_overview.md`
+
 ---
 
 ## 🔁 コア原則
@@ -363,6 +375,8 @@ Context consistency
 
 ## 🏗️ アーキテクチャ
 
+Repository全体の構成は、上記の公開用図版および`docs/292_gyroos_system_architecture_flow_overview.md`を参照する。
+
 ```text
 Runtime Structure
    ↓
@@ -443,7 +457,7 @@ Loop を制御しない。
 
 Operator Response を実装する。
 
-Stability が利用可能になった後の response decision を担う。
+Stability が得られた後のResponse判断を所有する。
 
 正しい関係：
 
@@ -457,7 +471,7 @@ Stability
 
 ### Update Engine
 
-Operator Response に要求された場合にのみ更新を適用する。
+Operator Responseによって要求された場合にのみ更新を適用する。
 
 GyroOS の中心ではない。
 
@@ -465,7 +479,7 @@ GyroOS の中心ではない。
 
 ```text
 Loop Controller / Operator Response
-→ Update Engine if needed
+→ 必要に応じて Update Engine
 → Next Orientation
 ```
 
@@ -473,7 +487,7 @@ Loop Controller / Operator Response
 
 ### Dynamic Equivalence Runtime
 
-2つの状態が、静的な一致ではなく、Trajectory 上で等価に接続されうるかを評価する。
+2つの状態を静的等価へ還元せず、Trajectory上での等価性を評価する。
 
 出力：
 
@@ -485,147 +499,99 @@ equivalent | not_equivalent | undecidable
 
 ## 🔁 GyroOS Runtime Flow
 
-各プロセス周期で次を行う。
+各Process Cycleでは次を行う。
 
 ```text
-1. 現在のRuntime Structureを読む
-2. Operator Orientation / Slice Policyの下でSliceへ入る
+1. 現在の Runtime Structure を読む
+2. Operator Orientation / Slice Policy のもとで Slice に入る
 3. slice-ing を実行する
-4. SliceDone = X + Δ と Boundary / Boundary State / Context / Void を、読めるSlice Resultとして生成する
-5. Stabilityを継続可能な成立として読む
-6. Loop Controller により Operator Response を実行する
-7. 選択に応じて Re-Slice Context / Defer Void / Jump / Stop / Continue を行う
+4. SliceDone = X + Δ と Boundary / Boundary State / Context / Void を生成する
+5. Stability を継続可能な成立として読む
+6. Loop Controllerを通じてOperator Responseを実行する
+7. 選択に応じてRe-Slice Context、Defer Void、Jump、Stop、Continueを行う
 8. Next Orientation または Next Process を準備する
 ```
 
 ---
 
-## ❌ GyroOS がしないこと
+## 🌐 Priority G Bounded Runtime API
 
-GyroOS は次を行わない。
+Priority Gは、不変Coreを変更せず、boundedかつpersistentなRuntime APIを追加する。
 
 ```text
-Structure → Slice → Stability を再定義する
-Stability を制御者として扱う
-Δ を消す
-slice-ing と slice-done を同一視する
-Update Engine を Loop の所有者にする
-Context を Representation として扱う
-Void を作用主体として扱う
-Context や Stability から Re-Slice を自動起動する
-Dynamic Equivalence を単なる類似度に還元する
-GyroAuth の認証仕様を GyroOS の中核定義に混ぜる
+POST /loop/step
+GET  /loop/state/{loop_id}
+GET  /loop/history/{loop_id}
+GET  /trajectory/{trajectory_ref}
+GET  /process/{process_id}
+GET  /memory/record/{record_id}
 ```
+
+Runtime persistenceは、atomicなSQLite-backed repository boundaryとして実装される。
+
+```text
+complete Process result group
+→ atomic publication
+→ current-scope pointer update
+→ immutable Process and Trajectory history
+→ restart後のtyped canonical reconstruction
+```
+
+Query surfaceは、新しいProcessを実行せず、Operator Responseを選択せず、hidden latest stateを推定せず、repository absenceをVOID、DEFER、STOP、Stability resultへ変換しない。
+
+詳細contractは`docs/66_*`から`docs/75_*`に記録されている。
 
 ---
 
-## ⭕ GyroOS がすること
+## 🛡️ Priority H Production Hardening
 
-GyroOS は次を行う。
+Priority Hは、canonicalなGyro Process semanticsを変更せずにPriority G Runtime boundaryを強化する。
+
+実装済みcontrol：
 
 ```text
-Gyro Process を実装する
-Δ を保持する
-Context と Void を runtime field として保持する
-Stability を測定する
-Operator Response を実装する
-Gyro Loop と Context Loop の反復を管理する
-Re-Slice / Defer / Jump handling を支援する
-Dynamic Equivalence runtime check を支援する
-Next Orientation を準備する
+development / test / production settings profile
+production configuration fail-fast
+Runtime endpointへのBearer authentication
+request-body、rate、concurrent-request limit
+SQLite WALとbounded lock waiting
+retryable repository-busy classification
+JSON structured loggingとX-Request-ID correlation
+database schema compatibility validation
+検証済みSQLite backup and restore
+production token quality check
+security response header
+bounded concurrent / sustained load test
 ```
+
+現在のcandidateは、single-host、SQLite-backed、単一Bearer token構成のbounded Runtimeである。
+
+Public production exposureには、TLS、network policy、secret injection、backup storage、logging destination、capacity、rollback、operator ownershipのdeployment declarationが必要である。
+
+詳細contractは`docs/76_*`から`docs/85_*`に記録されている。
 
 ---
 
-## 📦 Repository Structure
+## 🧪 vNext Experimental Projection and Inspection
 
-```text
-gyroos/
-  docs/
-    11_loop_controller.md
-    12_update_engine.md
-    13_slice_policy.md
-    14_api_design.md
-    15_context_runtime.md
-    16_reslice_engine.md
-    17_context_loop_controller.md
-    18_void_defer_jump.md
-    19_dynamic_equivalence_runtime.md
-  src/
-    core/
-    engines/
-    runtime/
-    api/
-  examples/
-  paper/
-```
+`/vnext/experimental`は、read-only、request-local、non-canonicalなprojectionおよびInspection contractを提供する。
+
+Inspection contract familyは、F ReceiptからW Comparison Archiveまでを明示的参照のみで接続する。Runtime stateを変更せず、canonical persistenceを作らず、semantic trend、risk、authentication decisionを生成しない。
+
+主要な参照先：
+
+- Inspection documentation index：`docs/283_vnext_inspection_documentation_index.md`
+- Consolidation completion：`docs/291_vnext_inspection_consolidation_implementation_completion_review.md`
+- システム構成図：`figures/gyroos_system_architecture_flow_jp.svg`
 
 ---
 
-## 🧭 Roadmap
+## 📄 リリース・投稿用図版
 
-GyroOS は、Gyro Logic を実行可能なランタイムシステムとして段階的に実装する。
+このシステム構成SVGを、次期GyroOS Release Candidate、GitHub Release Notes、README、将来のjxiv投稿における主要overview figureとして使用する。
 
-### Phase 4 — Gyro Process / Operator Response Execution
+SVGをマスターとし、PDFまたはPNGは投稿先・公開先が要求する場合のみ派生させる。
 
-```text
-Gyro Processₙ
-→ Operator Responseₙ
-→ Gyro Processₙ₊₁
-```
-
-### Phase 5 — Context-aware Runtime
-
-Focus:
-
-```text
-Context Runtime
-Re-Slice Engine
-Context Loop Controller
-Void / Defer / Jump handling
-Dynamic Equivalence Runtime
-```
-
-### Phase 6 — Application Connection
-
-GyroAuth は GyroOS の出力を利用してよいが、GyroOS の中核を再定義してはならない。
-
----
-
-## 🔐 Application Layer: GyroAuth
-
-GyroAuth は GyroOS の上に構築される応用である。
-
-GyroAuth を GyroOS の中核定義に混ぜてはならない。
-
-Repository:
-
-```text
-https://github.com/gitGyro-Dev/gyroauth
-```
-
----
-
-## 🧠 一行定義
-
-GyroOS とは：
-
-> Structure → Slice → Stability を Runtime Continuity へ写像し、成立した断面を Operator Response によって反復し、Context-aware Re-Slice と Dynamic Equivalence を runtime で支援する実装層である。
-
----
-
-## 🔴 Final Statement
-
-GyroOS は、Stability に Loop を直接制御させない。
-
-GyroOS が実装するのは：
-
-```text
-Stability → Operator Response → Next Process
-```
-
-であり、同時に次の不変コアを保持する。
-
-```text
-Structure → Slice → Stability
-```
+- 日本語マスター：`figures/gyroos_system_architecture_flow_jp.svg`
+- 英語マスター：`figures/gyroos_system_architecture_flow_en.svg`
+- 図版利用ノート：`docs/292_gyroos_system_architecture_flow_overview.md`
