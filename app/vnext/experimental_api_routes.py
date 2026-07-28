@@ -129,4 +129,6 @@ def check_experimental_consumer_compatibility(
         )
 
 
-router.include_router(inspection_router)
+# The dedicated inspection router owns fully prefixed inspection routes.
+# Extend the parent route table so existing route-table tests and imports remain compatible.
+router.routes.extend(inspection_router.routes)
