@@ -49,6 +49,14 @@ from .inspection_comparison_ledger_comparison import (
     ExperimentalComparisonLedgerComparisonRequest,
     ExperimentalComparisonLedgerComparisonResult,
 )
+from .inspection_comparison_ledger_comparison_archive import (
+    ExperimentalComparisonLedgerComparisonArchiveRequest,
+    ExperimentalComparisonLedgerComparisonArchiveResult,
+)
+from .inspection_comparison_ledger_comparison_archive_service import (
+    ExperimentalComparisonLedgerComparisonArchiveError,
+    ExperimentalComparisonLedgerComparisonArchiveService,
+)
 from .inspection_comparison_ledger_comparison_service import (
     ExperimentalComparisonLedgerComparisonError,
     ExperimentalComparisonLedgerComparisonService,
@@ -192,6 +200,9 @@ comparison_register_comparison_ledger_service = (
     ExperimentalComparisonRegisterComparisonLedgerService()
 )
 comparison_ledger_comparison_service = ExperimentalComparisonLedgerComparisonService()
+comparison_ledger_comparison_archive_service = (
+    ExperimentalComparisonLedgerComparisonArchiveService()
+)
 
 
 def experimental_error(
@@ -424,10 +435,13 @@ def create_experimental_inspection_review_bundle_comparison_set_comparison(
     except ExperimentalComparisonSetComparisonError as exc:
         return experimental_error(
             422,
-            code="GYRO_VNEXT_EXPERIMENTAL_COMPARISON_SET_COMPARISON_INVALID",
+            code=(
+                "GYRO_VNEXT_EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_"
+                "SET_COMPARISON_INVALID"
+            ),
             message=str(exc),
             category="VALIDATION",
-            phase="EXPERIMENTAL_COMPARISON_SET_COMPARISON_CREATE",
+            phase="EXPERIMENTAL_REVIEW_BUNDLE_COMPARISON_SET_COMPARISON_CREATE",
         )
 
 
@@ -640,4 +654,27 @@ def create_experimental_inspection_comparison_ledger_comparison(
             message=str(exc),
             category="VALIDATION",
             phase="EXPERIMENTAL_COMPARISON_LEDGER_COMPARISON_CREATE",
+        )
+
+
+@router.post(
+    "/inspection-comparison-ledger-comparison-archives",
+    response_model=ExperimentalComparisonLedgerComparisonArchiveResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_experimental_inspection_comparison_ledger_comparison_archive(
+    request: ExperimentalComparisonLedgerComparisonArchiveRequest,
+):
+    try:
+        return comparison_ledger_comparison_archive_service.create_archive(request)
+    except ExperimentalComparisonLedgerComparisonArchiveError as exc:
+        return experimental_error(
+            422,
+            code=(
+                "GYRO_VNEXT_EXPERIMENTAL_COMPARISON_LEDGER_"
+                "COMPARISON_ARCHIVE_INVALID"
+            ),
+            message=str(exc),
+            category="VALIDATION",
+            phase="EXPERIMENTAL_COMPARISON_LEDGER_COMPARISON_ARCHIVE_CREATE",
         )
