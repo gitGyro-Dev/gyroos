@@ -20,7 +20,27 @@ from .experimental_api import (
 from .experimental_api_provider import get_experimental_repository
 from .experimental_error_response import experimental_error
 from .experimental_repository import ExperimentalRecordRepository
-from .inspection_api_routes import inspection_router
+from .inspection_api_routes import (
+    create_experimental_inspection_batch_manifest,
+    create_experimental_inspection_comparison_collection_comparison,
+    create_experimental_inspection_comparison_collection_comparison_sequence,
+    create_experimental_inspection_comparison_ledger_comparison,
+    create_experimental_inspection_comparison_ledger_comparison_archive,
+    create_experimental_inspection_comparison_register_comparison,
+    create_experimental_inspection_comparison_register_comparison_ledger,
+    create_experimental_inspection_comparison_review_bundle,
+    create_experimental_inspection_comparison_sequence_comparison,
+    create_experimental_inspection_comparison_sequence_comparison_register,
+    create_experimental_inspection_comparison_series_comparison,
+    create_experimental_inspection_comparison_series_comparison_collection,
+    create_experimental_inspection_comparison_set_comparison_series,
+    create_experimental_inspection_manifest_comparison,
+    create_experimental_inspection_receipt,
+    create_experimental_inspection_review_bundle_comparison,
+    create_experimental_inspection_review_bundle_comparison_set,
+    create_experimental_inspection_review_bundle_comparison_set_comparison,
+    inspection_router,
+)
 
 
 router = APIRouter(
