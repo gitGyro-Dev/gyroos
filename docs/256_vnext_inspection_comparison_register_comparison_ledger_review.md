@@ -155,22 +155,34 @@ absence of Runtime, authentication, semantic, and risk outputs
 
 The Priority F workflow includes all U1-U3 tests.
 
-Final workflow verification remains pending.
+Verified successful workflow runs:
+
+```text
+30255610081
+30255637659
+30255706087
+30255737443
+30255921221
+30255957014
+30256017992
+```
+
+Each verified run completed the bounded Runtime and production hardening tests, generated PoC result artifacts, verified artifact count, and uploaded the artifacts successfully.
 
 ## 10. Final Decision
 
 ```text
 U inspection comparison-register comparison ledger review
-= COMPLETE AT DESIGN / IMPLEMENTATION LEVEL
+= COMPLETE
 
 U1 descriptor, settings, and digest policy
-= ACCEPTED
+= VERIFIED
 
 U2 comparison ledger assembly service
-= ACCEPTED
+= VERIFIED
 
 U3 optional comparison ledger creation endpoint
-= ACCEPTED PENDING WORKFLOW VERIFICATION
+= VERIFIED
 
 T comparison retrieval
 = NOT APPROVED
@@ -203,5 +215,8 @@ Critical design blocker
 = NONE IDENTIFIED
 
 GitHub Actions verification
-= PENDING
+= VERIFIED
+
+Integration gate U
+= COMPLETE
 ```
