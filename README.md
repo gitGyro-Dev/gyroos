@@ -4,6 +4,18 @@
 
 ---
 
+## 📄 Publication
+
+GyroOS v4.0 is now published on Jxiv.
+
+- English preprint: https://doi.org/10.51094/jxiv.5842
+- Zenodo archive: https://doi.org/10.5281/zenodo.21641266
+- GitHub Release: v4.0.0
+
+The Japanese translation will be prepared and submitted after reconciling it against the public English version.
+
+---
+
 ## 🧭 What is GyroOS?
 
 GyroOS is the execution layer of **Gyro Logic**.
@@ -588,7 +600,7 @@ Primary navigation:
 
 ## 📄 Release and Publication Figure
 
-The system architecture SVG is the primary overview figure for the next GyroOS release candidate, GitHub Release notes, README presentation, and future jxiv submissions.
+The system architecture SVG is the primary overview figure for the GyroOS v4.0 release, README presentation, and related publications.
 
 Use the SVG as the master source and derive PDF or PNG only when a publication or platform requires another format.
 
